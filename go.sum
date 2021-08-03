@@ -1,0 +1,8 @@
+github.com/6tail/lunar-go v1.0.27 h1:UMVTgR1iCRxQRk0Y7A9B2JkQ3nS9gd/2QnrUv5UwfjQ=
+github.com/6tail/lunar-go v1.0.27/go.mod h1:mMvCby9aWTSmsZjnv+5EOW7taJFV4RsjNcQLRl/3whY=
+github.com/6tail/lunar-go v1.2.0 h1:dsAfj75yPXZoUZzodzYdz7XclHeeTD93CtnmEAeo4Cg=
+github.com/6tail/lunar-go v1.2.0/go.mod h1:mMvCby9aWTSmsZjnv+5EOW7taJFV4RsjNcQLRl/3whY=
+github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
+github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
