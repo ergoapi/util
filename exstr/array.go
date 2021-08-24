@@ -26,6 +26,19 @@ func DuplicateInt64ElementInt64(addrs []int64) []int64 {
 	return result
 }
 
+// DuplicateIntElementInt 数组去重
+func DuplicateIntElementInt(addrs []int) []int {
+	result := make([]int, 0, len(addrs))
+	temp := map[int]struct{}{}
+	for _, item := range addrs {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
 // DuplicateStrElement 字符串去重
 func DuplicateStrElement(addrs []string) []string {
 	result := make([]string, 0, len(addrs))
@@ -37,4 +50,34 @@ func DuplicateStrElement(addrs []string) []string {
 		}
 	}
 	return result
+}
+
+// StringArrayContains 字符串数组是否包含某字符串
+func StringArrayContains(arr []string, str string) bool {
+	for _, s := range arr {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
+// Int64ArrayContains 数组是否包含某字符串
+func Int64ArrayContains(addrs []int64, i int64) bool {
+	for _, s := range addrs {
+		if s == i {
+			return true
+		}
+	}
+	return false
+}
+
+// IntArrayContains 数组是否包含某字符串
+func IntArrayContains(addrs []int, i int) bool {
+	for _, s := range addrs {
+		if s == i {
+			return true
+		}
+	}
+	return false
 }
