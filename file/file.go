@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ergoapi/util/zos"
 	"github.com/ergoapi/util/ztime"
 )
 
@@ -111,23 +110,18 @@ func CheckFileExists(filename string) bool {
 }
 
 // Writefile 写文件
-func Writefile(logpath, msg string, name ...string) (err error) {
-	svcname := "unknown"
-	if len(name) != 0 {
-		svcname = name[0]
-	}
-	prepath := "/var/log/"
-	if zos.IsMacOS() {
-		prepath = "/tmp"
-	}
-	logpath = fmt.Sprintf("%v/%v/%v", prepath, svcname, logpath)
+func Writefile(logpath, msg string, ext ...string) (err error) {
 	file, err := os.OpenFile(logpath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 	write := bufio.NewWriter(file)
-	write.WriteString(fmt.Sprintf("%v - %v\n", ztime.NowFormat(), msg))
+	if len(ext) > 0 {
+		write.WriteString(fmt.Sprintf("%v - %v\n", ztime.NowFormat(), msg))
+	} else {
+		write.WriteString(msg)
+	}
 	write.Flush()
 	return nil
 }
