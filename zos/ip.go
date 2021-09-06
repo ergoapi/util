@@ -83,3 +83,23 @@ func GetFreePort() int {
 
 	return port
 }
+
+// IsPrivateIP 私网ip
+func IsPrivateIP(ip net.IP) bool {
+	if ip.IsLoopback() || ip.IsLinkLocalMulticast() || ip.IsLinkLocalUnicast() {
+		return true
+	}
+	if ip4 := ip.To4(); ip4 != nil {
+		switch true {
+		case ip4[0] == 10:
+			return true
+		case ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31:
+			return true
+		case ip4[0] == 192 && ip4[1] == 168:
+			return true
+		default:
+			return false
+		}
+	}
+	return true
+}
