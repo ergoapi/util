@@ -18,7 +18,7 @@ import (
 	"os/user"
 	"runtime"
 
-	"github.com/kunnos/homedir"
+	"github.com/mitchellh/go-homedir"
 )
 
 // IsMacOS is Mac OS
