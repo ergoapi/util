@@ -17,6 +17,8 @@ import (
 	"os"
 	"os/user"
 	"runtime"
+
+	"github.com/kunnos/homedir"
 )
 
 // IsMacOS is Mac OS
@@ -76,4 +78,13 @@ func GetHostname() string {
 
 func GetOS() string {
 	return runtime.GOOS
+}
+
+// GetHomeDir 获取home目录
+func GetHomeDir() string {
+	home, err := homedir.Dir()
+	if err != nil {
+		return "/root"
+	}
+	return home
 }
