@@ -35,6 +35,12 @@ func Str2Int64(s string) int64 {
 	return si64
 }
 
+// Str2UInt64 string to uint64
+func Str2UInt64(s string) uint64 {
+	si64, _ := strconv.ParseUint(s, 10, 64)
+	return si64
+}
+
 // Str2Float64 string to float64
 func Str2Float64(s string) float64 {
 	sf, _ := strconv.ParseFloat(s, 64)
@@ -49,6 +55,11 @@ func Str2Byte(s string) []byte {
 // Int642Str int64 to string
 func Int642Str(i int64) string {
 	return strconv.FormatInt(i, 10)
+}
+
+// UInt642Str uint64 to string
+func UInt642Str(i uint64) string {
+	return strconv.FormatUint(i, 10)
 }
 
 // Int2Str int to string
