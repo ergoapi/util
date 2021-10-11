@@ -88,3 +88,9 @@ func GetHomeDir() string {
 	}
 	return home
 }
+
+// ExpandPath will parse `~` as user home dir path.
+func ExpandPath(path string) string {
+	path, _ = homedir.Expand(path)
+	return path
+}

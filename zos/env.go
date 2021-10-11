@@ -13,7 +13,10 @@
 
 package zos
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 // GetEnv 获取环境变量
 func GetEnv(envstr string, fallback ...string) string {
@@ -22,4 +25,21 @@ func GetEnv(envstr string, fallback ...string) string {
 		e = fallback[0]
 	}
 	return e
+}
+
+// Environ 类似 os.Environ, 返回key-value map[string]string.
+func Environ() map[string]string {
+	envList := os.Environ()
+	envMap := make(map[string]string, len(envList))
+
+	for _, str := range envList {
+		nodes := strings.SplitN(str, "=", 2)
+
+		if len(nodes) < 2 {
+			envMap[nodes[0]] = ""
+		} else {
+			envMap[nodes[0]] = nodes[1]
+		}
+	}
+	return envMap
 }
