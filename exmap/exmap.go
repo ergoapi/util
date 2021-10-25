@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -42,8 +43,19 @@ func Struct2Json2Map(obj interface{}) (result map[string]interface{}, err error)
 	return
 }
 
-// Map2String ...
-func Map2String(data []string) (result string) {
+// Slice is a helper function that converts a map of environment
+// variables to a slice of string values in key=value format.
+func Slice(env map[string]string) []string {
+	var s []string
+	for k, v := range env {
+		s = append(s, k+"="+v)
+	}
+	sort.Strings(s)
+	return s
+}
+
+// Slice2String slice string to string
+func Slice2String(data []string) (result string) {
 	if len(data) <= 0 {
 		return
 	}
@@ -69,7 +81,7 @@ func MapString2String(labels map[string]string) string {
 	return strings.Join(result, ",")
 }
 
-// merge label
+// MergeLabels merge label
 // the new map will overwrite the old one.
 // e.g. new: {"foo": "newbar"} old: {"foo": "bar"} will return {"foo": "newbar"}
 func MergeLabels(old map[string]string, new map[string]string) map[string]string {

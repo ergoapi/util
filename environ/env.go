@@ -11,16 +11,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package zos
+package environ
 
 import (
 	"os"
 	"strings"
 )
 
+// function used to expand environment variables.
+var getenv = os.Getenv
+
 // GetEnv 获取环境变量
 func GetEnv(envstr string, fallback ...string) string {
-	e := os.Getenv(envstr)
+	e := getenv(envstr)
 	if e == "" && len(fallback) > 0 {
 		e = fallback[0]
 	}
@@ -42,4 +45,17 @@ func Environ() map[string]string {
 		}
 	}
 	return envMap
+}
+
+// Expand is a helper function to expand the PATH parameter in
+// the pipeline environment.
+func Expand(env map[string]string) map[string]string {
+	c := map[string]string{}
+	for k, v := range env {
+		c[k] = v
+	}
+	if path := c["PATH"]; path != "" {
+		c["PATH"] = os.Expand(path, getenv)
+	}
+	return c
 }
