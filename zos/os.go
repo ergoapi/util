@@ -18,6 +18,7 @@ import (
 	"os/user"
 	"runtime"
 
+	"github.com/cobaugh/osrelease"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -93,4 +94,22 @@ func GetHomeDir() string {
 func ExpandPath(path string) string {
 	path, _ = homedir.Expand(path)
 	return path
+}
+
+// OSRelease get os release
+func OSRelease() (map[string]string, error) {
+	return osrelease.Read()
+}
+
+// Debian debian
+func Debian() bool {
+	os, err := osrelease.Read()
+	if err != nil {
+		return false
+	}
+	i, exist := os["ID"]
+	if exist && (i == "debian" || i == "ubuntu") {
+		return true
+	}
+	return false
 }
