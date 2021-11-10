@@ -14,7 +14,7 @@ import (
 // Paths like "~foo/bar" are unsupported.
 //
 // FIXME: is there an existing library for this?
-func Expand(orig string) (string, error) {
+func HomeExpand(orig string) (string, error) {
 	s := orig
 	if s == "" {
 		return "", errors.New("empty path")
