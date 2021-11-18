@@ -21,8 +21,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/ergoapi/util/ztime"
 )
 
 var (
@@ -118,7 +116,7 @@ func Writefile(logpath, msg string, ext ...string) (err error) {
 	defer file.Close()
 	write := bufio.NewWriter(file)
 	if len(ext) > 0 {
-		write.WriteString(fmt.Sprintf("%v - %v\n", ztime.NowFormat(), msg))
+		write.WriteString(fmt.Sprintf("%v\n", msg))
 	} else {
 		write.WriteString(msg)
 	}
