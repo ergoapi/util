@@ -108,18 +108,27 @@ func CheckFileExists(filename string) bool {
 }
 
 // Writefile 写文件
-func Writefile(logpath, msg string, ext ...string) (err error) {
+func Writefile(logpath, msg string) (err error) {
 	file, err := os.OpenFile(logpath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 	write := bufio.NewWriter(file)
-	if len(ext) > 0 {
-		write.WriteString(fmt.Sprintf("%v\n", msg))
-	} else {
-		write.WriteString(msg)
+	write.WriteString(msg)
+	write.Flush()
+	return nil
+}
+
+// WritefileWithLine 换行
+func WritefileWithLine(logpath, msg string) (err error) {
+	file, err := os.OpenFile(logpath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
+	if err != nil {
+		return err
 	}
+	defer file.Close()
+	write := bufio.NewWriter(file)
+	write.WriteString(msg + "\n")
 	write.Flush()
 	return nil
 }
