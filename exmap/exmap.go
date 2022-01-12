@@ -143,6 +143,22 @@ func AddLabel(labels map[string]string, labelKey, labelValue string) map[string]
 	return labels
 }
 
+// CheckLabel returns key exist stauts.
+func CheckLabel(labels map[string]string, labelKey string) bool {
+	if labelKey == "" {
+		// Don't need to add a label.
+		return true
+	}
+	if labels == nil {
+		labels = make(map[string]string)
+	}
+
+	if _, ok := labels[labelKey]; ok {
+		return true
+	}
+	return false
+}
+
 // CopyMap makes a shallow copy of a map.
 func CopyMap(m map[string]string) map[string]string {
 	if m == nil {

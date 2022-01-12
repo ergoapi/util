@@ -61,16 +61,8 @@ func Blacklist(s string) bool {
 }
 
 // KubeBlacklist
-func KubeBlacklist(s string) bool {
+func KubeBlacklist(s string, extlist ...string) bool {
 	if strings.HasPrefix(s, "kube-") {
-		return true
-	}
-
-	if strings.HasSuffix(s, "-system") {
-		return true
-	}
-
-	if strings.Contains(s, "cert-manager") {
 		return true
 	}
 
@@ -78,25 +70,10 @@ func KubeBlacklist(s string) bool {
 		return true
 	}
 
-	if strings.Contains(s, "observability") {
-		return true
+	for _, i := range extlist {
+		if strings.Contains(s, i) {
+			return true
+		}
 	}
-
-	if strings.Contains(s, "tke-") {
-		return true
-	}
-
-	if strings.Contains(s, "traefik") {
-		return true
-	}
-
-	if strings.Contains(s, "velero") {
-		return true
-	}
-
-	if strings.Contains(s, "ingress-nginx") {
-		return true
-	}
-
 	return false
 }
