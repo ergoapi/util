@@ -22,11 +22,11 @@ import (
 func TLSCheck(pemData string) (*x509.Certificate, error) {
 	block, _ := pem.Decode([]byte(pemData))
 	if block == nil {
-		return nil, fmt.Errorf("Certificate decoding error")
+		return nil, fmt.Errorf("certificate decoding error")
 	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("Certificate Parsing error")
+		return nil, fmt.Errorf("certificate Parsing error")
 	}
 	return cert, nil
 }

@@ -59,3 +59,44 @@ func Blacklist(s string) bool {
 
 	return false
 }
+
+// KubeBlacklist
+func KubeBlacklist(s string) bool {
+	if strings.HasPrefix(s, "kube-") {
+		return true
+	}
+
+	if strings.HasSuffix(s, "-system") {
+		return true
+	}
+
+	if strings.Contains(s, "cert-manager") {
+		return true
+	}
+
+	if strings.Contains(s, "default") {
+		return true
+	}
+
+	if strings.Contains(s, "observability") {
+		return true
+	}
+
+	if strings.Contains(s, "tke-") {
+		return true
+	}
+
+	if strings.Contains(s, "traefik") {
+		return true
+	}
+
+	if strings.Contains(s, "velero") {
+		return true
+	}
+
+	if strings.Contains(s, "ingress-nginx") {
+		return true
+	}
+
+	return false
+}

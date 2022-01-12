@@ -15,6 +15,7 @@ package environ
 
 import (
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -28,6 +29,30 @@ func GetEnv(envstr string, fallback ...string) string {
 		e = fallback[0]
 	}
 	return e
+}
+
+// GetEnvAsInt 获取环境变量
+func GetEnvAsInt(envstr string, fallback int) int {
+	if v := os.Getenv(envstr); v != "" {
+		value, err := strconv.Atoi(v)
+		if err != nil {
+			return fallback
+		}
+		return value
+	}
+	return fallback
+}
+
+// GetEnvAsFloat64 获取环境变量
+func GetEnvAsFloat64(envstr string, fallback float64) float64 {
+	if v := os.Getenv(envstr); v != "" {
+		value, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return fallback
+		}
+		return value
+	}
+	return fallback
 }
 
 // Environ 类似 os.Environ, 返回key-value map[string]string.

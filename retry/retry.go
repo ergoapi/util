@@ -26,7 +26,6 @@ func init() {
 
 // DoFunc try to execute the function, it only expect that the function will return an error only
 func DoFunc(attempt uint, sleep time.Duration, fn func() error) error {
-
 	if err := fn(); err != nil {
 		if attempt--; attempt > 0 {
 			// Add jitter to prevent Thundering Herd problem (https://en.wikipedia.org/wiki/Thundering_herd_problem)
@@ -43,7 +42,6 @@ func DoFunc(attempt uint, sleep time.Duration, fn func() error) error {
 // Do try to execute the function by its value, function can take variadic arguments and return multiple return.
 // You must put error as the last return value so that DoFunc can take decision that the call failed or not
 func Do(attempt uint, sleep time.Duration, fn interface{}, args ...interface{}) ([]interface{}, error) {
-
 	if attempt == 0 {
 		return nil, errors.New("retry: attempt should be greater than 0")
 	}
