@@ -18,7 +18,7 @@ import (
 	"os/user"
 	"runtime"
 
-	"github.com/cobaugh/osrelease"
+	"github.com/acobaugh/osrelease"
 	"github.com/mitchellh/go-homedir"
 )
 

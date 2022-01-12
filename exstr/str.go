@@ -66,10 +66,6 @@ func KubeBlacklist(s string, extlist ...string) bool {
 		return true
 	}
 
-	if strings.Contains(s, "default") {
-		return true
-	}
-
 	for _, i := range extlist {
 		if strings.Contains(s, i) {
 			return true
