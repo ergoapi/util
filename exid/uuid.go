@@ -11,16 +11,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package exhash
+package exid
 
-import (
-	"crypto/md5"
-	"encoding/hex"
-)
+import "github.com/google/uuid"
 
-// MD5 md5
-func MD5(str string) string {
-	s := md5.New()
-	s.Write([]byte(str))
-	return hex.EncodeToString(s.Sum(nil))
+// GenUUID 生成新的uuid
+func GenUUID() string {
+	u, _ := uuid.NewRandom()
+	return u.String()
+}
+
+// CheckUUID 检查uuid是否合法
+func CheckUUID(uid string) bool {
+	_, err := uuid.Parse(uid)
+	return err != nil
 }

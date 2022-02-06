@@ -1,22 +1,10 @@
-//  Copyright (c) 2021. The EFF Team Authors.
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-
-package zos
+package exnet
 
 import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 )
 
 //LocalIP 获取本机 ip
@@ -129,4 +117,20 @@ func CheckHostPort(host string, port int) (status bool, err error) {
 // Check if a port is available
 func Check(port int) (status bool, err error) {
 	return CheckHostPort("", port)
+}
+
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return net.IP{}
+	}
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP
+}
+
+func GetAddrPort(addrPort string) (string, int) {
+	parts := strings.Split(addrPort, ":")
+	port, _ := strconv.Atoi(parts[1])
+	return parts[0], port
 }

@@ -1,11 +1,10 @@
 package git
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // GitCLIRepository holds the information about a repository
@@ -16,7 +15,7 @@ type GitCLIRepository struct {
 // NewGitCLIRepository creates a new git repository struct with the given parameters
 func NewGitCLIRepository(localPath string) (*GitCLIRepository, error) {
 	if !isGitCommandAvailable() {
-		return nil, errors.New("git not found in path. Please make sure you have git installed to clone git dependencies")
+		return nil, fmt.Errorf("git not found in path. Please make sure you have git installed to clone git dependencies")
 	}
 
 	return &GitCLIRepository{
@@ -64,14 +63,14 @@ func (gr *GitCLIRepository) Clone(options CloneOptions) error {
 		args = append(args, options.Args...)
 		out, err := exec.Command("git", args...).CombinedOutput()
 		if err != nil {
-			return errors.Errorf("Error running 'git %s': %v -> %s", strings.Join(args, " "), err, string(out))
+			return fmt.Errorf("error running 'git %s': %v -> %s", strings.Join(args, " "), err, string(out))
 		}
 
 		// checkout the commit if necessary
 		if options.Commit != "" {
 			out, err := exec.Command("git", "-C", gr.LocalPath, "checkout", options.Commit).CombinedOutput()
 			if err != nil {
-				return errors.Errorf("Error running 'git checkout %s': %v -> %s", options.Commit, err, string(out))
+				return fmt.Errorf("error running 'git checkout %s': %v -> %s", options.Commit, err, string(out))
 			}
 		}
 
@@ -82,7 +81,7 @@ func (gr *GitCLIRepository) Clone(options CloneOptions) error {
 	if options.Commit == "" {
 		out, err := exec.Command("git", "-C", gr.LocalPath, "pull").CombinedOutput()
 		if err != nil {
-			return errors.Errorf("Error running 'git pull %s': %v -> %s", options.URL, err, string(out))
+			return fmt.Errorf("error running 'git pull %s': %v -> %s", options.URL, err, string(out))
 		}
 	}
 

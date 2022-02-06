@@ -31,6 +31,26 @@ func NowUnix() int64 {
 	return time.Now().Unix()
 }
 
+func NowUTC() time.Time {
+	return time.Now().UTC()
+}
+
+func UTCify(now time.Time) time.Time {
+	if now.IsZero() {
+		val := time.Now().UTC()
+		return val
+	}
+	return now.UTC()
+}
+
+func Localify(now time.Time) time.Time {
+	if now.IsZero() {
+		val := time.Now().Local()
+		return val
+	}
+	return now.Local()
+}
+
 // TimeParse time parse
 func TimeParse(layout, t string) (time.Time, error) {
 	return time.Parse(layout, t)
