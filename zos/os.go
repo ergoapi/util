@@ -37,6 +37,11 @@ func IsUnix() bool {
 	return runtime.GOOS == "linux" || runtime.GOOS == "darwin"
 }
 
+// NotUnix  not macos and not linux
+func NotUnix() bool {
+	return runtime.GOOS != "linux" && runtime.GOOS != "darwin"
+}
+
 // IsContainer 是否是容器
 func IsContainer() bool {
 	_, err := os.Stat("/.dockerenv")
