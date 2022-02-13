@@ -14,8 +14,13 @@
 package exhash
 
 import (
+	"bytes"
 	b32 "encoding/base32"
 	b64 "encoding/base64"
+	"math/big"
+
+	"github.com/ergoapi/util/common"
+	"github.com/ergoapi/util/exstr"
 )
 
 // B64EnCode base64加密
@@ -29,6 +34,29 @@ func B64Decode(code string) (string, error) {
 	return string(ds), err
 }
 
+// B58EnCode base58加密
+func B58EnCode(code string) string {
+	var src []byte
+	intBytes := big.NewInt(0).SetBytes(exstr.Str2Bytes(code))
+	int0, int58 := big.NewInt(0), big.NewInt(58)
+	for intBytes.Cmp(big.NewInt(0)) > 0 {
+		intBytes.DivMod(intBytes, int58, int0)
+		src = append(src, exstr.Str2Bytes(common.Base58table)[int0.Int64()])
+	}
+	return string(reverseBytes(src))
+}
+
+// B58Decode base58解密
+func B58Decode(code string) (string, error) {
+	int0 := big.NewInt(0)
+	for _, val := range exstr.Str2Bytes(code) {
+		index := bytes.IndexByte([]byte(common.Base58table), val)
+		int0.Mul(int0, big.NewInt(58))
+		int0.Add(int0, big.NewInt(int64(index)))
+	}
+	return int0.String(), nil
+}
+
 // B32EnCode base32加密
 func B32EnCode(code string) string {
 	return b32.StdEncoding.EncodeToString([]byte(code))
@@ -38,4 +66,11 @@ func B32EnCode(code string) string {
 func B32Decode(code string) (string, error) {
 	ds, err := b32.StdEncoding.DecodeString(code)
 	return string(ds), err
+}
+
+func reverseBytes(b []byte) []byte {
+	for i := 0; i < len(b)/2; i++ {
+		b[i], b[len(b)-1-i] = b[len(b)-1-i], b[i]
+	}
+	return b
 }

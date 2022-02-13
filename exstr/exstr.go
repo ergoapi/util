@@ -15,6 +15,7 @@ package exstr
 
 import (
 	"strconv"
+	"unsafe"
 )
 
 // Str2Int string to int
@@ -65,4 +66,19 @@ func UInt642Str(i uint64) string {
 // Int2Str int to string
 func Int2Str(i int) string {
 	return strconv.Itoa(i)
+}
+
+// Str2Bytes converts string to byte slice without a memory allocation.
+func Str2Bytes(s string) []byte {
+	return *(*[]byte)(unsafe.Pointer(
+		&struct {
+			string
+			Cap int
+		}{s, len(s)},
+	))
+}
+
+// Bytes2Str converts byte slice to string without a memory allocation.
+func Bytes2Str(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
 }

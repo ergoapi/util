@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ergoapi/util/common"
 	"github.com/ergoapi/util/exstr"
 )
 
@@ -58,7 +59,7 @@ func TimeParse(layout, t string) (time.Time, error) {
 
 // NowFormat 当前时间format
 func NowFormat() string {
-	return time.Now().Format("2006-01-02 15:04:05")
+	return time.Now().Format(common.DefaultTimeLayout)
 }
 
 func NextDay(d int, layout string) string {
@@ -84,22 +85,22 @@ func BeforeNowUnix(old string) (oldunix int64) {
 
 // UnixInt642String unix转化为字符串
 func UnixInt642String(t int64) string {
-	return time.Unix(t, 0).Format("2006-01-02 15:04:05")
+	return time.Unix(t, 0).Format(common.DefaultTimeLayout)
 }
 
 // UnixString2String unix转化为字符串
 func UnixString2String(t string) string {
-	return time.Unix(exstr.Str2Int64(t), 0).Format("2006-01-02 15:04:05")
+	return time.Unix(exstr.Str2Int64(t), 0).Format(common.DefaultTimeLayout)
 }
 
 // UnixNanoInt642String unix转化为字符串
 func UnixNanoInt642String(t int64) string {
-	return time.Unix(0, t).Format("2006-01-02 15:04:05")
+	return time.Unix(0, t).Format(common.DefaultTimeLayout)
 }
 
 // UnixNanoString2String unix转化为字符串
 func UnixNanoString2String(t string) string {
-	return time.Unix(0, exstr.Str2Int64(t)).Format("2006-01-02 15:04:05")
+	return time.Unix(0, exstr.Str2Int64(t)).Format(common.DefaultTimeLayout)
 }
 
 // GetTime 获取时间
@@ -120,6 +121,22 @@ func GetTodayHour() string {
 // GetToday 获取今天时间
 func GetToday() string {
 	return time.Now().Format("20060102")
+}
+
+// GetYesterday 昨天
+func GetYesterday(layout ...string) string {
+	if len(layout) == 0 {
+		layout = append(layout, common.DefaultTimeLayout)
+	}
+	return time.Now().AddDate(0, 0, -1).Format(layout[0])
+}
+
+// GetTomorrow 明天
+func GetTomorrow(layout ...string) string {
+	if len(layout) == 0 {
+		layout = append(layout, common.DefaultTimeLayout)
+	}
+	return time.Now().AddDate(0, 0, 1).Format(layout[0])
 }
 
 // GetNowTimeByLayout layout time
@@ -193,7 +210,7 @@ func GetWeekDayUnixString() (string, string) {
 	}
 	weekStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, offset)
 	weekNextStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, offset+7)
-	return weekStart.Format("2006-01-02 15:03:04"), weekNextStart.Format("2006-01-02 15:03:04")
+	return weekStart.Format(common.DefaultTimeLayout), weekNextStart.Format(common.DefaultTimeLayout)
 }
 
 // NowAddUnix2Int64 当前时间戳 add
@@ -253,7 +270,7 @@ func IsLeapYear(year int) bool { //y == 2000, 2004
 // 时间转时间戳
 func TimeToUninx(t string) int64 {
 	loc, _ := time.LoadLocation("Asia/Shanghai")
-	tt, _ := time.ParseInLocation("2006-01-02 15:04:05", t, loc) //2006-01-02 15:04:05是转换的格式如php的"Y-m-d H:i:s"
+	tt, _ := time.ParseInLocation(common.DefaultTimeLayout, t, loc) //2006-01-02 15:04:05是转换的格式如php的"Y-m-d H:i:s"
 	return tt.Unix()
 }
 

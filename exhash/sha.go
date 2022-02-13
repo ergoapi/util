@@ -16,12 +16,20 @@ package exhash
 import (
 	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 )
 
 // GenSha256 生成sha256
 func GenSha256(code string) string {
 	s := sha256.New()
+	s.Write([]byte(code))
+	return hex.EncodeToString(s.Sum(nil))
+}
+
+// GenSha512 生成sha512
+func GenSha512(code string) string {
+	s := sha512.New()
 	s.Write([]byte(code))
 	return hex.EncodeToString(s.Sum(nil))
 }
