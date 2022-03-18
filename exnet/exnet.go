@@ -5,8 +5,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-
-	"gorm.io/gorm/logger"
 )
 
 //LocalIP 获取本机 ip
@@ -62,7 +60,6 @@ func LocalIPs() (addr []string) {
 func IsLocalHostAddrs() (*[]net.Addr, error) {
 	netInterfaces, err := net.Interfaces()
 	if err != nil {
-		logger.Warn("net.Interfaces failed, err:", err.Error())
 		return nil, err
 	}
 	var allAddrs []net.Addr
