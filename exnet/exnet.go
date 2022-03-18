@@ -5,6 +5,8 @@ import (
 	"net"
 	"strconv"
 	"strings"
+
+	"gorm.io/gorm/logger"
 )
 
 //LocalIP 获取本机 ip
@@ -55,6 +57,28 @@ func LocalIPs() (addr []string) {
 		}
 	}
 	return addr
+}
+
+func IsLocalHostAddrs() (*[]net.Addr, error) {
+	netInterfaces, err := net.Interfaces()
+	if err != nil {
+		logger.Warn("net.Interfaces failed, err:", err.Error())
+		return nil, err
+	}
+	var allAddrs []net.Addr
+	for i := 0; i < len(netInterfaces); i++ {
+		if (netInterfaces[i].Flags & net.FlagUp) == 0 {
+			continue
+		}
+		addrs, err := netInterfaces[i].Addrs()
+		if err != nil {
+			continue
+		}
+		for j := 0; j < len(addrs); j++ {
+			allAddrs = append(allAddrs, addrs[j])
+		}
+	}
+	return &allAddrs, nil
 }
 
 // GetFreePort 获取空闲端口
