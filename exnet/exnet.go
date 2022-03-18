@@ -134,3 +134,19 @@ func GetAddrPort(addrPort string) (string, int) {
 	port, _ := strconv.Atoi(parts[1])
 	return parts[0], port
 }
+
+func IsLocalIP(ip string, addrs *[]net.Addr) bool {
+	for _, address := range *addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil && ipnet.IP.String() == ip {
+			return true
+		}
+	}
+	return false
+}
+
+func CheckIP(i string) bool {
+	if !strings.Contains(i, ":") {
+		return net.ParseIP(i) != nil
+	}
+	return false
+}
