@@ -68,3 +68,9 @@ func DownloadFile(url string, location string) {
 	RunCmd("/bin/sh", "-c", "cp -a /tmp/ysicing/* "+location)
 	RunCmd("/bin/sh", "-c", "rm -rf /tmp/ysicing")
 }
+
+// CheckBin 检查二进制是否存在
+func CheckBin(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
+}
