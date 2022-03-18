@@ -16,6 +16,7 @@ package file
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -73,6 +74,35 @@ func Rmdir(path string, notIncludeSelf ...bool) (ok bool) {
 		_ = os.Mkdir(path, os.ModePerm)
 	}
 	return
+}
+
+func Mkdir(dirName string) error {
+	return os.MkdirAll(dirName, 0755)
+}
+
+func MkDirs(dirs ...string) error {
+	if len(dirs) == 0 {
+		return nil
+	}
+	for _, dir := range dirs {
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			return fmt.Errorf("failed to create %s, %v", dir, err)
+		}
+	}
+	return nil
+}
+
+func MkTmpdir(dir string) (string, error) {
+	tempDir, err := ioutil.TempDir(dir, ".dtmp-")
+	if err != nil {
+		return "", err
+	}
+	return tempDir, os.MkdirAll(tempDir, 0755)
+}
+
+func MkTmpFile(path string) (*os.File, error) {
+	return ioutil.TempFile(path, ".ftmp-")
 }
 
 // Size file size
@@ -218,6 +248,49 @@ func RemoveFiles(path string) bool {
 		return false
 	}
 	return true
+}
+
+func ReadLines(fileName string) ([]string, error) {
+	var lines []string
+	if !CheckFileExists(fileName) {
+		return nil, errors.New("no such file")
+	}
+	file, err := os.Open(filepath.Clean(fileName))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	br := bufio.NewReader(file)
+	for {
+		line, _, c := br.ReadLine()
+		if c == io.EOF {
+			break
+		}
+		lines = append(lines, string(line))
+	}
+	return lines, nil
+}
+
+// ReadAll read file content
+func ReadAll(fileName string) ([]byte, error) {
+	// step1：check file exist
+	if !CheckFileExists(fileName) {
+		return nil, errors.New("no such file")
+	}
+	// step2：open file
+	file, err := os.Open(filepath.Clean(fileName))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// step3：read file content
+	content, err := ioutil.ReadFile(filepath.Clean(fileName))
+	if err != nil {
+		return nil, err
+	}
+
+	return content, nil
 }
 
 // ReadFileOneLine 读取文件一行
