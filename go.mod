@@ -3,7 +3,7 @@ module github.com/ergoapi/util
 go 1.17
 
 require (
-	github.com/6tail/lunar-go v1.2.14
+	github.com/6tail/lunar-go v1.2.15
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/blang/semver/v4 v4.0.0
 	github.com/gin-gonic/gin v1.7.7
