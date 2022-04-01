@@ -18,6 +18,7 @@ type Info struct {
 	GoVersion    string `json:"goVersion"`
 	Compiler     string `json:"compiler"`
 	Platform     string `json:"platform"`
+	Release      string `json:"release"`
 }
 
 func (info Info) String() string {
@@ -38,6 +39,7 @@ func Get() Info {
 		GoVersion:    runtime.Version(),
 		Compiler:     runtime.Compiler,
 		Platform:     fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
+		Release:      release,
 	}
 }
 

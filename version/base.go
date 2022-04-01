@@ -6,8 +6,8 @@ var (
 	// them irrelevant. (Next we'll take it out, which may muck with
 	// scripts consuming the kubectl version output - but most of
 	// these should be looking at gitVersion already anyways.)
-	gitMajor string = "1" // major version, always numeric
-	gitMinor string = "6" // minor version, numeric possibly followed by "+"
+	gitMajor string = "0" // major version, always numeric
+	gitMinor string = "0" // minor version, numeric possibly followed by "+"
 
 	// semantic version, derived by build scripts (see
 	// https://github.com/kubernetes/kubernetes/blob/master/docs/design/versioning.md
@@ -24,4 +24,6 @@ var (
 	gitBranch    string = "unknown"
 
 	buildDate string = "1970-01-01T00:00:00Z" // build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
+	release string = "unknown" // release version, output of $(cat VERSION)
 )
