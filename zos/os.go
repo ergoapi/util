@@ -19,6 +19,7 @@ import (
 	"runtime"
 
 	"github.com/acobaugh/osrelease"
+	"github.com/ergoapi/util/file"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -44,8 +45,7 @@ func NotUnix() bool {
 
 // IsContainer 是否是容器
 func IsContainer() bool {
-	_, err := os.Stat("/.dockerenv")
-	return err == nil || os.IsExist(err)
+	return file.CheckFileExists("/.dockerenv")
 }
 
 // GetUserName 获取当前系统登录用户

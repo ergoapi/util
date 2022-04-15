@@ -403,3 +403,12 @@ func IsRecursiveSymlink(f os.FileInfo, symlinkPath string) bool {
 
 	return false
 }
+
+// IsDir 是否为目录
+func IsDir(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
+}
