@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	recursiveCopy "github.com/otiai10/copy"
@@ -411,4 +412,54 @@ func IsDir(path string) bool {
 		return false
 	}
 	return info.IsDir()
+}
+
+// DirFilesList 获取目录下的文件列表
+func DirFilesList(sourcePath string, include string, exclude string) (files []string, err error) {
+	// bfs遍历文件夹
+	var dirs []string
+	dirs = append(dirs, sourcePath)
+	for len(dirs) > 0 {
+		dirName := dirs[0]
+		dirs = dirs[1:]
+
+		fileInfos, err := ioutil.ReadDir(dirName)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, f := range fileInfos {
+			fileName := dirName + "/" + f.Name()
+			if f.IsDir() {
+				dirs = append(dirs, fileName)
+			} else {
+				fileName = fileName[len(sourcePath)+1:]
+				files = append(files, fileName)
+			}
+		}
+	}
+
+	if len(include) > 0 {
+		files = matchPattern(files, include, true)
+	}
+	if len(exclude) > 0 {
+		files = matchPattern(files, exclude, false)
+	}
+
+	return files, nil
+}
+
+func matchPattern(strs []string, pattern string, include bool) []string {
+	res := make([]string, 0)
+	re := regexp.MustCompile(pattern)
+	for _, s := range strs {
+		match := re.MatchString(s)
+		if !include {
+			match = !match
+		}
+		if match {
+			res = append(res, s)
+		}
+	}
+	return res
 }
