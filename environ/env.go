@@ -84,3 +84,13 @@ func Expand(env map[string]string) map[string]string {
 	}
 	return c
 }
+
+// Setenv 设置一个环境变量的值.
+func Setenv(varname, data string) error {
+	return os.Setenv(varname, data)
+}
+
+// Unsetenv 删除一个环境变量.
+func Unsetenv(varname string) error {
+	return os.Unsetenv(varname)
+}

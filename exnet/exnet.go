@@ -1,7 +1,7 @@
 package exnet
 
 import (
-	"fmt"
+	"errors"
 	"net"
 	"strconv"
 	"strings"
@@ -29,7 +29,7 @@ func LocalIP() (net.IP, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("cannot find local IP address")
+	return nil, errors.New("cannot find local IP address")
 }
 
 //LocalIPs 获取本机非loopback ip
@@ -55,6 +55,21 @@ func LocalIPs() (addr []string) {
 		}
 	}
 	return addr
+}
+
+// GetMacAddrs 获取本机的Mac网卡地址列表.
+func GetMacAddrs() (macAddrs []string) {
+	netInterfaces, _ := net.Interfaces()
+	if len(netInterfaces) > 0 {
+		for _, netInterface := range netInterfaces {
+			macAddr := netInterface.HardwareAddr.String()
+			if len(macAddr) == 0 {
+				continue
+			}
+			macAddrs = append(macAddrs, macAddr)
+		}
+	}
+	return
 }
 
 func IsLocalHostAddrs() (*[]net.Addr, error) {
@@ -95,7 +110,16 @@ func GetFreePort() int {
 }
 
 // IsPrivateIP 私网ip
-func IsPrivateIP(ip net.IP) bool {
+func IsPrivateIP(str string) (bool, error) {
+	ip := net.ParseIP(str)
+	if ip == nil {
+		return false, errors.New("str is not valid ip")
+	}
+	return IsPrivateNetIP(ip), nil
+}
+
+// IsPrivateNetIP 私网ip
+func IsPrivateNetIP(ip net.IP) bool {
 	if ip.IsLoopback() || ip.IsLinkLocalMulticast() || ip.IsLinkLocalUnicast() {
 		return true
 	}
@@ -140,14 +164,16 @@ func Check(port int) (status bool, err error) {
 	return CheckHostPort("", port)
 }
 
-func GetOutboundIP() net.IP {
+// OutboundIP 获取本机的出口IP.
+func OutboundIP() (string, error) {
+	res := ""
 	conn, err := net.Dial("udp", "8.8.8.8:80")
-	if err != nil {
-		return net.IP{}
+	if conn != nil {
+		addr := conn.LocalAddr().(*net.UDPAddr)
+		res = addr.IP.String()
+		_ = conn.Close()
 	}
-	defer conn.Close()
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP
+	return res, err
 }
 
 func GetAddrPort(addrPort string) (string, int) {
@@ -170,4 +196,42 @@ func CheckIP(i string) bool {
 		return net.ParseIP(i) != nil
 	}
 	return false
+}
+
+// GetIpByHostname 返回主机名对应的 IPv4地址.
+func GetIpByHostname(hostname string) (string, error) {
+	ips, err := net.LookupIP(hostname)
+	if ips != nil {
+		for _, v := range ips {
+			if v.To4() != nil {
+				return v.String(), nil
+			}
+		}
+		return "", nil
+	}
+	return "", err
+}
+
+// GetIpsByHost 获取互联网域名/主机名对应的 IPv4 地址列表.
+func GetIpsByDomain(domain string) ([]string, error) {
+	ips, err := net.LookupIP(domain)
+	if ips != nil {
+		var ipstrs []string
+		for _, v := range ips {
+			if v.To4() != nil {
+				ipstrs = append(ipstrs, v.String())
+			}
+		}
+		return ipstrs, nil
+	}
+	return nil, err
+}
+
+// GetHostByIP 获取指定的IP地址对应的主机名.
+func GetHostByIP(ipAddress string) (string, error) {
+	names, err := net.LookupAddr(ipAddress)
+	if names != nil {
+		return strings.TrimRight(names[0], "."), nil
+	}
+	return "", err
 }

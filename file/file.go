@@ -463,3 +463,8 @@ func matchPattern(strs []string, pattern string, include bool) []string {
 	}
 	return res
 }
+
+// GetTempDir 返回用于临时文件的目录.
+func GetTempDir() string {
+	return os.TempDir()
+}

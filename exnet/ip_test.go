@@ -18,7 +18,7 @@ import (
 	"testing"
 )
 
-func TestIsPrivateIP(t *testing.T) {
+func TestIsPrivateNetIP(t *testing.T) {
 	type args struct {
 		ip net.IP
 	}
@@ -44,8 +44,8 @@ func TestIsPrivateIP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsPrivateIP(tt.args.ip); got != tt.want {
-				t.Errorf("IsPrivateIP() = %v, want %v", got, tt.want)
+			if got := IsPrivateNetIP(tt.args.ip); got != tt.want {
+				t.Errorf("IsPrivateNetIP() = %v, want %v", got, tt.want)
 			}
 		})
 	}
