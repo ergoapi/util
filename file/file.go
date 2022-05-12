@@ -104,11 +104,7 @@ func MkDirs(dirs ...string) error {
 }
 
 func MkTmpdir(dir string) (string, error) {
-	tempDir, err := ioutil.TempDir(dir, ".dtmp-")
-	if err != nil {
-		return "", err
-	}
-	return tempDir, os.MkdirAll(tempDir, 0755)
+	return ioutil.TempDir(dir, ".dtmp-")
 }
 
 func MkTmpFile(path string) (*os.File, error) {
