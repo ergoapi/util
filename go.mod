@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
-	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang v1.12.2
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88
 	k8s.io/client-go v0.23.6
 )
