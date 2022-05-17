@@ -411,7 +411,7 @@ func IsDir(path string) bool {
 }
 
 // DirFilesList 获取目录下的文件列表
-func DirFilesList(sourcePath string, include string, exclude string) (files []string, err error) {
+func DirFilesList(sourcePath string, include, exclude []string) (files []string, err error) {
 	// bfs遍历文件夹
 	var dirs []string
 	dirs = append(dirs, sourcePath)
@@ -436,10 +436,14 @@ func DirFilesList(sourcePath string, include string, exclude string) (files []st
 	}
 
 	if len(include) > 0 {
-		files = matchPattern(files, include, true)
+		for _, i := range include {
+			files = matchPattern(files, i, true)
+		}
 	}
 	if len(exclude) > 0 {
-		files = matchPattern(files, exclude, false)
+		for _, e := range include {
+			files = matchPattern(files, e, false)
+		}
 	}
 
 	return files, nil
