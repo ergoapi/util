@@ -441,7 +441,7 @@ func DirFilesList(sourcePath string, include, exclude []string) (files []string,
 		}
 	}
 	if len(exclude) > 0 {
-		for _, e := range include {
+		for _, e := range exclude {
 			files = matchPattern(files, e, false)
 		}
 	}
