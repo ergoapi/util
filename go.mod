@@ -3,13 +3,13 @@ module github.com/ergoapi/util
 go 1.18
 
 require (
-	github.com/6tail/lunar-go v1.2.17
+	github.com/6tail/lunar-go v1.2.18
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/blang/semver/v4 v4.0.0
 	github.com/google/uuid v1.3.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.7.0
-	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang v1.12.2
 	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88
 	k8s.io/client-go v0.23.6
 )
