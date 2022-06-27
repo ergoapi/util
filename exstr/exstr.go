@@ -14,7 +14,9 @@
 package exstr
 
 import (
+	"regexp"
 	"strconv"
+	"strings"
 	"unsafe"
 )
 
@@ -81,4 +83,32 @@ func Str2Bytes(s string) []byte {
 // Bytes2Str converts byte slice to string without a memory allocation.
 func Bytes2Str(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+func IsEmptyLine(str string) bool {
+	re := regexp.MustCompile(`^\s*$`)
+
+	return re.MatchString(str)
+}
+
+func TrimWS(str string) string {
+	return strings.Trim(str, "\n\t")
+}
+
+func TrimSpaceWS(str string) string {
+	return strings.TrimRight(str, " \n\t")
+}
+
+func RemoveSliceEmpty(list []string) (fList []string) {
+	for i := range list {
+		if strings.TrimSpace(list[i]) != "" {
+			fList = append(fList, list[i])
+		}
+	}
+	return
+}
+
+func SplitRemoveEmpty(s, sep string) []string {
+	data := strings.Split(s, sep)
+	return RemoveSliceEmpty(data)
 }
