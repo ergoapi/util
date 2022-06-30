@@ -18,6 +18,9 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"fmt"
+	"hash/fnv"
+	"io"
 )
 
 // GenSha256 生成sha256
@@ -39,4 +42,18 @@ func GenSha1(code string) string {
 	s := sha1.New()
 	s.Write([]byte(code))
 	return hex.EncodeToString(s.Sum(nil))
+}
+
+// StringToNumber hashes a given string to a number
+func StringToNumber(s string) uint32 {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(s))
+	return h.Sum32()
+}
+
+// String hashes a given string
+func String(s string) string {
+	hash := sha256.New()
+	_, _ = io.WriteString(hash, s)
+	return fmt.Sprintf("%x", hash.Sum(nil))
 }
