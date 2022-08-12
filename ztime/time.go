@@ -258,7 +258,7 @@ func GetMonthDayNum(year, month string) int {
 	}
 }
 
-//判断是否为闰年
+// 判断是否为闰年
 func IsLeapYear(year int) bool { //y == 2000, 2004
 	//判断是否为闰年
 	if year%4 == 0 && year%100 != 0 || year%400 == 0 {

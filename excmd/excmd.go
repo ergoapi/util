@@ -21,7 +21,7 @@ import (
 	"os/exec"
 )
 
-//RunCmd is exec on os ,no return
+// RunCmd is exec on os ,no return
 func RunCmd(name string, arg ...string) error {
 	cmd := exec.Command(name, arg[:]...)
 	cmd.Stdin = os.Stdin
@@ -30,7 +30,7 @@ func RunCmd(name string, arg ...string) error {
 	return cmd.Run()
 }
 
-//RunCmdRes is exec on os , return result
+// RunCmdRes is exec on os , return result
 func RunCmdRes(name string, arg ...string) (string, error) {
 	cmd := exec.Command(name, arg[:]...)
 	cmd.Stdin = os.Stdin

@@ -19,7 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -104,11 +104,11 @@ func MkDirs(dirs ...string) error {
 }
 
 func MkTmpdir(dir string) (string, error) {
-	return ioutil.TempDir(dir, ".dtmp-")
+	return os.MkdirTemp(dir, ".dtmp-")
 }
 
 func MkTmpFile(path string) (*os.File, error) {
-	return ioutil.TempFile(path, ".ftmp-")
+	return os.CreateTemp(path, ".ftmp-")
 }
 
 // Size file size
@@ -153,7 +153,7 @@ func WriteToFile(filePath string, data []byte) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filePath, data, 0666)
+	return os.WriteFile(filePath, data, 0600)
 }
 
 // Writefile 写文件
@@ -182,25 +182,25 @@ func WritefileWithLine(logpath, msg string) error {
 	return nil
 }
 
-//DirIsEmpty 验证目录是否为空
+// DirIsEmpty 验证目录是否为空
 func DirIsEmpty(dir string) bool {
-	infos, err := ioutil.ReadDir(dir)
+	infos, err := os.ReadDir(dir)
 	if len(infos) == 0 || err != nil {
 		return true
 	}
 	return false
 }
 
-//SearchFileBody 搜索文件中是否含有指定字符串
+// SearchFileBody 搜索文件中是否含有指定字符串
 func SearchFileBody(filename, searchStr string) bool {
-	body, _ := ioutil.ReadFile(filename)
+	body, _ := os.ReadFile(filename)
 	return strings.Contains(string(body), searchStr)
 }
 
-//IsHaveFile 指定目录是否含有文件
-//.开头文件除外
+// IsHaveFile 指定目录是否含有文件
+// .开头文件除外
 func IsHaveFile(path string) bool {
-	files, _ := ioutil.ReadDir(path)
+	files, _ := os.ReadDir(path)
 	for _, file := range files {
 		if !strings.HasPrefix(file.Name(), ".") {
 			return true
@@ -209,13 +209,13 @@ func IsHaveFile(path string) bool {
 	return false
 }
 
-//SearchFile 搜索指定目录是否有指定文件，指定搜索目录层数，-1为全目录搜索
+// SearchFile 搜索指定目录是否有指定文件，指定搜索目录层数，-1为全目录搜索
 func SearchFile(pathDir, name string, level int) bool {
 	if level == 0 {
 		return false
 	}
-	files, _ := ioutil.ReadDir(pathDir)
-	var dirs []os.FileInfo
+	files, _ := os.ReadDir(pathDir)
+	var dirs []fs.DirEntry
 	for _, file := range files {
 		if file.IsDir() {
 			dirs = append(dirs, file)
@@ -237,9 +237,9 @@ func SearchFile(pathDir, name string, level int) bool {
 	return false
 }
 
-//CheckFileExistsWithSuffix 指定目录是否含有指定后缀的文件
+// CheckFileExistsWithSuffix 指定目录是否含有指定后缀的文件
 func CheckFileExistsWithSuffix(pathDir, suffix string) bool {
-	files, _ := ioutil.ReadDir(pathDir)
+	files, _ := os.ReadDir(pathDir)
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), suffix) {
 			return true
@@ -291,7 +291,7 @@ func ReadAll(fileName string) ([]byte, error) {
 	defer file.Close()
 
 	// step3：read file content
-	content, err := ioutil.ReadFile(filepath.Clean(fileName))
+	content, err := os.ReadFile(filepath.Clean(fileName))
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +317,7 @@ func ReadFileOneLine(fileName string) string {
 // ReadFile reads a file with a given limit
 func ReadFile(path string, limit int64) ([]byte, error) {
 	if limit <= 0 {
-		return ioutil.ReadFile(path)
+		return os.ReadFile(path)
 	}
 
 	f, err := os.Open(path)
@@ -419,7 +419,7 @@ func DirFilesList(sourcePath string, include, exclude []string) (files []string,
 		dirName := dirs[0]
 		dirs = dirs[1:]
 
-		fileInfos, err := ioutil.ReadDir(dirName)
+		fileInfos, err := os.ReadDir(dirName)
 		if err != nil {
 			return nil, err
 		}

@@ -181,9 +181,8 @@ func (ar IPV4AddrRange) Merge(ar2 IPV4AddrRange) (*IPV4AddrRange, bool) {
 func (ar IPV4AddrRange) IsOverlap(ar2 IPV4AddrRange) bool {
 	if ar.start > ar2.end || ar.end < ar2.start {
 		return false
-	} else {
-		return true
 	}
+	return true
 }
 
 func (ar IPV4AddrRange) ToIPNets() []*net.IPNet {

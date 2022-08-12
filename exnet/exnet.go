@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//LocalIP 获取本机 ip
+// LocalIP 获取本机 ip
 // 获取第一个非 loopback ip
 func LocalIP() (net.IP, error) {
 	tables, err := net.Interfaces()
@@ -32,7 +32,7 @@ func LocalIP() (net.IP, error) {
 	return nil, errors.New("cannot find local IP address")
 }
 
-//LocalIPs 获取本机非loopback ip
+// LocalIPs 获取本机非loopback ip
 func LocalIPs() (addr []string) {
 	tables, err := net.Interfaces()
 	if err != nil {

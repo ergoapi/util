@@ -19,21 +19,21 @@ func IsBinary(path string) bool {
 
 	r := bufio.NewReader(file)
 	buf := make([]byte, 1024)
-	n, err := r.Read(buf)
+	n, _ := r.Read(buf)
 
-	white_byte := 0
+	whiteByte := 0
 	for i := 0; i < n; i++ {
 		if (buf[i] >= 0x20 && buf[i] <= 0xff) ||
 			buf[i] == 9 ||
 			buf[i] == 10 ||
 			buf[i] == 13 {
-			white_byte++
+			whiteByte++
 		} else if buf[i] <= 6 || (buf[i] >= 14 && buf[i] <= 31) {
 			return true
 		}
 	}
 
-	if white_byte >= 1 {
+	if whiteByte >= 1 {
 		return false
 	}
 	return true
