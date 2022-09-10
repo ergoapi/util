@@ -25,5 +25,22 @@ func Int64Ptr(p int64) *int64 { return &p }
 // StringPtr 字符串指针
 func StringPtr(p string) *string { return &p }
 
+// ReverseStringPtr returns a string from a string pointer
+func ReverseStringPtr(val *string) string {
+	if val == nil {
+		return ""
+	}
+	return *val
+}
+
 // BoolPtr bool指针
 func BoolPtr(p bool) *bool { return &p }
+
+// ReverseBoolPtr returns a bool from a bool pointer
+func ReverseBoolPtr(val *bool) bool {
+	if val == nil {
+		return false
+	}
+
+	return *val
+}

@@ -112,3 +112,9 @@ func SplitRemoveEmpty(s, sep string) []string {
 	data := strings.Split(s, sep)
 	return RemoveSliceEmpty(data)
 }
+
+func Merge(haystack []string, haystack2 []string) []string {
+	ret := append([]string{}, haystack...)
+	ret = append(ret, haystack2...)
+	return DuplicateStrElement(ret)
+}
