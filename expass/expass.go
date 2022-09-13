@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	cryptorand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
@@ -17,10 +18,17 @@ import (
 )
 
 const (
-	DIGITS   = "23456789"
+	DIGITS   = "0123456789"
+	Alpha    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	Symbols  = "_-?!.,@#$%^&*()=[]{}<>"
 	LETTERS  = "abcdefghjkmnpqrstuvwxyz"
 	PUNC     = ""
 	SaltHash = "<-*Uk30^96eY*->"
+)
+
+var (
+	AlphaNum        = DIGITS + Alpha
+	AlphaNumSymbols = AlphaNum + Symbols
 )
 
 var CHARS = fmt.Sprintf("%s%s%s%s", DIGITS, LETTERS, strings.ToUpper(LETTERS), PUNC)
@@ -135,4 +143,41 @@ func PKCS7UnPadding(origData []byte) []byte {
 		return origData[:(length - unpadding)]
 	}
 	return nil
+}
+
+func NewPwGen(length int, chars string) string {
+	var bytes = make([]byte, length)
+	var op = byte(len(chars))
+
+	cryptorand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = chars[b%op]
+	}
+	return string(bytes)
+}
+
+// PwGenNum generates a random string of the given length out of numeric characters
+func PwGenNum(length int) string {
+	return NewPwGen(length, DIGITS)
+}
+
+// PwGenSymbols generates a random string of the given length out of alphabetic characters
+func PwGenAlpha(length int) string {
+	return NewPwGen(length, Alpha)
+}
+
+// PwGenSymbols generates a random string of the given length out of symbols
+func PwGenSymbols(length int) string {
+	return NewPwGen(length, Symbols)
+}
+
+// PwGenAlphaNum generates a random string of the given length out of alphanumeric characters
+func PwGenAlphaNum(length int) string {
+	return NewPwGen(length, AlphaNum)
+}
+
+// PwGenAlphaNumSymbols generates a random string of the given length out of alphanumeric characters and
+// symbols
+func PwGenAlphaNumSymbols(length int) string {
+	return NewPwGen(length, AlphaNumSymbols)
 }
