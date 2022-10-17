@@ -16,7 +16,6 @@ package file
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -25,6 +24,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/cockroachdb/errors"
 
 	recursiveCopy "github.com/otiai10/copy"
 )
@@ -81,7 +82,7 @@ func Rmdir(path string, notIncludeSelf ...bool) (ok bool) {
 func MkFileFullPathDir(fileName string) error {
 	localDir := filepath.Dir(fileName)
 	if err := Mkdir(localDir); err != nil {
-		return fmt.Errorf("failed to create local dir %s: %v", localDir, err)
+		return errors.Errorf("failed to create local dir %s: %v", localDir, err)
 	}
 	return nil
 }
@@ -97,7 +98,7 @@ func MkDirs(dirs ...string) error {
 	for _, dir := range dirs {
 		err := os.MkdirAll(dir, 0755)
 		if err != nil {
-			return fmt.Errorf("failed to create %s, %v", dir, err)
+			return errors.Errorf("failed to create %s, %v", dir, err)
 		}
 	}
 	return nil

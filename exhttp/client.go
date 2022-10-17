@@ -18,10 +18,25 @@ import (
 	"time"
 )
 
-var ExHttpClient *http.Client
+type ExHttpClient struct {
+	*http.Client
+}
+
+var httpClient *ExHttpClient
 
 func init() {
-	clt := *http.DefaultClient
-	clt.Timeout = time.Second * 5
-	ExHttpClient = &clt
+	httpClient = &ExHttpClient{http.DefaultClient}
+	httpClient.Timeout = time.Second * 60
+	httpClient.Transport = &http.Transport{
+		TLSHandshakeTimeout:   time.Second * 5,
+		IdleConnTimeout:       time.Second * 10,
+		ResponseHeaderTimeout: time.Second * 10,
+		ExpectContinueTimeout: time.Second * 20,
+		Proxy:                 http.ProxyFromEnvironment,
+	}
+}
+
+func GetHttpClient() *ExHttpClient {
+	c := *httpClient
+	return &c
 }

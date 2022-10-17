@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/cockroachdb/errors"
 )
 
 func SavePid(pidfile string) error {
@@ -13,7 +15,7 @@ func SavePid(pidfile string) error {
 
 	file, err := os.OpenFile(pidfile, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		return fmt.Errorf("error opening pidfile %s: %s", pidfile, err)
+		return errors.Errorf("error opening pidfile %s: %s", pidfile, err)
 	}
 	defer file.Close() // in case we fail before the explicit close
 

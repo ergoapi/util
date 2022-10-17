@@ -15,18 +15,19 @@ package zos
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
+
+	"github.com/cockroachdb/errors"
 )
 
 // TLSCheck check tls Certificate
 func TLSCheck(pemData string) (*x509.Certificate, error) {
 	block, _ := pem.Decode([]byte(pemData))
 	if block == nil {
-		return nil, fmt.Errorf("certificate decoding error")
+		return nil, errors.New("certificate decoding error")
 	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("certificate Parsing error")
+		return nil, errors.New("certificate Parsing error")
 	}
 	return cert, nil
 }

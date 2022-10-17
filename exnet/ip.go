@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cockroachdb/errors"
 	"github.com/ergoapi/util/validation"
 )
 
@@ -32,16 +33,16 @@ func IP2Number(ipstr string) (uint32, error) {
 		for i := 0; i < 4; i += 1 {
 			n, e := strconv.Atoi(parts[i])
 			if e != nil {
-				return 0, fmt.Errorf("invalid number")
+				return 0, errors.New("invalid number")
 			}
 			if n < 0 || n > 255 {
-				return 0, fmt.Errorf("ip number out of range [0-255]")
+				return 0, errors.New("ip number out of range [0-255]")
 			}
 			num = num | (uint32(n) << uint32(24-i*8))
 		}
 		return num, nil
 	}
-	return 0, fmt.Errorf("invalid ip address %s", ipstr)
+	return 0, errors.Errorf("invalid ip address %s", ipstr)
 }
 
 func Number2Bytes(num uint32) []byte {
@@ -66,7 +67,7 @@ func NewIPV4Addr(ipstr string) (IPV4Addr, error) {
 	if len(ipstr) > 0 {
 		num, err := IP2Number(ipstr)
 		if err != nil {
-			return addr, fmt.Errorf("IP2Number: %v", err)
+			return addr, errors.Errorf("IP2Number: %v", err)
 		}
 		addr = IPV4Addr(num)
 	}
@@ -315,29 +316,29 @@ func ParsePrefix(prefix string) (IPV4Addr, int8, error) {
 	if slash > 0 {
 		addr, err := NewIPV4Addr(prefix[:slash])
 		if err != nil {
-			return 0, 0, fmt.Errorf("NewIPV4Addr: %v", err)
+			return 0, 0, errors.Errorf("NewIPV4Addr: %v", err)
 		}
 		if validation.MatchIP4Addr(prefix[slash+1:]) {
 			mask, err := NewIPV4Addr(prefix[slash+1:])
 			if err != nil {
-				return 0, 0, fmt.Errorf("NewIPV4Addr: %v", err)
+				return 0, 0, errors.Errorf("NewIPV4Addr: %v", err)
 			}
 			maskLen := Mask2Len(mask)
 			return addr.NetAddr(maskLen), maskLen, nil
 		} else {
 			maskLen, err := strconv.Atoi(prefix[slash+1:])
 			if err != nil {
-				return 0, 0, fmt.Errorf("invalid masklen %s", err)
+				return 0, 0, errors.Errorf("invalid masklen %s", err)
 			}
 			if maskLen < 0 || maskLen > 32 {
-				return 0, 0, fmt.Errorf("out of range masklen")
+				return 0, 0, errors.New("out of range masklen")
 			}
 			return addr.NetAddr(int8(maskLen)), int8(maskLen), nil
 		}
 	} else {
 		addr, err := NewIPV4Addr(prefix)
 		if err != nil {
-			return 0, 0, fmt.Errorf("NewIPV4Addr: %v", err)
+			return 0, 0, errors.Errorf("NewIPV4Addr: %v", err)
 		}
 		return addr, 32, nil
 	}
@@ -346,7 +347,7 @@ func ParsePrefix(prefix string) (IPV4Addr, int8, error) {
 func NewIPV4Prefix(prefix string) (IPV4Prefix, error) {
 	addr, maskLen, err := ParsePrefix(prefix)
 	if err != nil {
-		return IPV4Prefix{}, fmt.Errorf("ParsePrefix: %v", err)
+		return IPV4Prefix{}, errors.Errorf("ParsePrefix: %v", err)
 	}
 	pref := IPV4Prefix{
 		Address: addr,

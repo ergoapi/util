@@ -1,11 +1,11 @@
 package zos
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/cockroachdb/errors"
 )
 
 // https://github.com/lima-vm/lima/blob/19e79df9673c5122fbe3e3418b6297c6296ec8eb/pkg/localpathutil/localpathutil.go
@@ -29,7 +29,7 @@ func HomeExpand(orig string) (string, error) {
 			s = strings.Replace(s, "~", homeDir, 1)
 		} else {
 			// Paths like "~foo/bar" are unsupported.
-			return "", fmt.Errorf("unexpandable path %q", orig)
+			return "", errors.Errorf("unexpandable path %q", orig)
 		}
 	}
 	return filepath.Abs(s)
