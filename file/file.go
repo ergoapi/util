@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/cockroachdb/errors"
+	"github.com/ergoapi/util/exstr"
 
 	recursiveCopy "github.com/otiai10/copy"
 )
@@ -427,19 +428,25 @@ func DirFilesList(sourcePath string, include, exclude []string) (files []string,
 
 		for _, f := range fileInfos {
 			fileName := dirName + "/" + f.Name()
-			if f.IsDir() {
+			if f.IsDir() { // 目录
 				dirs = append(dirs, fileName)
-			} else {
+			} else if f.Type().IsRegular() { // 普通文件
 				fileName = fileName[len(sourcePath)+1:]
 				files = append(files, fileName)
+			} else {
+				// 可能是软连接等
+				continue
 			}
 		}
 	}
 
 	if len(include) > 0 {
+		var okfile []string
 		for _, i := range include {
-			files = matchPattern(files, i, true)
+			ifiles := matchPattern(files, i, true)
+			okfile = append(okfile, ifiles...)
 		}
+		files = exstr.DuplicateStrElement(okfile)
 	}
 	if len(exclude) > 0 {
 		for _, e := range exclude {
