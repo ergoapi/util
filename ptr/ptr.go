@@ -44,3 +44,19 @@ func ReverseBoolPtr(val *bool) bool {
 
 	return *val
 }
+
+func ArrayPtr2Ptr(ptrs []*string) []string {
+	var s []string
+	for _, i := range ptrs {
+		s = append(s, *i)
+	}
+	return s
+}
+
+func Array2Ptr(s []string) []*string {
+	var ptrs []*string
+	for _, i := range s {
+		ptrs = append(ptrs, &i)
+	}
+	return ptrs
+}
