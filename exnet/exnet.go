@@ -32,6 +32,25 @@ func LocalIP() (net.IP, error) {
 	return nil, errors.New("cannot find local IP address")
 }
 
+// ListLocalIPs 获取本机非loopback ip
+func Lists() (*[]net.Addr, error) {
+	tables, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+	var allAddrs []net.Addr
+	for i := 0; i < len(tables); i++ {
+		if (tables[i].Flags & net.FlagUp) == 0 {
+			continue
+		}
+		addrs, _ := tables[i].Addrs()
+		for j := 0; j < len(addrs); j++ {
+			allAddrs = append(allAddrs, addrs[j])
+		}
+	}
+	return &allAddrs, nil
+}
+
 // LocalIPs 获取本机非loopback ip
 func LocalIPs() (addr []string) {
 	tables, err := net.Interfaces()
