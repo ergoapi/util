@@ -476,3 +476,22 @@ func matchPattern(strs []string, pattern string, include bool) []string {
 func GetTempDir() string {
 	return os.TempDir()
 }
+
+// CountDirFiles reutrns # of files under a directory.
+func CountDirFiles(dirName string) int {
+	if !IsDir(dirName) {
+		return 0
+	}
+	var count int
+	err := filepath.Walk(dirName, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		count++
+		return nil
+	})
+	if err != nil {
+		return 0
+	}
+	return count
+}
