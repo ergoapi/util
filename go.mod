@@ -3,7 +3,7 @@ module github.com/ergoapi/util
 go 1.19
 
 require (
-	github.com/6tail/lunar-go v1.2.19
+	github.com/6tail/lunar-go v1.2.20
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/blang/semver/v4 v4.0.0
 	github.com/cockroachdb/errors v1.9.0
@@ -12,6 +12,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.9.0
 	github.com/prometheus/client_golang v1.14.0
+	github.com/schollz/progressbar/v3 v3.12.1
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
 	k8s.io/client-go v0.25.4
 	sigs.k8s.io/yaml v1.3.0
@@ -56,7 +57,6 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
-	github.com/schollz/progressbar/v3 v3.12.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
