@@ -15,8 +15,10 @@ package zos
 
 import (
 	"os"
+	"os/exec"
 	"os/user"
 	"runtime"
+	"strings"
 
 	"github.com/acobaugh/osrelease"
 	"github.com/ergoapi/util/file"
@@ -106,8 +108,8 @@ func OSRelease() (map[string]string, error) {
 	return osrelease.Read()
 }
 
-// Debian debian
-func Debian() bool {
+// IsDebian debian
+func IsDebian() bool {
 	os, err := osrelease.Read()
 	if err != nil {
 		return false
@@ -117,4 +119,29 @@ func Debian() bool {
 		return true
 	}
 	return false
+}
+
+func IsWsl() bool {
+	// Return false if meet error
+	cmd := exec.Command("cat", "/proc/version")
+	output, err := cmd.Output()
+	if err != nil {
+		return false
+	}
+	return strings.Contains(strings.ToLower(string(output)), "microsoft")
+}
+
+func GetWindowsConfigHome() (string, error) {
+	userCmd := exec.Command("wslvar", "LOCALAPPDATA")
+	userOutput, err := userCmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	cmd := exec.Command("wslpath", string(userOutput))
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.Trim(string(output), "\n"), nil
 }
