@@ -14,7 +14,7 @@ func NewTraceIdHook(traceID string) logrus.Hook {
 }
 
 func (hook *TraceIdHook) Fire(entry *logrus.Entry) error {
-	entry.Data["traceId"] = hook.TraceID
+	entry.Data["traceID"] = hook.TraceID
 	return nil
 }
 

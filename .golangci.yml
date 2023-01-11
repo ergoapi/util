@@ -40,13 +40,13 @@ linters-settings:
     checks: [ "all" ]
 
   gosimple:
-    go: "1.18"
+    go: "1.19"
   gofmt:
     simplify: false
   golint:
     minConfidence: 0
   unused:
-    go: "1.18"
+    go: "1.19"
   govet:
     enable-all: true
     disable:
