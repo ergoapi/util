@@ -20,6 +20,7 @@ import (
 
 	"github.com/ergoapi/util/common"
 	"github.com/ergoapi/util/exstr"
+	"github.com/golang-module/carbon/v2"
 )
 
 // NowUnixString 当前时间时间戳
@@ -389,4 +390,75 @@ func NowMonthAddNum(value int64) (int64, int64) {
 			return st, et
 		}
 	}
+}
+
+// GetStartQuarter 季度开始时间
+func GetStartQuarter(t string) string {
+	return carbon.Parse(t).StartOfQuarter().ToDateTimeString()
+}
+
+// GetEndQuarter 季度结束时间
+func GetEndQuarter(t string) string {
+	return carbon.Parse(t).EndOfQuarter().ToDateTimeString()
+}
+
+// GetStartMonth 月度开始时间
+func GetStartMonth(t string) string {
+	return carbon.Parse(t).StartOfMonth().ToDateTimeString()
+}
+
+// GetEndMonth 月度结束时间
+func GetEndMonth(t string) string {
+	return carbon.Parse(t).EndOfMonth().ToDateTimeString()
+}
+
+// GetStartWeek 星期开始时间
+func GetStartWeek(t string, startMonday bool) string {
+	day := carbon.Sunday
+	if startMonday {
+		day = carbon.Monday
+	}
+	return carbon.Parse(t).SetWeekStartsAt(day).StartOfWeek().ToDateTimeString()
+}
+
+// GetEndWeek 星期结束时间
+func GetEndWeek(t string, startMonday bool) string {
+	day := carbon.Sunday
+	if startMonday {
+		day = carbon.Monday
+	}
+	return carbon.Parse(t).SetWeekStartsAt(day).EndOfWeek().ToDateTimeString()
+}
+
+func AddDays(t string, day int) string {
+	return carbon.Parse(t).AddDays(day).ToDateTimeString()
+}
+
+func SubDays(t string, day int) string {
+	return carbon.Parse(t).SubDays(day).ToDateTimeString()
+}
+
+func AddHours(t string, hour int) string {
+	return carbon.Parse(t).AddHours(hour).ToDateTimeString()
+}
+
+func SubHours(t string, hour int) string {
+	return carbon.Parse(t).SubHours(hour).ToDateTimeString()
+}
+
+// AddDuration add Duration like "2.5h","2h30m"
+func AddDuration(t, duration string) string {
+	return carbon.Parse(t).AddDuration(duration).ToDateTimeString()
+}
+
+func SubDuration(t, duration string) string {
+	return carbon.Parse(t).SubDuration(duration).ToDateTimeString()
+}
+
+func DiffInDays(t1, t2 string) int64 {
+	return carbon.Parse(t1).DiffInDays(carbon.Parse(t2))
+}
+
+func DiffInHours(t1, t2 string) int64 {
+	return carbon.Parse(t1).DiffInHours(carbon.Parse(t2))
 }

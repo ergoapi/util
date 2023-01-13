@@ -12,7 +12,7 @@ import (
 
 	errors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/exid"
-	ltrace "github.com/ergoapi/util/hooks/trace"
+	ltrace "github.com/ergoapi/util/log/hooks/trace"
 	"github.com/ergoapi/util/ztime"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
