@@ -17,6 +17,7 @@ var (
 	promNamespace = "exgin"
 	promGinLabels = []string{
 		"status_code",
+		"url",
 		"path",
 		"method",
 	}

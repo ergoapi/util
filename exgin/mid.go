@@ -83,7 +83,7 @@ func ExLog(skip ...string) gin.HandlerFunc {
 			logrus.Infof("requestid %v =>  %v | %v | %v | %v | %v | %v | %v | %v", statuscode, bodysize, RealIP(c), method, host, path, query, latency, ua)
 		}
 		// update prom
-		labels := []string{fmt.Sprint(statuscode), path, method}
+		labels := []string{fmt.Sprint(statuscode), host, path, method}
 		promGinReqCount.WithLabelValues(labels...).Inc()
 		promGinReqLatency.WithLabelValues(labels...).Observe(latency.Seconds())
 	}
