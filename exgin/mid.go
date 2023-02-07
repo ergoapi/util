@@ -77,10 +77,41 @@ func ExLog(skip ...string) gin.HandlerFunc {
 		}
 		statuscode := c.Writer.Status()
 		bodysize := c.Writer.Size()
+		clientIP := c.ClientIP()
+		remoteIP := c.RemoteIP()
+		xffIP := c.Writer.Header().Get("X-Forwarded-For")
+		readIP := c.Writer.Header().Get("X-Real-Ip")
+		referer := c.Request.Referer()
 		if len(c.Errors) > 0 || c.Writer.Status() >= 500 {
-			logrus.Warnf("requestid %v =>  %v | %v | %v | %v | %v | %v | %v | %v  <= err: %v", statuscode, bodysize, RealIP(c), method, host, path, query, latency, ua, c.Errors.String())
+			logrus.WithFields(logrus.Fields{
+				"statuscode": statuscode,
+				"bodysize":   bodysize,
+				"client_ip":  clientIP,
+				"remote_ip":  remoteIP,
+				"xff_ip":     xffIP,
+				"real_ip":    readIP,
+				"method":     method,
+				"host":       host,
+				"path":       path,
+				"latency":    latency,
+				"ua":         ua,
+				"referer":    referer,
+			}).Warnf("query: %v  <= err: %v", query, c.Errors.String())
 		} else {
-			logrus.Infof("requestid %v =>  %v | %v | %v | %v | %v | %v | %v | %v", statuscode, bodysize, RealIP(c), method, host, path, query, latency, ua)
+			logrus.WithFields(logrus.Fields{
+				"statuscode": statuscode,
+				"bodysize":   bodysize,
+				"client_ip":  clientIP,
+				"remote_ip":  remoteIP,
+				"xff_ip":     xffIP,
+				"real_ip":    readIP,
+				"method":     method,
+				"host":       host,
+				"path":       path,
+				"latency":    latency,
+				"ua":         ua,
+				"referer":    referer,
+			}).Infof("query: %v", query)
 		}
 		// update prom
 		labels := []string{fmt.Sprint(statuscode), host, path, method}
