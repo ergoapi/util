@@ -20,7 +20,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.13.0
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/crypto v0.5.0
-	gorm.io/gorm v1.24.4
+	gorm.io/gorm v1.24.5
 	k8s.io/client-go v0.26.1
 	sigs.k8s.io/yaml v1.3.0
 )
