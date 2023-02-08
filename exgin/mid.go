@@ -133,7 +133,8 @@ func ExRecovery() gin.HandlerFunc {
 				var brokenPipe bool
 				if ne, ok := err.(*net.OpError); ok {
 					if se, ok := ne.Err.(*os.SyscallError); ok {
-						if strings.Contains(strings.ToLower(se.Error()), "broken pipe") || strings.Contains(strings.ToLower(se.Error()), "connection reset by peer") {
+						if strings.Contains(strings.ToLower(se.Error()), "broken pipe") ||
+							strings.Contains(strings.ToLower(se.Error()), "connection reset by peer") {
 							brokenPipe = true
 						}
 					}
@@ -141,7 +142,8 @@ func ExRecovery() gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					logrus.Errorf("Recovery from brokenPipe ---> path: %v, err: %v, request: %v", c.Request.URL.Path, err, string(httpRequest))
+					logrus.Errorf("Recovery from brokenPipe ---> path: %v, err: %v, request: %v",
+						c.Request.URL.Path, err, string(httpRequest))
 					c.AbortWithStatusJSON(200, gin.H{
 						"data":      nil,
 						"message":   "请求broken",
@@ -149,7 +151,8 @@ func ExRecovery() gin.HandlerFunc {
 						"code":      10500,
 					})
 				} else {
-					logrus.Errorf("Recovery from panic ---> err: %v, request: %v, stack: %v", err, string(httpRequest), string(debug.Stack()))
+					logrus.Errorf("Recovery from panic ---> err: %v, request: %v, stack: %v",
+						err, string(httpRequest), string(debug.Stack()))
 					c.AbortWithStatusJSON(200, gin.H{
 						"data":      nil,
 						"message":   "请求panic",

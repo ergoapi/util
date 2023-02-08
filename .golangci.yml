@@ -1,6 +1,9 @@
 run:
   timeout: 5m
 
+output:
+  format: checkstyle:report.xml,json:stdout,colored-line-number
+
 linters:
   # TODO: fix errors so that all of the linters below pass.
   # The linters that are commented out, as well as those explicitly disabled,
@@ -19,9 +22,11 @@ linters:
     - staticcheck
     - stylecheck
     - unused
+    - unparam
     - varcheck
     - whitespace
     - gocyclo
+    - lll
 
 issues:
   exclude-rules:
@@ -32,6 +37,9 @@ issues:
     - linters:
         - dupl
       path: _test\.go
+    - linters:
+        - lll
+      source: "^//go:generate "
 
 linters-settings:
   staticcheck:
@@ -73,3 +81,7 @@ linters-settings:
   gocyclo:
     # default 30
     max-complexity: 100
+
+  lll:
+    # Default: 120.
+    line-length: 300

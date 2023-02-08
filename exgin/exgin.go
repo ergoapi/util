@@ -40,14 +40,15 @@ var (
 )
 
 type Config struct {
-	Debug       bool
-	Gops        bool
-	GopsPath    string
-	Pprof       bool
-	PprofPath   string
-	Cors        bool
-	Metrics     bool
-	MetricsPath string
+	Debug          bool
+	Gops           bool
+	GopsPath       string
+	Pprof          bool
+	PprofPath      string
+	Cors           bool
+	Metrics        bool
+	MetricsPath    string
+	TrustedProxies []string
 }
 
 func (c *Config) GinSet(r *gin.Engine) {
@@ -56,6 +57,11 @@ func (c *Config) GinSet(r *gin.Engine) {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
+	}
+	if len(c.TrustedProxies) > 0 {
+		r.SetTrustedProxies(c.TrustedProxies)
+	} else {
+		r.SetTrustedProxies([]string{"0.0.0.0/0", "::/0"})
 	}
 	if c.Cors {
 		r.Use(ExCors())

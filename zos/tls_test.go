@@ -47,5 +47,4 @@ func TestExTLSCheck(t *testing.T) {
 	if err == nil {
 		t.Logf("domain %v", tlsres.DNSNames)
 	}
-
 }

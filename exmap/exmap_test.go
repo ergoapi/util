@@ -186,6 +186,7 @@ func TestMergeValues(t *testing.T) {
 	}
 	equal = reflect.DeepEqual(testMap, expectedMap)
 	if !equal {
-		t.Errorf("Expected a map with different keys to merge properly with another map. Expected: %v, got %v", expectedMap, testMap)
+		t.Errorf("Expected a map with different keys to merge properly with another map. Expected: %v, got %v",
+			expectedMap, testMap)
 	}
 }
