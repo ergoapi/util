@@ -159,8 +159,12 @@ func WriteToFile(filePath string, data []byte) error {
 }
 
 // Writefile 写文件
-func Writefile(logpath, msg string) error {
-	file, err := os.OpenFile(logpath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
+func Writefile(logpath, msg string, truncate bool) error {
+	filemode := os.O_WRONLY | os.O_APPEND | os.O_CREATE
+	if truncate {
+		filemode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
+	}
+	file, err := os.OpenFile(logpath, filemode, 0777)
 	if err != nil {
 		return err
 	}
