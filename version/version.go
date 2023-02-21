@@ -69,3 +69,8 @@ func GetShortString() string {
 	v := Get()
 	return fmt.Sprintf("%s: %s-%s", shortDate(v.BuildDate), v.GitBranch, v.GitCommit)
 }
+
+func GetVersion() string {
+	v := Get()
+	return fmt.Sprintf("%s-%s-%s", v.GitBranch, shortDate(v.BuildDate), v.GitCommit)
+}
