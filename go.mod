@@ -11,7 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.8.2
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/golang-module/carbon/v2 v2.2.3
-	github.com/google/gops v0.3.26
+	github.com/google/gops v0.3.27
 	github.com/google/uuid v1.3.0
 	github.com/gosuri/uitable v0.0.4
 	github.com/mitchellh/go-homedir v1.1.0
