@@ -18,11 +18,29 @@ import (
 	"math/bits"
 	"math/rand"
 	"net"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/cockroachdb/errors"
 	"github.com/ergoapi/util/validation"
+)
+
+const (
+	v4Seg   = "(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
+	v4Str   = "(" + v4Seg + "[.]){3}" + v4Seg
+	ipv4Reg = "^" + v4Str + "$"
+	v6Seg   = "(?:[0-9a-fA-F]{1,4})"
+	ipv6Reg = "^(" +
+		"(?:" + v6Seg + ":){7}(?:" + v6Seg + "|:)|" +
+		"(?:" + v6Seg + ":){6}(?:" + v4Str + "|:" + v6Seg + "|:)|" +
+		"(?:" + v6Seg + ":){5}(?::" + v4Str + "|(:" + v6Seg + "){1,2}|:)|" +
+		"(?:" + v6Seg + ":){4}(?:(:" + v6Seg + "){0,1}:" + v4Str + "|(:" + v6Seg + "){1,3}|:)|" +
+		"(?:" + v6Seg + ":){3}(?:(:" + v6Seg + "){0,2}:" + v4Str + "|(:" + v6Seg + "){1,4}|:)|" +
+		"(?:" + v6Seg + ":){2}(?:(:" + v6Seg + "){0,3}:" + v4Str + "|(:" + v6Seg + "){1,5}|:)|" +
+		"(?:" + v6Seg + ":){1}(?:(:" + v6Seg + "){0,4}:" + v4Str + "|(:" + v6Seg + "){1,6}|:)|" +
+		"(?::((?::" + v6Seg + "){0,5}:" + v4Str + "|(?::" + v6Seg + "){1,7}|:))" +
+		")(%[0-9a-zA-Z-.:]{1,})?$"
 )
 
 // IP2Number ip转化数字
@@ -451,4 +469,20 @@ func MacUnpackHex(mac string) string {
 		return strings.Join(parts, ":")
 	}
 	return ""
+}
+
+func IsIPv4(s string) bool {
+	ok, err := regexp.MatchString(ipv4Reg, s)
+	if err != nil {
+		return false
+	}
+	return ok
+}
+
+func IsIPv6(s string) bool {
+	ok, err := regexp.MatchString(ipv6Reg, s)
+	if err != nil {
+		return false
+	}
+	return ok
 }

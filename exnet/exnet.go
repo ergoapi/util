@@ -2,7 +2,9 @@ package exnet
 
 import (
 	"errors"
+	"io"
 	"net"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -183,6 +185,7 @@ func Check(port int) (status bool, err error) {
 	return CheckHostPort("", port)
 }
 
+// Deprecated: Use OutboundIPv2 instead.
 // OutboundIP 获取本机的出口IP.
 func OutboundIP() (string, error) {
 	res := ""
@@ -193,6 +196,29 @@ func OutboundIP() (string, error) {
 		_ = conn.Close()
 	}
 	return res, err
+}
+
+// OutboundIPv2 获取出口IP
+func OutboundIPv2() (string, error) {
+	resp, err := http.Get("https://ip.ysicing.cloud")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	body := resp.Body
+	txt, err := io.ReadAll(body)
+
+	if err != nil {
+		return "", err
+	}
+
+	ip := string(txt)
+
+	if CheckIP(ip) == false {
+		return ip, errors.New(ip + ": not ipv4")
+	}
+
+	return ip, nil
 }
 
 func GetAddrPort(addrPort string) (string, int) {
