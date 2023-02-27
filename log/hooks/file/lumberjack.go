@@ -3,8 +3,9 @@ package file
 import (
 	"io"
 
-	"github.com/natefinch/lumberjack"
 	"github.com/sirupsen/logrus"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type RotateFileConfig struct {

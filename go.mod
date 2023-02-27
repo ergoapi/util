@@ -3,7 +3,7 @@ module github.com/ergoapi/util
 go 1.20
 
 require (
-	github.com/6tail/lunar-go v1.3.0
+	github.com/6tail/lunar-go v1.3.1
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/blang/semver/v4 v4.0.0
 	github.com/cockroachdb/errors v1.9.1
@@ -15,12 +15,12 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gosuri/uitable v0.0.4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/otiai10/copy v1.9.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/schollz/progressbar/v3 v3.13.0
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/crypto v0.6.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/gorm v1.24.5
 	k8s.io/client-go v0.26.1
 	sigs.k8s.io/yaml v1.3.0
@@ -89,7 +89,6 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.26.1 // indirect
