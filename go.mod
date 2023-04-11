@@ -21,7 +21,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/crypto v0.8.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-	gorm.io/gorm v1.24.6
+	gorm.io/gorm v1.25.0
 	k8s.io/client-go v0.26.3
 	sigs.k8s.io/yaml v1.3.0
 )
