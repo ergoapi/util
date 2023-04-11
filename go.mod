@@ -15,7 +15,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gosuri/uitable v0.0.4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/otiai10/copy v1.9.0
+	github.com/otiai10/copy v1.10.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/schollz/progressbar/v3 v3.13.1
 	github.com/sirupsen/logrus v1.9.0
