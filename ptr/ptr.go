@@ -60,3 +60,8 @@ func Array2Ptr(s []string) []*string {
 	}
 	return ptrs
 }
+
+// To returns a pointer to a shallow copy of v.
+func To[T any](v T) *T {
+	return &v
+}

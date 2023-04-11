@@ -14,6 +14,7 @@
 package zos
 
 import (
+	"io"
 	"os"
 	"os/exec"
 	"os/user"
@@ -23,6 +24,7 @@ import (
 	"github.com/acobaugh/osrelease"
 	"github.com/ergoapi/util/file"
 	"github.com/mitchellh/go-homedir"
+	"go4.org/mem"
 )
 
 // IsMacOS is Mac OS
@@ -47,7 +49,35 @@ func NotUnix() bool {
 
 // IsContainer 是否是容器
 func IsContainer() bool {
-	return file.CheckFileExists("/.dockerenv")
+	isContainer := false
+	if runtime.GOOS != "linux" {
+		return isContainer
+	}
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		isContainer = true
+		return isContainer
+	}
+	if _, err := os.Stat("/run/.containerenv"); err == nil {
+		// See https://github.com/cri-o/cri-o/issues/5461
+		isContainer = true
+		return isContainer
+	}
+	file.LineReadFile("/proc/1/cgroup", func(line []byte) error {
+		if mem.Contains(mem.B(line), mem.S("/docker/")) ||
+			mem.Contains(mem.B(line), mem.S("/lxc/")) {
+			isContainer = true
+			return io.EOF // arbitrary non-nil error to stop loop
+		}
+		return nil
+	})
+	file.LineReadFile("/proc/mounts", func(line []byte) error {
+		if mem.Contains(mem.B(line), mem.S("fuse.lxcfs")) {
+			isContainer = true
+			return io.EOF
+		}
+		return nil
+	})
+	return isContainer
 }
 
 // GetUserName 获取当前系统登录用户
