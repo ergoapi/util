@@ -14,7 +14,7 @@ linters:
     - dogsled
     - gofmt
     - goimports
-    # - gosec
+    - gosec
     - govet
     - ineffassign
     - misspell
@@ -47,14 +47,10 @@ linters-settings:
     # https://staticcheck.io/docs/options#checks
     checks: [ "all" ]
 
-  gosimple:
-    go: "1.20"
   gofmt:
     simplify: false
   golint:
     minConfidence: 0
-  unused:
-    go: "1.20"
   govet:
     enable-all: true
     disable:
@@ -70,7 +66,7 @@ linters-settings:
     dot-import-whitelist:
       - fmt
     # https://staticcheck.io/docs/options#initialisms
-    initialisms: [ "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS" ]
+    initialisms: [ "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSS" ]
     # https://staticcheck.io/docs/options#http_status_code_whitelist
     http-status-code-whitelist: [ "200", "400", "404", "500" ]
 
