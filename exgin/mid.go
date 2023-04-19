@@ -18,7 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// ExCors excors middleware
+// ExCors ex cors middleware
 func ExCors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
@@ -47,6 +47,7 @@ func ExTraceID() gin.HandlerFunc {
 			traceID = exid.GenUUID()
 			g.Header("X-Trace-Id", traceID)
 		}
+		g.Set("ex-trace-id", traceID)
 		logrus.AddHook(ltrace.NewTraceIdHook(traceID))
 		g.Next()
 	}
