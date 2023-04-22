@@ -3,6 +3,9 @@ package github
 import (
 	"context"
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/google/go-github/v52/github"
 )
 
@@ -22,7 +25,9 @@ type Commit struct {
 }
 
 func (p *Pkg) listTags() (ts []Tag, err error) {
-	client := github.NewClient(nil)
+	client := github.NewClient(&http.Client{
+		Timeout: time.Second * 10,
+	})
 	ctx := context.Background()
 	tags, _, err := client.Repositories.ListTags(ctx, p.Owner, p.Repo, nil)
 	if err != nil {
