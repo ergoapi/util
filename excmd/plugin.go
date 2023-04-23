@@ -46,18 +46,24 @@ type PluginHandler interface {
 // DefaultPluginHandler implements PluginHandler
 type DefaultPluginHandler struct {
 	ValidPrefixes []string
+	ExPath string
 }
 
 // NewDefaultPluginHandler instantiates the DefaultPluginHandler with a list of
 // given filename prefixes used to identify valid plugin filenames.
-func NewDefaultPluginHandler(validPrefixes []string) *DefaultPluginHandler {
+func NewDefaultPluginHandler(expath string, validPrefixes []string) *DefaultPluginHandler {
 	return &DefaultPluginHandler{
 		ValidPrefixes: validPrefixes,
+		ExPath: expath,
 	}
 }
 
 // Lookup implements PluginHandler
 func (h *DefaultPluginHandler) Lookup(filename string) (string, bool) {
+	p, _ := os.LookupEnv("PATH")
+	if !strings.Contains(p, h.ExPath) {
+		os.Setenv("PATH", fmt.Sprintf("%v:%v", p, h.ExPath))
+	}
 	for _, prefix := range h.ValidPrefixes {
 		path, err := exec.LookPath(fmt.Sprintf("%s-%s", prefix, filename))
 		if shouldSkipOnLookPathErr(err) || len(path) == 0 {
