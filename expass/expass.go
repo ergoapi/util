@@ -13,31 +13,25 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ergoapi/util/common"
+
 	"github.com/ergoapi/util/exhash"
 	"golang.org/x/crypto/pbkdf2"
 )
 
-const (
-	DIGITS   = "0123456789"
-	Alpha    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	Symbols  = "_-?!.,@#$%^&*()=[]{}<>"
-	LETTERS  = "abcdefghjkmnpqrstuvwxyz"
-	PUNC     = ""
-	SaltHash = "<-*Uk30^96eY*->"
-)
-
 var (
-	AlphaNum        = DIGITS + Alpha
-	AlphaNumSymbols = AlphaNum + Symbols
+	AlphaNum        = common.DIGITS + common.Alpha
+	AlphaNumSymbols = AlphaNum + common.Symbols
 )
 
-var CHARS = fmt.Sprintf("%s%s%s%s", DIGITS, LETTERS, strings.ToUpper(LETTERS), PUNC)
+var CHARS = fmt.Sprintf("%s%s%s%s", common.DIGITS, common.LETTERS, strings.ToUpper(common.LETTERS), common.PUNC)
 
 // SaltMd5Pass crypto password use salt
 func SaltMd5Pass(salt, raw string) string {
-	return exhash.MD5(salt + SaltHash + raw)
+	return exhash.MD5(salt + common.SaltHash + raw)
 }
 
+// Deprecated: use PwGenAlphaNum instead
 func RandomPassword(width int) string {
 	if width < 6 {
 		width = 6
@@ -50,11 +44,11 @@ func RandomPassword(width int) string {
 		for i := 0; i < width; i += 1 {
 			index := rand.Intn(len(CHARS))
 			ch := CHARS[index]
-			if strings.IndexByte(DIGITS, ch) >= 0 {
+			if strings.IndexByte(common.DIGITS, ch) >= 0 {
 				digitsCnt += 1
-			} else if strings.IndexByte(LETTERS, ch) >= 0 {
+			} else if strings.IndexByte(common.LETTERS, ch) >= 0 {
 				letterCnt += 1
-			} else if strings.IndexByte(LETTERS, ch+32) >= 0 {
+			} else if strings.IndexByte(common.LETTERS, ch+32) >= 0 {
 				upperCnt += 1
 			}
 			buf.WriteByte(ch)
@@ -158,17 +152,17 @@ func NewPwGen(length int, chars string) string {
 
 // PwGenNum generates a random string of the given length out of numeric characters
 func PwGenNum(length int) string {
-	return NewPwGen(length, DIGITS)
+	return NewPwGen(length, common.DIGITS)
 }
 
-// PwGenSymbols generates a random string of the given length out of alphabetic characters
+// PwGenAlpha generates a random string of the given length out of alphabetic characters
 func PwGenAlpha(length int) string {
-	return NewPwGen(length, Alpha)
+	return NewPwGen(length, common.Alpha)
 }
 
 // PwGenSymbols generates a random string of the given length out of symbols
 func PwGenSymbols(length int) string {
-	return NewPwGen(length, Symbols)
+	return NewPwGen(length, common.Symbols)
 }
 
 // PwGenAlphaNum generates a random string of the given length out of alphanumeric characters

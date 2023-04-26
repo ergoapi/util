@@ -13,7 +13,14 @@
 
 package exid
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/ergoapi/util/exhash"
+	"github.com/google/uuid"
+)
 
 // GenUUID 生成新的uuid
 func GenUUID() string {
@@ -25,4 +32,17 @@ func GenUUID() string {
 func CheckUUID(uid string) bool {
 	_, err := uuid.Parse(uid)
 	return err != nil
+}
+
+// Deprecated: use HashUID instead
+func GenUID(username string) string {
+	return exhash.MD5(username + fmt.Sprint(time.Now().UnixNano()))
+}
+
+// HashUID 生成新的uid
+func HashUID(username string, prefix string) string {
+	if len(prefix) > 0 && !strings.HasSuffix(prefix, "-") {
+		prefix = fmt.Sprintf("%s-", prefix)
+	}
+	return fmt.Sprintf("%s%s", prefix, exhash.MD5(username+fmt.Sprint(time.Now().UnixNano())))
 }

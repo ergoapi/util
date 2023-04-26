@@ -68,7 +68,7 @@ func pathAddSlash(path string, addSlash ...bool) string {
 	return path
 }
 
-// Rmdir rmdir,support to keep the current directory
+// Rmdir support to keep the current directory
 func Rmdir(path string, notIncludeSelf ...bool) (ok bool) {
 	realPath := RealPath(path)
 	err := os.RemoveAll(realPath)
@@ -79,7 +79,7 @@ func Rmdir(path string, notIncludeSelf ...bool) (ok bool) {
 	return
 }
 
-// file ./test/dir/xxx.txt if dir ./test/dir not exist, create it
+// MkFileFullPathDir file ./test/dir/xxx.txt if dir ./test/dir not exist, create it
 func MkFileFullPathDir(fileName string) error {
 	localDir := filepath.Dir(fileName)
 	if err := Mkdir(localDir); err != nil {
@@ -158,13 +158,13 @@ func WriteToFile(filePath string, data []byte) error {
 	return os.WriteFile(filePath, data, 0600)
 }
 
-// Writefile 写文件
-func Writefile(logpath, msg string, truncate bool) error {
-	filemode := os.O_WRONLY | os.O_APPEND | os.O_CREATE
+// WriteFile 写文件
+func WriteFile(logPath, msg string, truncate bool) error {
+	fileMode := os.O_WRONLY | os.O_APPEND | os.O_CREATE
 	if truncate {
-		filemode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
+		fileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 	}
-	file, err := os.OpenFile(logpath, filemode, 0777)
+	file, err := os.OpenFile(logPath, fileMode, 0777)
 	if err != nil {
 		return err
 	}
@@ -175,9 +175,9 @@ func Writefile(logpath, msg string, truncate bool) error {
 	return nil
 }
 
-// WritefileWithLine 换行
-func WritefileWithLine(logpath, msg string) error {
-	file, err := os.OpenFile(logpath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
+// WriteFileWithLine 换行
+func WriteFileWithLine(logPath, msg string) error {
+	file, err := os.OpenFile(logPath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -481,7 +481,7 @@ func GetTempDir() string {
 	return os.TempDir()
 }
 
-// CountDirFiles reutrns # of files under a directory.
+// CountDirFiles return count files under a directory.
 func CountDirFiles(dirName string) int {
 	if !IsDir(dirName) {
 		return 0

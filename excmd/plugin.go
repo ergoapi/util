@@ -18,13 +18,14 @@ package excmd
 
 import (
 	"fmt"
-	"github.com/cockroachdb/errors"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
+
+	"github.com/cockroachdb/errors"
 )
 
 // https://github.com/kubernetes/kubectl/blob/master/pkg/cmd/cmd.go
@@ -46,7 +47,7 @@ type PluginHandler interface {
 // DefaultPluginHandler implements PluginHandler
 type DefaultPluginHandler struct {
 	ValidPrefixes []string
-	ExPath string
+	ExPath        string
 }
 
 // NewDefaultPluginHandler instantiates the DefaultPluginHandler with a list of
@@ -54,7 +55,7 @@ type DefaultPluginHandler struct {
 func NewDefaultPluginHandler(expath string, validPrefixes []string) *DefaultPluginHandler {
 	return &DefaultPluginHandler{
 		ValidPrefixes: validPrefixes,
-		ExPath: expath,
+		ExPath:        expath,
 	}
 }
 

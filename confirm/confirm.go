@@ -5,10 +5,11 @@ package confirm
 
 import (
 	"fmt"
-	"github.com/cockroachdb/errors"
-	"github.com/manifoldco/promptui"
 	"regexp"
 	"strings"
+
+	"github.com/cockroachdb/errors"
+	"github.com/manifoldco/promptui"
 )
 
 // Confirm is send the prompt and get result

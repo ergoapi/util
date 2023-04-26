@@ -56,7 +56,7 @@ func ArrayPtr2Ptr(ptrs []*string) []string {
 func Array2Ptr(s []string) []*string {
 	var ptrs []*string
 	for _, i := range s {
-		ptrs = append(ptrs, &i)
+		ptrs = append(ptrs, StringPtr(i))
 	}
 	return ptrs
 }

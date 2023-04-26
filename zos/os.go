@@ -14,17 +14,12 @@
 package zos
 
 import (
-	"io"
-	"os"
 	"os/exec"
 	"os/user"
 	"runtime"
 	"strings"
 
-	"github.com/acobaugh/osrelease"
-	"github.com/ergoapi/util/file"
 	"github.com/mitchellh/go-homedir"
-	"go4.org/mem"
 )
 
 // IsMacOS is Mac OS
@@ -49,35 +44,8 @@ func NotUnix() bool {
 
 // IsContainer 是否是容器
 func IsContainer() bool {
-	isContainer := false
-	if runtime.GOOS != "linux" {
-		return isContainer
-	}
-	if _, err := os.Stat("/.dockerenv"); err == nil {
-		isContainer = true
-		return isContainer
-	}
-	if _, err := os.Stat("/run/.containerenv"); err == nil {
-		// See https://github.com/cri-o/cri-o/issues/5461
-		isContainer = true
-		return isContainer
-	}
-	file.LineReadFile("/proc/1/cgroup", func(line []byte) error {
-		if mem.Contains(mem.B(line), mem.S("/docker/")) ||
-			mem.Contains(mem.B(line), mem.S("/lxc/")) {
-			isContainer = true
-			return io.EOF // arbitrary non-nil error to stop loop
-		}
-		return nil
-	})
-	file.LineReadFile("/proc/mounts", func(line []byte) error {
-		if mem.Contains(mem.B(line), mem.S("fuse.lxcfs")) {
-			isContainer = true
-			return io.EOF
-		}
-		return nil
-	})
-	return isContainer
+	h := HostInfo()
+	return h.Container.EqualBool(true)
 }
 
 // GetUserName 获取当前系统登录用户
@@ -98,24 +66,34 @@ func GetUser() *user.User {
 	return user
 }
 
-func GetHostnames() []string {
-	host, err := os.Hostname()
-	if err != nil {
-		return nil
-	}
-	return []string{host}
-}
-
 func GetHostname() string {
-	hosts := GetHostnames()
-	if len(hosts) == 0 {
-		return "unknow"
-	}
-	return hosts[0]
+	h := HostInfo()
+	return h.Hostname
 }
 
 func GetOS() string {
-	return runtime.GOOS
+	h := HostInfo()
+	return h.OS
+}
+
+func GetDistro() string {
+	h := HostInfo()
+	return h.Distro
+}
+
+func GetDistroVersion() string {
+	h := HostInfo()
+	return h.DistroVersion
+}
+
+func GetDistroCodeName() string {
+	h := HostInfo()
+	return h.DistroCodeName
+}
+
+func GetOSVersion() string {
+	h := HostInfo()
+	return h.OSVersion
 }
 
 // GetHomeDir 获取home目录
@@ -133,22 +111,10 @@ func ExpandPath(path string) string {
 	return path
 }
 
-// OSRelease get os release
-func OSRelease() (map[string]string, error) {
-	return osrelease.Read()
-}
-
 // IsDebian debian
 func IsDebian() bool {
-	os, err := osrelease.Read()
-	if err != nil {
-		return false
-	}
-	i, exist := os["ID"]
-	if exist && (i == "debian" || i == "ubuntu") {
-		return true
-	}
-	return false
+	h := HostInfo()
+	return h.Distro == "debian"
 }
 
 func IsWsl() bool {
