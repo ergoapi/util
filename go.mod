@@ -25,7 +25,7 @@ require (
 	gorm.io/gorm v1.25.0
 	k8s.io/client-go v0.26.3
 	sigs.k8s.io/yaml v1.3.0
-	tailscale.com v1.38.4
+	tailscale.com v1.40.0
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	github.com/cockroachdb/redact v1.1.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
-	github.com/fatih/color v1.13.0 // indirect
+	github.com/fatih/color v1.15.0 // indirect
 	github.com/getsentry/sentry-go v0.14.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
