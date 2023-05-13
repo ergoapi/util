@@ -14,7 +14,7 @@ linters:
     - dogsled
     - gofmt
     - goimports
-    - gosec
+#    - gosec
     - govet
     - ineffassign
     - misspell

@@ -2,6 +2,7 @@ package exnet
 
 import (
 	"errors"
+	"github.com/docker/go-connections/nat"
 	"io"
 	"net"
 	"net/http"
@@ -34,7 +35,7 @@ func LocalIP() (net.IP, error) {
 	return nil, errors.New("cannot find local IP address")
 }
 
-// ListLocalIPs 获取本机非loopback ip
+// Lists 获取本机非loopback ip
 func Lists() (*[]net.Addr, error) {
 	tables, err := net.Interfaces()
 	if err != nil {
@@ -120,13 +121,11 @@ func GetFreePort() int {
 	if err != nil {
 		return 0
 	}
-
+	defer listener.Close()
 	port := listener.Addr().(*net.TCPAddr).Port
-	err = listener.Close()
 	if err != nil {
 		return 0
 	}
-
 	return port
 }
 
@@ -257,7 +256,7 @@ func GetIpByHostname(hostname string) (string, error) {
 	return "", err
 }
 
-// GetIpsByHost 获取互联网域名/主机名对应的 IPv4 地址列表.
+// GetIpsByDomain 获取互联网域名/主机名对应的 IPv4 地址列表.
 func GetIpsByDomain(domain string) ([]string, error) {
 	ips, err := net.LookupIP(domain)
 	if ips != nil {
@@ -279,4 +278,22 @@ func GetHostByIP(ipAddress string) (string, error) {
 		return strings.TrimRight(names[0], "."), nil
 	}
 	return "", err
+}
+
+var equalHostIPs = map[string]interface{}{
+	"":          nil,
+	"127.0.0.1": nil,
+	"0.0.0.0":   nil,
+	"localhost": nil,
+}
+
+func IsPortBindingEqual(a, b nat.PortBinding) bool {
+	if a.HostPort == b.HostPort {
+		if _, ok := equalHostIPs[a.HostIP]; ok {
+			if _, ok := equalHostIPs[b.HostIP]; ok {
+				return true
+			}
+		}
+	}
+	return false
 }

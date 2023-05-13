@@ -6,6 +6,7 @@ require (
 	github.com/6tail/lunar-go v1.3.3
 	github.com/blang/semver/v4 v4.0.0
 	github.com/cockroachdb/errors v1.9.1
+	github.com/docker/go-connections v0.4.0
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
