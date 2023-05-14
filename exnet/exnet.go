@@ -2,12 +2,13 @@ package exnet
 
 import (
 	"errors"
-	"github.com/docker/go-connections/nat"
 	"io"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/docker/go-connections/nat"
 )
 
 // LocalIP 获取本机 ip
@@ -123,9 +124,6 @@ func GetFreePort() int {
 	}
 	defer listener.Close()
 	port := listener.Addr().(*net.TCPAddr).Port
-	if err != nil {
-		return 0
-	}
 	return port
 }
 

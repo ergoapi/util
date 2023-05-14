@@ -31,10 +31,10 @@ func SetupGracefulStop(srv *http.Server) {
 	ShutDown(srv)
 }
 
-// ShutDown shutdown http
+// ShutDown http shutdown
 func ShutDown(srv *http.Server) {
-	ctx, cancal := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancal()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("shutdown err: ", err)
 	}

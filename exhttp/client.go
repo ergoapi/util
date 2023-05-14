@@ -14,29 +14,50 @@
 package exhttp
 
 import (
-	"net/http"
-	"time"
+	"github.com/imroc/req/v3"
 )
 
-type ExHttpClient struct {
-	*http.Client
+type Client struct {
+	*req.Client
 }
 
-var httpClient *ExHttpClient
-
-func init() {
-	httpClient = &ExHttpClient{http.DefaultClient}
-	httpClient.Timeout = time.Second * 60
-	httpClient.Transport = &http.Transport{
-		TLSHandshakeTimeout:   time.Second * 5,
-		IdleConnTimeout:       time.Second * 10,
-		ResponseHeaderTimeout: time.Second * 10,
-		ExpectContinueTimeout: time.Second * 20,
-		Proxy:                 http.ProxyFromEnvironment,
+func GetClientRequest(opts ...ClientOptionFunc) (*req.Request, error) {
+	c, err := GetClient(opts...)
+	if err != nil {
+		return nil, err
 	}
+	return c.R(), nil
 }
 
-func GetHttpClient() *ExHttpClient {
-	c := *httpClient
-	return &c
+func GetClient(opts ...ClientOptionFunc) (*Client, error) {
+	c := &Client{req.C().SetLogger(nil)}
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		if err := opt(c); err != nil {
+			return nil, err
+		}
+	}
+	return c, nil
+}
+
+func (c *Client) setDebug() error {
+	c.EnableDebugLog()
+	return nil
+}
+
+func (c *Client) setDumpAll() error {
+	c.EnableDumpAll()
+	return nil
+}
+
+func (c *Client) setDisableProxy() error {
+	c.SetProxy(nil)
+	return nil
+}
+
+func (c *Client) setReqUserAgent(ua string) error {
+	c.SetUserAgent(ua)
+	return nil
 }
