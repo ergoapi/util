@@ -10,8 +10,9 @@ import (
 )
 
 type ClientConfig struct {
-	QPS   float32
-	Burst int
+	QPS        float32
+	Burst      int
+	Kubeconfig string
 }
 
 // New returns a kubernetes client.
@@ -21,14 +22,14 @@ func New(cc *ClientConfig) (client kubernetes.Interface, err error) {
 	if err == nil {
 		return
 	}
-
-	dir, err := os.UserHomeDir()
-	if err != nil {
-		return
+	if len(cc.Kubeconfig) == 0 {
+		if dir, err := os.UserHomeDir(); err != nil {
+			return client, err
+		} else {
+			cc.Kubeconfig = filepath.Join(dir, ".kube", "config")
+		}
 	}
-	dir = filepath.Join(dir, ".kube", "config")
-
-	client, err = NewFromConfig(cc, dir)
+	client, err = NewFromConfig(cc)
 	if err != nil {
 		return
 	}
@@ -37,9 +38,9 @@ func New(cc *ClientConfig) (client kubernetes.Interface, err error) {
 }
 
 // NewFromConfig returns a new out-of-cluster kubernetes client.
-func NewFromConfig(cc *ClientConfig, path string) (client kubernetes.Interface, err error) {
+func NewFromConfig(cc *ClientConfig) (client kubernetes.Interface, err error) {
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", path)
+	config, err := clientcmd.BuildConfigFromFlags("", cc.Kubeconfig)
 	if err != nil {
 		return
 	}
@@ -51,9 +52,7 @@ func NewFromConfig(cc *ClientConfig, path string) (client kubernetes.Interface, 
 	if err != nil {
 		return
 	}
-
 	client = clientset
-
 	return
 }
 
@@ -75,6 +74,47 @@ func NewInCluster(cc *ClientConfig) (client kubernetes.Interface, err error) {
 
 	client = clientset
 
+	return
+}
+
+// newRestConfigInCluster returns a new in-cluster kubernetes rest client.
+func newRestConfigInCluster(cc *ClientConfig) (config *rest.Config, err error) {
+	// creates the in-cluster config
+	config, err = rest.InClusterConfig()
+	if err != nil {
+		return
+	}
+	cc.apply(config)
+	return
+}
+
+// newRestConfigFromConfig returns a new out-of-cluster kubernetes client.
+func newRestConfigFromConfig(cc *ClientConfig) (config *rest.Config, err error) {
+	// use the current context in kubeconfig
+	config, err = clientcmd.BuildConfigFromFlags("", cc.Kubeconfig)
+	if err != nil {
+		return
+	}
+	cc.apply(config)
+	return
+}
+
+func NewRestConfig(cc *ClientConfig) (config *rest.Config, err error) {
+	config, err = newRestConfigInCluster(cc)
+	if err == nil {
+		return
+	}
+	if len(cc.Kubeconfig) == 0 {
+		if dir, err := os.UserHomeDir(); err != nil {
+			return config, err
+		} else {
+			cc.Kubeconfig = filepath.Join(dir, ".kube", "config")
+		}
+	}
+	config, err = newRestConfigFromConfig(cc)
+	if err != nil {
+		return
+	}
 	return
 }
 
