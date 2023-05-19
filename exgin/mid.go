@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ergoapi/util/environ"
 	errors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/exid"
 	ltrace "github.com/ergoapi/util/log/hooks/trace"
@@ -165,5 +166,14 @@ func ExRecovery() gin.HandlerFunc {
 			}
 		}()
 		c.Next()
+	}
+}
+
+func ExHeader() gin.HandlerFunc {
+	return func(g *gin.Context) {
+		g.Writer.Header().Add("ex-glb", environ.GetEnv("POD_NAME", "tbh-9526"))
+		g.Writer.Header().Add("ex-loc", environ.GetEnv("POD_LOC", "cn"))
+		g.Writer.Header().Add("Server", "cloudflare")
+		g.Next()
 	}
 }
