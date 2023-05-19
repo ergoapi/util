@@ -54,7 +54,7 @@ func ExTraceID() gin.HandlerFunc {
 	}
 }
 
-// ExLog ex logrus middleware
+// ExLog log middleware
 func ExLog(skip ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -122,7 +122,7 @@ func ExLog(skip ...string) gin.HandlerFunc {
 	}
 }
 
-// ExRecovery logrus recovery
+// ExRecovery recovery
 func ExRecovery() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
@@ -169,7 +169,8 @@ func ExRecovery() gin.HandlerFunc {
 	}
 }
 
-func ExHeader() gin.HandlerFunc {
+// ExHackHeader hack header
+func ExHackHeader() gin.HandlerFunc {
 	return func(g *gin.Context) {
 		g.Writer.Header().Add("ex-glb", environ.GetEnv("POD_NAME", "tbh-9526"))
 		g.Writer.Header().Add("ex-loc", environ.GetEnv("POD_LOC", "cn"))
