@@ -27,7 +27,7 @@ require (
 	gorm.io/gorm v1.25.1
 	k8s.io/api v0.27.1
 	k8s.io/apiextensions-apiserver v0.27.1
-	k8s.io/apimachinery v0.27.1
+	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v0.27.1
 	sigs.k8s.io/yaml v1.3.0
 	tailscale.com v1.42.0
