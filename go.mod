@@ -11,7 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang-module/carbon/v2 v2.2.3
-	github.com/google/go-github/v52 v52.0.0
+	github.com/google/go-github/v53 v53.0.0
 	github.com/google/gops v0.3.27
 	github.com/google/uuid v1.3.0
 	github.com/gosuri/uitable v0.0.4
@@ -21,14 +21,14 @@ require (
 	github.com/otiai10/copy v1.11.0
 	github.com/prometheus/client_golang v1.15.1
 	github.com/schollz/progressbar/v3 v3.13.1
-	github.com/sirupsen/logrus v1.9.2
+	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.9.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/gorm v1.25.1
-	k8s.io/api v0.27.1
-	k8s.io/apiextensions-apiserver v0.27.1
-	k8s.io/apimachinery v0.27.1
-	k8s.io/client-go v0.27.1
+	k8s.io/api v0.27.2
+	k8s.io/apiextensions-apiserver v0.27.2
+	k8s.io/apimachinery v0.27.2
+	k8s.io/client-go v0.27.2
 	sigs.k8s.io/yaml v1.3.0
 	tailscale.com v1.42.0
 )
