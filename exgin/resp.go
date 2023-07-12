@@ -8,43 +8,46 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// respDone done
-func respDone(code int, data interface{}) gin.H {
+// customRespDone done
+func customRespDone(code int, message, tid, data interface{}) gin.H {
 	return gin.H{
 		"data":      data,
-		"message":   "请求成功",
+		"message":   message,
 		"timestamp": ztime.NowUnix(),
 		"code":      code,
+		"traceId":   tid,
 	}
+}
+
+// respDone done
+func respDone(code int, tid, data interface{}) gin.H {
+	return customRespDone(code, "请求成功", tid, data)
 }
 
 // respError error
-func respError(code int, data interface{}) gin.H {
-	return gin.H{
-		"data":      nil,
-		"message":   data,
-		"timestamp": ztime.NowUnix(),
-		"code":      code,
-	}
+func respError(code int, message, tid interface{}) gin.H {
+	return customRespDone(code, message, tid, nil)
 }
 
 func renderMessage(c *gin.Context, v interface{}) {
+	tid := c.Writer.Header().Get("X-Trace-Id")
 	if v == nil {
-		c.JSON(200, respDone(200, nil))
+		c.JSON(200, respDone(200, tid, nil))
 		return
 	}
 
 	switch t := v.(type) {
 	case string:
-		c.JSON(200, respError(10400, t))
+		c.JSON(200, respError(10400, tid, t))
 	case error:
-		c.JSON(200, respError(10400, t.Error()))
+		c.JSON(200, respError(10400, tid, t.Error()))
 	}
 }
 
 func GinsData(c *gin.Context, data interface{}, err error) {
+	tid := c.Writer.Header().Get("X-Trace-Id")
 	if err == nil {
-		c.JSON(200, respDone(200, data))
+		c.JSON(200, respDone(200, tid, data))
 		return
 	}
 
@@ -52,8 +55,9 @@ func GinsData(c *gin.Context, data interface{}, err error) {
 }
 
 func GinsCodeData(c *gin.Context, code int, data interface{}, err error) {
+	tid := c.Writer.Header().Get("X-Trace-Id")
 	if err == nil {
-		c.JSON(200, respDone(code, data))
+		c.JSON(200, respDone(code, tid, data))
 		return
 	}
 
@@ -61,20 +65,18 @@ func GinsCodeData(c *gin.Context, code int, data interface{}, err error) {
 }
 
 func GinsErrorData(c *gin.Context, code int, data interface{}, err error) {
-	c.JSON(200, gin.H{
-		"data":      data,
-		"message":   fmt.Sprintf("%v", err),
-		"timestamp": ztime.NowUnix(),
-		"code":      code,
-	})
+	tid := c.Writer.Header().Get("X-Trace-Id")
+	c.JSON(200, customRespDone(code, fmt.Sprintf("%v", err), tid, data))
 }
 
 func GinsAbort(c *gin.Context, msg string, args ...interface{}) {
-	c.AbortWithStatusJSON(200, respError(10400, fmt.Sprintf(msg, args...)))
+	tid := c.Writer.Header().Get("X-Trace-Id")
+	c.AbortWithStatusJSON(200, respError(10400, fmt.Sprintf(msg, args...), tid))
 }
 
 func GinsAbortWithCode(c *gin.Context, respcode int, msg string, args ...interface{}) {
-	c.AbortWithStatusJSON(200, respError(respcode, fmt.Sprintf(msg, args...)))
+	tid := c.Writer.Header().Get("X-Trace-Id")
+	c.AbortWithStatusJSON(200, respError(respcode, fmt.Sprintf(msg, args...), tid))
 }
 
 func GinsCustomResp(c *gin.Context, obj interface{}) {

@@ -15,12 +15,13 @@ package exhttp
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // SetupGracefulStop grace stop
@@ -36,12 +37,12 @@ func ShutDown(srv *http.Server) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("shutdown err: ", err)
+		logrus.Fatal("shutdown err: ", err)
 	}
 	select {
 	case <-ctx.Done():
-		log.Println("server exit timeout of 5 seconds.")
+		logrus.Println("server exit timeout of 5 seconds.")
 	default:
 	}
-	log.Println("server exited.")
+	logrus.Println("server exited.")
 }

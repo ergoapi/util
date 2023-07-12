@@ -14,13 +14,12 @@ import (
 	errors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/exid"
 	ltrace "github.com/ergoapi/util/log/hooks/trace"
-	"github.com/ergoapi/util/ztime"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
-// ExCors ex cors middleware
-func ExCors() gin.HandlerFunc {
+// exCors ex cors middleware
+func exCors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
 		origin := c.Request.Header.Get("Origin")
@@ -41,7 +40,7 @@ func ExCors() gin.HandlerFunc {
 	}
 }
 
-func ExTraceID() gin.HandlerFunc {
+func exTraceID() gin.HandlerFunc {
 	return func(g *gin.Context) {
 		traceID := g.GetHeader("X-Trace-Id")
 		if traceID == "" {
@@ -146,21 +145,11 @@ func ExRecovery() gin.HandlerFunc {
 				if brokenPipe {
 					logrus.Errorf("Recovery from brokenPipe ---> path: %v, err: %v, request: %v",
 						c.Request.URL.Path, err, string(httpRequest))
-					c.AbortWithStatusJSON(200, gin.H{
-						"data":      nil,
-						"message":   "请求broken",
-						"timestamp": ztime.NowUnix(),
-						"code":      10500,
-					})
+					c.AbortWithStatusJSON(200, customRespDone(10500, "请求broken", c.Writer.Header().Get("X-Trace-Id"), nil))
 				} else {
 					logrus.Errorf("Recovery from panic ---> err: %v, request: %v, stack: %v",
 						err, string(httpRequest), string(debug.Stack()))
-					c.AbortWithStatusJSON(200, gin.H{
-						"data":      nil,
-						"message":   "请求panic",
-						"timestamp": ztime.NowUnix(),
-						"code":      10500,
-					})
+					c.AbortWithStatusJSON(200, customRespDone(10500, "请求panic", c.Writer.Header().Get("X-Trace-Id"), nil))
 				}
 				return
 			}

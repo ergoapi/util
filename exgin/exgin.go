@@ -45,7 +45,8 @@ type Config struct {
 	GopsPath       string
 	Pprof          bool
 	PprofPath      string
-	Cors           bool
+	NoCors         bool
+	NoTrace        bool
 	Metrics        bool
 	MetricsPath    string
 	TrustedProxies []string
@@ -63,8 +64,12 @@ func (c *Config) GinSet(r *gin.Engine) {
 	} else {
 		r.SetTrustedProxies([]string{"0.0.0.0/0", "::/0"})
 	}
-	if c.Cors {
-		r.Use(ExCors())
+	if !c.NoCors {
+		r.Use(exCors())
+	}
+
+	if !c.NoTrace {
+		r.Use(exTraceID())
 	}
 	if c.Gops {
 		if c.GopsPath == "" {
