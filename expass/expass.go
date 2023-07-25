@@ -9,13 +9,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"math/rand"
 	"strconv"
 	"strings"
 
 	"github.com/ergoapi/util/common"
 
-	"github.com/ergoapi/util/exhash"
 	"golang.org/x/crypto/pbkdf2"
 )
 
@@ -25,39 +23,6 @@ var (
 )
 
 var CHARS = fmt.Sprintf("%s%s%s%s", common.DIGITS, common.LETTERS, strings.ToUpper(common.LETTERS), common.PUNC)
-
-// SaltMd5Pass crypto password use salt
-func SaltMd5Pass(salt, raw string) string {
-	return exhash.MD5(salt + common.SaltHash + raw)
-}
-
-// Deprecated: use PwGenAlphaNum instead
-func RandomPassword(width int) string {
-	if width < 6 {
-		width = 6
-	}
-	for {
-		var buf bytes.Buffer
-		digitsCnt := 0
-		letterCnt := 0
-		upperCnt := 0
-		for i := 0; i < width; i += 1 {
-			index := rand.Intn(len(CHARS))
-			ch := CHARS[index]
-			if strings.IndexByte(common.DIGITS, ch) >= 0 {
-				digitsCnt += 1
-			} else if strings.IndexByte(common.LETTERS, ch) >= 0 {
-				letterCnt += 1
-			} else if strings.IndexByte(common.LETTERS, ch+32) >= 0 {
-				upperCnt += 1
-			}
-			buf.WriteByte(ch)
-		}
-		if digitsCnt > 1 && letterCnt > 1 && upperCnt > 1 {
-			return buf.String()
-		}
-	}
-}
 
 func SaltPbkdf2Pass(sl, password string) string {
 	pwd := []byte(password)
