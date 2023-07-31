@@ -15,7 +15,7 @@ require (
 	github.com/google/gops v0.3.27
 	github.com/google/uuid v1.3.0
 	github.com/gosuri/uitable v0.0.4
-	github.com/imroc/req/v3 v3.38.0
+	github.com/imroc/req/v3 v3.39.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/otiai10/copy v1.12.0
