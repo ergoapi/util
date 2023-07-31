@@ -169,8 +169,8 @@ github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+l
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/imdario/mergo v0.3.15 h1:M8XP7IuFNsqUx6VPK2P9OSmsYsI/YFaGil0uD21V3dM=
 github.com/imdario/mergo v0.3.15/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
-github.com/imroc/req/v3 v3.38.0 h1:HpUrW3evLgy3XGyJ4kyIdMAYNagaMzNAeqyWS8XaTeM=
-github.com/imroc/req/v3 v3.38.0/go.mod h1:4wMbz0QYY5jmXNWk0BsWrRTR9ItZqOxzSJdGL0M9kzY=
+github.com/imroc/req/v3 v3.39.0 h1:d4j0Wgxo/9XM6vEBZ+D3WIOeNBtK3ulemg7nOL3mqXc=
+github.com/imroc/req/v3 v3.39.0/go.mod h1:4wMbz0QYY5jmXNWk0BsWrRTR9ItZqOxzSJdGL0M9kzY=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
