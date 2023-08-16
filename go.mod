@@ -28,7 +28,7 @@ require (
 	k8s.io/api v0.28.0
 	k8s.io/apiextensions-apiserver v0.27.4
 	k8s.io/apimachinery v0.28.0
-	k8s.io/client-go v0.27.4
+	k8s.io/client-go v0.28.0
 	sigs.k8s.io/yaml v1.3.0
 	tailscale.com v1.48.0
 )
@@ -63,7 +63,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
