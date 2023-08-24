@@ -1,5 +1,5 @@
-github.com/6tail/lunar-go v1.3.3 h1:iKSfNS5udnAjyWiALk1/M5WlNY6EB8dFa/+IOLbcjqg=
-github.com/6tail/lunar-go v1.3.3/go.mod h1:mMvCby9aWTSmsZjnv+5EOW7taJFV4RsjNcQLRl/3whY=
+github.com/6tail/lunar-go v1.3.4 h1:HJs/iTsaKfOZ0t04Gb4NRKPSnvLAJWbqed5tpgg/QvE=
+github.com/6tail/lunar-go v1.3.4/go.mod h1:mMvCby9aWTSmsZjnv+5EOW7taJFV4RsjNcQLRl/3whY=
 github.com/ProtonMail/go-crypto v0.0.0-20230626094100-7e9e0395ebec h1:vV3RryLxt42+ZIVOFbYJCH1jsZNTNmj2NYru5zfx+4E=
 github.com/ProtonMail/go-crypto v0.0.0-20230626094100-7e9e0395ebec/go.mod h1:EjAoLdwvbIOoOQr3ihjnSoLZRtE8azugULFRteWMNc0=
 github.com/andybalholm/brotli v1.0.5 h1:8uQZIdzKmjc/iuPu7O2ioW48L81FgatrcpfFmiq/cCs=

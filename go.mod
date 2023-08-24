@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/6tail/lunar-go v1.3.3
+	github.com/6tail/lunar-go v1.3.4
 	github.com/blang/semver/v4 v4.0.0
 	github.com/cockroachdb/errors v1.10.0
 	github.com/docker/go-connections v0.4.0
