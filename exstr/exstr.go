@@ -14,6 +14,7 @@
 package exstr
 
 import (
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -87,7 +88,6 @@ func Bytes2Str(b []byte) string {
 
 func IsEmptyLine(str string) bool {
 	re := regexp.MustCompile(`^\s*$`)
-
 	return re.MatchString(str)
 }
 
@@ -117,4 +117,18 @@ func Merge(haystack []string, haystack2 []string) []string {
 	ret := append([]string{}, haystack...)
 	ret = append(ret, haystack2...)
 	return DuplicateStrElement(ret)
+}
+
+func Int64Float64(i int64) (string, float64) {
+	t := "MB"
+	k := math.Round(float64(i)/1024.0/1024.0*100) / 100
+	if k >= 1024.0 {
+		t = "GB"
+		k = math.Round(k/1024.0*100) / 100
+	}
+	if k >= 1024.0 {
+		t = "TB"
+		k = math.Round(k/1024.0*100) / 100
+	}
+	return t, k
 }
