@@ -15,7 +15,7 @@ require (
 	github.com/golang-module/carbon/v2 v2.2.11
 	github.com/google/go-github/v55 v55.0.0
 	github.com/google/gops v0.3.28
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	github.com/gosuri/uitable v0.0.4
 	github.com/imroc/req/v3 v3.42.1
 	github.com/manifoldco/promptui v0.9.0
