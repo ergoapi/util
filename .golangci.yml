@@ -1,5 +1,8 @@
 run:
   timeout: 5m
+  skip-dirs-use-default: true
+  modules-download-mode: readonly
+  go: '1.21'
 
 output:
   format: checkstyle:report.xml,json:stdout,colored-line-number
@@ -20,12 +23,14 @@ linters:
     - nakedret
     - staticcheck
     - stylecheck
-    - unused
     - unparam
-    - varcheck
+    - unused
     - whitespace
     - gocyclo
     - lll
+    - dupl
+    # - errcheck
+    - golint
 
 issues:
   exclude-rules:
@@ -42,7 +47,7 @@ issues:
 
 linters-settings:
   staticcheck:
-    go: "1.20"
+    go: "1.21"
     # https://staticcheck.io/docs/options#checks
     checks: [ "all" ]
 
