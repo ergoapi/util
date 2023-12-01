@@ -43,7 +43,7 @@ func Get() Info {
 	}
 }
 
-func GetJsonString() string {
+func GetJSONString() string {
 	bs, _ := json.MarshalIndent(Get(), "", "  ")
 	return string(bs)
 }

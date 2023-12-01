@@ -11,6 +11,9 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-playground/locales v0.14.1
+	github.com/go-playground/universal-translator v0.18.1
+	github.com/go-playground/validator/v10 v10.16.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang-module/carbon/v2 v2.2.13
 	github.com/google/go-github/v56 v56.0.0
@@ -32,7 +35,7 @@ require (
 	k8s.io/apimachinery v0.28.4
 	k8s.io/client-go v0.28.4
 	sigs.k8s.io/yaml v1.4.0
-	tailscale.com v1.54.0
+	tailscale.com v1.54.1
 )
 
 require (
@@ -50,7 +53,7 @@ require (
 	github.com/dblohm7/wingoes v0.0.0-20230929194252-e994401fc077 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gaukas/godicttls v0.0.4 // indirect
 	github.com/getsentry/sentry-go v0.25.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -58,9 +61,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.20.0 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.22.4 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
-	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.5 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -112,7 +112,7 @@ require (
 	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sync v0.4.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect

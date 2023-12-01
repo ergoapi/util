@@ -24,14 +24,14 @@ const macCapChars = "ABCDEF"
 func FormatMacAddr(macAddr string) string {
 	buf := make([]byte, 12)
 	bufIdx := 0
-	for i := 0; i < len(macAddr) && bufIdx < len(buf); i += 1 {
+	for i := 0; i < len(macAddr) && bufIdx < len(buf); i++ {
 		c := macAddr[i]
 		if strings.IndexByte(macChars, c) >= 0 {
 			buf[bufIdx] = c
-			bufIdx += 1
+			bufIdx++
 		} else if strings.IndexByte(macCapChars, c) >= 0 {
 			buf[bufIdx] = c - 'A' + 'a'
-			bufIdx += 1
+			bufIdx++
 		}
 	}
 	if len(buf) == bufIdx {

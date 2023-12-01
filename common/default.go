@@ -1,9 +1,9 @@
 package common
 
 const (
-	Default114Dns    = "114.114.114.114"
-	DefaultGoogleDns = "8.8.8.8"
-	DefaultCFDns     = "1.1.1.1"
+	Default114DNS    = "114.114.114.114"
+	DefaultGoogleDNS = "8.8.8.8"
+	DefaultCFDNS     = "1.1.1.1"
 
 	DefaultFileMode0777 = 0o777
 	DefaultFileMode0755 = 0o755

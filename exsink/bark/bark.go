@@ -30,13 +30,13 @@ type Bark struct {
 	Icon              string `json:"icon,omitempty"`              // 图标
 	Group             string `json:"group,omitempty"`             // 分组
 	IsArchive         string `json:"isArchive,omitempty"`         // 是否存档，设置值只能为1
-	Url               string `json:"url,omitempty"`               // 点击跳转的url
+	URL               string `json:"url,omitempty"`               // 点击跳转的url
 }
 
 type Core struct {
 	Title string `json:"title"`           // 标题
 	Body  string `json:"body"`            // 内容
-	Url   string `json:"url,omitempty"`   // 点击跳转的url
+	URL   string `json:"url,omitempty"`   // 点击跳转的url
 	Copy  string `json:"copy,omitempty"`  // 复制内容
 	Group string `json:"group,omitempty"` // 分组
 }
@@ -62,8 +62,8 @@ func (b *Bark) SendEvent(c Core) error {
 	if len(c.Body) > 0 {
 		b.Body = c.Body
 	}
-	if len(c.Url) > 0 {
-		b.Url = c.Url
+	if len(c.URL) > 0 {
+		b.URL = c.URL
 	}
 	if len(c.Group) > 0 {
 		b.Group = c.Group

@@ -23,11 +23,11 @@ func New(cc *ClientConfig) (client kubernetes.Interface, err error) {
 		return
 	}
 	if len(cc.Kubeconfig) == 0 {
-		if dir, err := os.UserHomeDir(); err != nil {
+		dir, err := os.UserHomeDir()
+		if err != nil {
 			return client, err
-		} else {
-			cc.Kubeconfig = filepath.Join(dir, ".kube", "config")
 		}
+		cc.Kubeconfig = filepath.Join(dir, ".kube", "config")
 	}
 	client, err = NewFromConfig(cc)
 	if err != nil {
@@ -105,11 +105,11 @@ func NewRestConfig(cc *ClientConfig) (config *rest.Config, err error) {
 		return
 	}
 	if len(cc.Kubeconfig) == 0 {
-		if dir, err := os.UserHomeDir(); err != nil {
+		dir, err := os.UserHomeDir()
+		if err != nil {
 			return config, err
-		} else {
-			cc.Kubeconfig = filepath.Join(dir, ".kube", "config")
 		}
+		cc.Kubeconfig = filepath.Join(dir, ".kube", "config")
 	}
 	config, err = newRestConfigFromConfig(cc)
 	if err != nil {

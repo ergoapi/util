@@ -240,8 +240,8 @@ func CheckIP(i string) bool {
 	return false
 }
 
-// GetIpByHostname 返回主机名对应的 IPv4地址.
-func GetIpByHostname(hostname string) (string, error) {
+// GetIPByHostname 返回主机名对应的 IPv4地址.
+func GetIPByHostname(hostname string) (string, error) {
 	ips, err := net.LookupIP(hostname)
 	if ips != nil {
 		for _, v := range ips {

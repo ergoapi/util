@@ -48,7 +48,7 @@ func IP2Number(ipstr string) (uint32, error) {
 	parts := strings.Split(ipstr, ".")
 	if len(parts) == 4 {
 		var num uint32
-		for i := 0; i < 4; i += 1 {
+		for i := 0; i < 4; i++ {
 			n, e := strconv.Atoi(parts[i])
 			if e != nil {
 				return 0, errors.New("invalid number")
@@ -176,11 +176,11 @@ func (ar IPV4AddrRange) String() string {
 	return fmt.Sprintf("%s-%s", ar.start, ar.end)
 }
 
-func (ar IPV4AddrRange) StartIp() IPV4Addr {
+func (ar IPV4AddrRange) StartIP() IPV4Addr {
 	return ar.start
 }
 
-func (ar IPV4AddrRange) EndIp() IPV4Addr {
+func (ar IPV4AddrRange) EndIP() IPV4Addr {
 	return ar.end
 }
 

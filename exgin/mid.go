@@ -15,8 +15,18 @@ import (
 	"github.com/ergoapi/util/exid"
 	ltrace "github.com/ergoapi/util/log/hooks/trace"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/sirupsen/logrus"
+
+	"github.com/go-playground/locales/en"
+	"github.com/go-playground/locales/zh"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	en_translations "github.com/go-playground/validator/v10/translations/en"
+	zh_translations "github.com/go-playground/validator/v10/translations/zh"
 )
+
+var uni = ut.New(en.New(), zh.New())
 
 // exCors ex cors middleware
 func exCors() gin.HandlerFunc {
@@ -45,10 +55,11 @@ func exTraceID() gin.HandlerFunc {
 		traceID := g.GetHeader("X-Trace-Id")
 		if traceID == "" {
 			traceID = exid.GenUUID()
-			g.Header("X-Trace-Id", traceID)
+			g.Request.Header.Set("X-Trace-Id", traceID)
 		}
+		g.Header("X-Trace-Id", traceID)
 		g.Set("ex-trace-id", traceID)
-		logrus.AddHook(ltrace.NewTraceIdHook(traceID))
+		logrus.AddHook(ltrace.NewTraceIDHook(traceID))
 		g.Next()
 	}
 }
@@ -166,4 +177,34 @@ func ExHackHeader() gin.HandlerFunc {
 		g.Writer.Header().Add("Server", "cloudflare")
 		g.Next()
 	}
+}
+
+// Translations .
+func Translations() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locale := c.GetHeader("locale")
+		trans, _ := uni.GetTranslator(locale)
+		v, ok := binding.Validator.Engine().(*validator.Validate)
+		if ok {
+			switch locale {
+			case "zh":
+				_ = zh_translations.RegisterDefaultTranslations(v, trans)
+			case "en":
+				_ = en_translations.RegisterDefaultTranslations(v, trans)
+			default:
+				_ = zh_translations.RegisterDefaultTranslations(v, trans)
+			}
+			c.Set("trans", trans)
+		}
+		c.Next()
+	}
+}
+
+// NoCache is a middleware function that appends headers
+// to prevent the client from caching the HTTP response.
+func NoCache(c *gin.Context) {
+	c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+	c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+	c.Header("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
+	c.Next()
 }

@@ -41,9 +41,9 @@ func TestCloneAndAddLabel(t *testing.T) {
 			t.Errorf("[Add] got %v, want %v", got, tc.want)
 		}
 		// now test the inverse.
-		got_rm := CloneAndRemoveLabel(got, tc.labelKey)
-		if !reflect.DeepEqual(got_rm, tc.labels) {
-			t.Errorf("[RM] got %v, want %v", got_rm, tc.labels)
+		gotrm := CloneAndRemoveLabel(got, tc.labelKey)
+		if !reflect.DeepEqual(gotrm, tc.labels) {
+			t.Errorf("[RM] got %v, want %v", gotrm, tc.labels)
 		}
 	}
 }
