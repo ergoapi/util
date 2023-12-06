@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -151,7 +152,7 @@ func (c *Client) GetService(ctx context.Context, namespace, name string, opts me
 	return c.Clientset.CoreV1().Services(namespace).Get(ctx, name, opts)
 }
 
-func (c *Client) ListServices(ctx context.Context, namespace string, options metav1.ListOptions) (*corev1.ServiceList, error) {
+func (c *Client) ListService(ctx context.Context, namespace string, options metav1.ListOptions) (*corev1.ServiceList, error) {
 	return c.Clientset.CoreV1().Services(namespace).List(ctx, options)
 }
 
@@ -413,14 +414,6 @@ func (c *Client) DeleteIngressClass(ctx context.Context, name string, opts metav
 	return c.Clientset.NetworkingV1().IngressClasses().Delete(ctx, name, opts)
 }
 
-func (c *Client) ListIngresses(ctx context.Context, namespace string, o metav1.ListOptions) (*networkingv1.IngressList, error) {
-	return c.Clientset.NetworkingV1().Ingresses(namespace).List(ctx, o)
-}
-
-func (c *Client) ListAllIngresses(ctx context.Context, o metav1.ListOptions) (*networkingv1.IngressList, error) {
-	return c.Clientset.NetworkingV1().Ingresses(corev1.NamespaceAll).List(ctx, o)
-}
-
 func (c *Client) ListNetworkPolicies(ctx context.Context, namespace string, o metav1.ListOptions) (*networkingv1.NetworkPolicyList, error) {
 	return c.Clientset.NetworkingV1().NetworkPolicies(namespace).List(ctx, o)
 }
@@ -435,4 +428,60 @@ func (c *Client) GetIngress(ctx context.Context, namespace string, name string, 
 
 func (c *Client) CreateIngress(ctx context.Context, namespace string, ingress *networkingv1.Ingress, opts metav1.CreateOptions) (*networkingv1.Ingress, error) {
 	return c.Clientset.NetworkingV1().Ingresses(namespace).Create(ctx, ingress, opts)
+}
+
+func (c *Client) DeleteIngress(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error {
+	return c.Clientset.NetworkingV1().Ingresses(namespace).Delete(ctx, name, opts)
+}
+
+func (c *Client) ListIngresses(ctx context.Context, namespace string, o metav1.ListOptions) (*networkingv1.IngressList, error) {
+	return c.Clientset.NetworkingV1().Ingresses(namespace).List(ctx, o)
+}
+
+func (c *Client) ListAllIngresses(ctx context.Context, o metav1.ListOptions) (*networkingv1.IngressList, error) {
+	return c.Clientset.NetworkingV1().Ingresses(corev1.NamespaceAll).List(ctx, o)
+}
+
+func (c *Client) ListStorageClasses(ctx context.Context, opts metav1.ListOptions) (*storagev1.StorageClassList, error) {
+	return c.Clientset.StorageV1().StorageClasses().List(ctx, opts)
+}
+
+func (c *Client) GetStorageClass(ctx context.Context, name string, opts metav1.GetOptions) (*storagev1.StorageClass, error) {
+	return c.Clientset.StorageV1().StorageClasses().Get(ctx, name, opts)
+}
+
+func (c *Client) DeleteStorageClass(ctx context.Context, name string, opts metav1.DeleteOptions) error {
+	return c.Clientset.StorageV1().StorageClasses().Delete(ctx, name, opts)
+}
+
+func (c *Client) UpdateStorageClass(ctx context.Context, storage *storagev1.StorageClass, opts metav1.UpdateOptions) (*storagev1.StorageClass, error) {
+	return c.Clientset.StorageV1().StorageClasses().Update(ctx, storage, opts)
+}
+
+func (c *Client) CreateStorageClass(ctx context.Context, storage *storagev1.StorageClass, opts metav1.CreateOptions) (*storagev1.StorageClass, error) {
+	return c.Clientset.StorageV1().StorageClasses().Create(ctx, storage, opts)
+}
+
+func (c *Client) ListAllPersistentVolumeClaims(ctx context.Context, opts metav1.ListOptions) (*corev1.PersistentVolumeClaimList, error) {
+	return c.Clientset.CoreV1().PersistentVolumeClaims(corev1.NamespaceAll).List(ctx, opts)
+}
+
+func (c *Client) ListPersistentVolumeClaims(ctx context.Context, namespace string, opts metav1.ListOptions) (*corev1.PersistentVolumeClaimList, error) {
+	return c.Clientset.CoreV1().PersistentVolumeClaims(namespace).List(ctx, opts)
+}
+
+func (c *Client) GetPersistentVolumeClaims(ctx context.Context, namespace, name string, opts metav1.GetOptions) (*corev1.PersistentVolumeClaim, error) {
+	return c.Clientset.CoreV1().PersistentVolumeClaims(namespace).Get(ctx, name, opts)
+}
+
+func (c *Client) DeletePersistentVolumeClaims(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error {
+	return c.Clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(ctx, name, opts)
+}
+
+func (c *Client) CreatePersistentVolumeClaims(ctx context.Context, namespace string, pvc *corev1.PersistentVolumeClaim, opts metav1.CreateOptions) (*corev1.PersistentVolumeClaim, error) {
+	return c.Clientset.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, pvc, opts)
+}
+
+func (c *Client) UpdatePersistentVolumeClaims(ctx context.Context, namespace string, pvc *corev1.PersistentVolumeClaim, opts metav1.UpdateOptions) (*corev1.PersistentVolumeClaim, error) {
+	return c.Clientset.CoreV1().PersistentVolumeClaims(namespace).Update(ctx, pvc, opts)
 }
