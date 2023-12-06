@@ -132,3 +132,15 @@ func Int64Float64(i int64) (string, float64) {
 	}
 	return t, k
 }
+
+func StringsEqual(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for i := 0; i < len(left); i++ {
+		if left[i] != right[i] {
+			return false
+		}
+	}
+	return true
+}

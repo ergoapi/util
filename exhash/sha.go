@@ -14,6 +14,7 @@
 package exhash
 
 import (
+	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -56,4 +57,10 @@ func String(s string) string {
 	hash := sha256.New()
 	_, _ = io.WriteString(hash, s)
 	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+func Hex(s string, length int) string {
+	h := md5.Sum([]byte(s))
+	d := hex.EncodeToString(h[:])
+	return d[:length]
 }

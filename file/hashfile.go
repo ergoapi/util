@@ -39,7 +39,6 @@ func Md5file(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	out := hex.EncodeToString(hash.Sum(nil))
 	return out, nil
 }
