@@ -155,6 +155,10 @@ func (c *Client) ListServices(ctx context.Context, namespace string, options met
 	return c.Clientset.CoreV1().Services(namespace).List(ctx, options)
 }
 
+func (c *Client) ListAllServices(ctx context.Context, options metav1.ListOptions) (*corev1.ServiceList, error) {
+	return c.Clientset.CoreV1().Services(corev1.NamespaceAll).List(ctx, options)
+}
+
 func (c *Client) CreateEndpoints(ctx context.Context, namespace string, ep *corev1.Endpoints, opts metav1.CreateOptions) (*corev1.Endpoints, error) {
 	return c.Clientset.CoreV1().Endpoints(namespace).Create(ctx, ep, opts)
 }
@@ -221,6 +225,10 @@ func (c *Client) ListDeployment(ctx context.Context, namespace string, o metav1.
 	return c.Clientset.AppsV1().Deployments(namespace).List(ctx, o)
 }
 
+func (c *Client) ListAllDeployment(ctx context.Context, o metav1.ListOptions) (*appsv1.DeploymentList, error) {
+	return c.Clientset.AppsV1().Deployments(corev1.NamespaceAll).List(ctx, o)
+}
+
 func (c *Client) CreateNamespace(ctx context.Context, namespace string, opts metav1.CreateOptions) (*corev1.Namespace, error) {
 	return c.Clientset.CoreV1().Namespaces().Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}, opts)
 }
@@ -231,6 +239,10 @@ func (c *Client) GetNamespace(ctx context.Context, namespace string, options met
 
 func (c *Client) DeleteNamespace(ctx context.Context, namespace string, opts metav1.DeleteOptions) error {
 	return c.Clientset.CoreV1().Namespaces().Delete(ctx, namespace, opts)
+}
+
+func (c *Client) ListAllNamespace(ctx context.Context, options metav1.ListOptions) (*corev1.NamespaceList, error) {
+	return c.Clientset.CoreV1().Namespaces().List(ctx, options)
 }
 
 func (c *Client) GetPod(ctx context.Context, namespace, name string, opts metav1.GetOptions) (*corev1.Pod, error) {
@@ -251,6 +263,10 @@ func (c *Client) DeletePodCollection(ctx context.Context, namespace string, opts
 
 func (c *Client) ListPods(ctx context.Context, namespace string, options metav1.ListOptions) (*corev1.PodList, error) {
 	return c.Clientset.CoreV1().Pods(namespace).List(ctx, options)
+}
+
+func (c *Client) ListAllPods(ctx context.Context, options metav1.ListOptions) (*corev1.PodList, error) {
+	return c.Clientset.CoreV1().Pods(corev1.NamespaceAll).List(ctx, options)
 }
 
 func (c *Client) PodLogs(namespace, name string, opts *corev1.PodLogOptions) *rest.Request {
@@ -327,6 +343,10 @@ func (c *Client) ListDaemonSet(ctx context.Context, namespace string, o metav1.L
 	return c.Clientset.AppsV1().DaemonSets(namespace).List(ctx, o)
 }
 
+func (c *Client) ListAllDaemonSet(ctx context.Context, o metav1.ListOptions) (*appsv1.DaemonSetList, error) {
+	return c.Clientset.AppsV1().DaemonSets(corev1.NamespaceAll).List(ctx, o)
+}
+
 func (c *Client) DeleteDaemonSet(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error {
 	return c.Clientset.AppsV1().DaemonSets(namespace).Delete(ctx, name, opts)
 }
@@ -393,11 +413,19 @@ func (c *Client) DeleteIngressClass(ctx context.Context, name string, opts metav
 	return c.Clientset.NetworkingV1().IngressClasses().Delete(ctx, name, opts)
 }
 
-func (c *Client) ListIngresses(ctx context.Context, o metav1.ListOptions) (*networkingv1.IngressList, error) {
+func (c *Client) ListIngresses(ctx context.Context, namespace string, o metav1.ListOptions) (*networkingv1.IngressList, error) {
+	return c.Clientset.NetworkingV1().Ingresses(namespace).List(ctx, o)
+}
+
+func (c *Client) ListAllIngresses(ctx context.Context, o metav1.ListOptions) (*networkingv1.IngressList, error) {
 	return c.Clientset.NetworkingV1().Ingresses(corev1.NamespaceAll).List(ctx, o)
 }
 
-func (c *Client) ListNetworkPolicies(ctx context.Context, o metav1.ListOptions) (*networkingv1.NetworkPolicyList, error) {
+func (c *Client) ListNetworkPolicies(ctx context.Context, namespace string, o metav1.ListOptions) (*networkingv1.NetworkPolicyList, error) {
+	return c.Clientset.NetworkingV1().NetworkPolicies(namespace).List(ctx, o)
+}
+
+func (c *Client) ListAllNetworkPolicies(ctx context.Context, o metav1.ListOptions) (*networkingv1.NetworkPolicyList, error) {
 	return c.Clientset.NetworkingV1().NetworkPolicies(corev1.NamespaceAll).List(ctx, o)
 }
 
