@@ -151,6 +151,10 @@ func (c *Client) GetService(ctx context.Context, namespace, name string, opts me
 	return c.Clientset.CoreV1().Services(namespace).Get(ctx, name, opts)
 }
 
+func (c *Client) ListServices(ctx context.Context, namespace string, options metav1.ListOptions) (*corev1.ServiceList, error) {
+	return c.Clientset.CoreV1().Services(namespace).List(ctx, options)
+}
+
 func (c *Client) CreateEndpoints(ctx context.Context, namespace string, ep *corev1.Endpoints, opts metav1.CreateOptions) (*corev1.Endpoints, error) {
 	return c.Clientset.CoreV1().Endpoints(namespace).Create(ctx, ep, opts)
 }
@@ -253,10 +257,6 @@ func (c *Client) PodLogs(namespace, name string, opts *corev1.PodLogOptions) *re
 	return c.Clientset.CoreV1().Pods(namespace).GetLogs(name, opts)
 }
 
-func (c *Client) ListServices(ctx context.Context, namespace string, options metav1.ListOptions) (*corev1.ServiceList, error) {
-	return c.Clientset.CoreV1().Services(namespace).List(ctx, options)
-}
-
 func (c *Client) ExecInPodWithStderr(ctx context.Context, namespace, pod, container string, command []string) (bytes.Buffer, bytes.Buffer, error) {
 	result, err := c.execInPod(ctx, ExecParameters{
 		Namespace: namespace,
@@ -355,4 +355,56 @@ func (c *Client) UpdateKubernetesNetworkPolicy(ctx context.Context, policy *netw
 
 func (c *Client) DeleteKubernetesNetworkPolicy(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error {
 	return c.Clientset.NetworkingV1().NetworkPolicies(namespace).Delete(ctx, name, opts)
+}
+
+func (c *Client) CreateResourceQuota(ctx context.Context, namespace string, rq *corev1.ResourceQuota, opts metav1.CreateOptions) (*corev1.ResourceQuota, error) {
+	return c.Clientset.CoreV1().ResourceQuotas(namespace).Create(ctx, rq, opts)
+}
+
+func (c *Client) DeleteResourceQuota(ctx context.Context, namespace, name string, opts metav1.DeleteOptions) error {
+	return c.Clientset.CoreV1().ResourceQuotas(namespace).Delete(ctx, name, opts)
+}
+
+func (c *Client) GetNode(ctx context.Context, name string, opts metav1.GetOptions) (*corev1.Node, error) {
+	return c.Clientset.CoreV1().Nodes().Get(ctx, name, opts)
+}
+
+func (c *Client) ListNodes(ctx context.Context, options metav1.ListOptions) (*corev1.NodeList, error) {
+	return c.Clientset.CoreV1().Nodes().List(ctx, options)
+}
+
+func (c *Client) PatchNode(ctx context.Context, nodeName string, pt types.PatchType, data []byte) (*corev1.Node, error) {
+	return c.Clientset.CoreV1().Nodes().Patch(ctx, nodeName, pt, data, metav1.PatchOptions{})
+}
+
+func (c *Client) ListEvents(ctx context.Context, o metav1.ListOptions) (*corev1.EventList, error) {
+	return c.Clientset.CoreV1().Events(corev1.NamespaceAll).List(ctx, o)
+}
+
+func (c *Client) ListIngressClasses(ctx context.Context, o metav1.ListOptions) (*networkingv1.IngressClassList, error) {
+	return c.Clientset.NetworkingV1().IngressClasses().List(ctx, o)
+}
+
+func (c *Client) CreateIngressClass(ctx context.Context, ingressClass *networkingv1.IngressClass, opts metav1.CreateOptions) (*networkingv1.IngressClass, error) {
+	return c.Clientset.NetworkingV1().IngressClasses().Create(ctx, ingressClass, opts)
+}
+
+func (c *Client) DeleteIngressClass(ctx context.Context, name string, opts metav1.DeleteOptions) error {
+	return c.Clientset.NetworkingV1().IngressClasses().Delete(ctx, name, opts)
+}
+
+func (c *Client) ListIngresses(ctx context.Context, o metav1.ListOptions) (*networkingv1.IngressList, error) {
+	return c.Clientset.NetworkingV1().Ingresses(corev1.NamespaceAll).List(ctx, o)
+}
+
+func (c *Client) ListNetworkPolicies(ctx context.Context, o metav1.ListOptions) (*networkingv1.NetworkPolicyList, error) {
+	return c.Clientset.NetworkingV1().NetworkPolicies(corev1.NamespaceAll).List(ctx, o)
+}
+
+func (c *Client) GetIngress(ctx context.Context, namespace string, name string, opts metav1.GetOptions) (*networkingv1.Ingress, error) {
+	return c.Clientset.NetworkingV1().Ingresses(namespace).Get(ctx, name, opts)
+}
+
+func (c *Client) CreateIngress(ctx context.Context, namespace string, ingress *networkingv1.Ingress, opts metav1.CreateOptions) (*networkingv1.Ingress, error) {
+	return c.Clientset.NetworkingV1().Ingresses(namespace).Create(ctx, ingress, opts)
 }
