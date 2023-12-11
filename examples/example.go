@@ -7,9 +7,24 @@ import (
 
 	"github.com/ergoapi/util/exgin"
 	"github.com/ergoapi/util/exhttp"
+	filehook "github.com/ergoapi/util/log/hooks/file"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
+
+func init() {
+	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetOutput(os.Stdout)
+	logrus.AddHook(filehook.NewRotateFileHook(filehook.RotateFileConfig{
+		Filename:   "/tmp/ergoapi.log",
+		MaxSize:    10,
+		MaxBackups: 1,
+		MaxAge:     1,
+		Level:      logrus.DebugLevel,
+		Formatter:  &logrus.JSONFormatter{},
+	}))
+	logrus.SetLevel(logrus.DebugLevel)
+}
 
 func main() {
 	g := exgin.Init(&exgin.Config{

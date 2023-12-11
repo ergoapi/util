@@ -24,6 +24,15 @@ type RotateFileHook struct {
 }
 
 func NewRotateFileHook(config RotateFileConfig) logrus.Hook {
+	if config.MaxAge <= 1 {
+		config.MaxAge = 1
+	}
+	if config.MaxSize <= 50 {
+		config.MaxSize = 50
+	}
+	if config.MaxBackups > 7 {
+		config.MaxBackups = 7
+	}
 	hook := RotateFileHook{
 		Config: config,
 	}
