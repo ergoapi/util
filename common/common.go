@@ -11,3 +11,7 @@ const (
 	PUNC     = ""
 	SaltHash = "<-*Uk30^96eY*->"
 )
+
+var (
+	FakeUA = []string{"masscan", "InternetMeasurement", "internet-measurement", "CensysInspect", "censys"}
+)
