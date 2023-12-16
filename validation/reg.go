@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-var FUNCTION_REG *regexp.Regexp
-var UUID_REG *regexp.Regexp
+var FunctionReg *regexp.Regexp
+var UUIDReg *regexp.Regexp
 var UUID_EXACT_REG *regexp.Regexp
 var INTEGER_REG *regexp.Regexp
 var FLOAT_REG *regexp.Regexp
@@ -40,8 +40,8 @@ var US_CURRENCY_REG *regexp.Regexp
 var EU_CURRENCY_REG *regexp.Regexp
 
 func init() {
-	FUNCTION_REG = regexp.MustCompile(`^\w+\(.*\)$`)
-	UUID_REG = regexp.MustCompile(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`)
+	FunctionReg = regexp.MustCompile(`^\w+\(.*\)$`)
+	UUIDReg = regexp.MustCompile(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`)
 	UUID_EXACT_REG = regexp.MustCompile(`^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$`)
 	INTEGER_REG = regexp.MustCompile(`^[0-9]+$`)
 	FLOAT_REG = regexp.MustCompile(`^\d+(\.\d*)?$`)
@@ -74,11 +74,11 @@ func init() {
 }
 
 func MatchFunction(str string) bool {
-	return FUNCTION_REG.MatchString(str)
+	return FunctionReg.MatchString(str)
 }
 
 func MatchUUID(str string) bool {
-	return UUID_REG.MatchString(str)
+	return UUIDReg.MatchString(str)
 }
 
 func MatchUUIDExact(str string) bool {

@@ -59,7 +59,6 @@ func (g *GoRedis) GetWithTTL(key string) (any, time.Duration, error) {
 // Set defines data in Redis for given key identifier
 func (g *GoRedis) Set(key string, value any, options ...Option) error {
 	opts := ApplyOptionsWithDefault(g.options, options...)
-
 	err := g.Client.Set(context.Background(), key, value, opts.Expiration).Err()
 	if err != nil {
 		return err

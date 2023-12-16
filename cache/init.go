@@ -11,3 +11,7 @@ func InitGoRedis(options ...Option) {
 func InitGoRedisCluster(options ...Option) {
 	Instance = NewGoRedisCluster(options...)
 }
+
+func InitRedigo(options ...Option) {
+	Instance = NewRedigo(options...)
+}

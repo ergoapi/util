@@ -8,10 +8,13 @@ type Options struct {
 	Expiration      time.Duration
 	CleanupInterval time.Duration
 
-	RedisDB       int
-	RedisHost     string
-	RedisUser     string
-	RedisPassword string
+	RedisDB          int
+	RedisHost        string
+	RedisUser        string
+	RedisPassword    string
+	RedisMaxidle     int
+	RedisMaxactive   int
+	RedisIdleTimeout time.Duration
 
 	Endpoints []string
 }
@@ -83,5 +86,26 @@ func WithRedisPassword(password string) Option {
 func WithEndpoints(endpoints []string) Option {
 	return func(o *Options) {
 		o.Endpoints = endpoints
+	}
+}
+
+// WithRedisMaxidle allows to specify a redis max idle.
+func WithRedisMaxidle(maxidle int) Option {
+	return func(o *Options) {
+		o.RedisMaxidle = maxidle
+	}
+}
+
+// WithRedisMaxactive allows to specify a redis max active.
+func WithRedisMaxactive(maxactive int) Option {
+	return func(o *Options) {
+		o.RedisMaxactive = maxactive
+	}
+}
+
+// WithRedisIdleTimeout allows to specify a redis idle timeout.
+func WithRedisIdleTimeout(idleTimeout time.Duration) Option {
+	return func(o *Options) {
+		o.RedisIdleTimeout = idleTimeout
 	}
 }
