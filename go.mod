@@ -30,7 +30,7 @@ require (
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/schollz/progressbar/v3 v3.14.1
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/gorm v1.25.5
 	k8s.io/api v0.29.0
