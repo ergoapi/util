@@ -102,6 +102,9 @@ func GetHomeDir() string {
 	if err != nil {
 		return "/root"
 	}
+	if home == "/" || home == "" {
+		return "/tmp"
+	}
 	return home
 }
 
