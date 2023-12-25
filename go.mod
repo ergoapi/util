@@ -15,7 +15,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/golang-module/carbon/v2 v2.2.14
+	github.com/golang-module/carbon/v2 v2.3.0
 	github.com/gomodule/redigo v1.8.9
 	github.com/google/go-github/v56 v56.0.0
 	github.com/google/gops v0.3.28
