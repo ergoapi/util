@@ -1,6 +1,7 @@
 module github.com/ergoapi/util
 
 go 1.21
+
 require (
 	github.com/6tail/lunar-go v1.3.9
 	github.com/blang/semver/v4 v4.0.0
