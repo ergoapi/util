@@ -32,7 +32,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.21.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-	gorm.io/gorm v1.25.8
+	gorm.io/gorm v1.25.9
 	k8s.io/api v0.29.3
 	k8s.io/apiextensions-apiserver v0.29.3
 	k8s.io/apimachinery v0.29.3
