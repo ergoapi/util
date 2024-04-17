@@ -33,9 +33,9 @@ require (
 	golang.org/x/crypto v0.22.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/gorm v1.25.9
-	k8s.io/api v0.29.3
+	k8s.io/api v0.29.4
 	k8s.io/apiextensions-apiserver v0.29.3
-	k8s.io/apimachinery v0.29.3
+	k8s.io/apimachinery v0.29.4
 	k8s.io/client-go v0.29.3
 	sigs.k8s.io/yaml v1.4.0
 	tailscale.com v1.64.1
@@ -114,7 +114,7 @@ require (
 	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/mod v0.16.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
