@@ -343,23 +343,21 @@ func ParsePrefix(prefix string) (IPV4Addr, int8, error) {
 			}
 			maskLen := Mask2Len(mask)
 			return addr.NetAddr(maskLen), maskLen, nil
-		} else {
-			maskLen, err := strconv.Atoi(prefix[slash+1:])
-			if err != nil {
-				return 0, 0, errors.Errorf("invalid masklen %s", err)
-			}
-			if maskLen < 0 || maskLen > 32 {
-				return 0, 0, errors.New("out of range masklen")
-			}
-			return addr.NetAddr(int8(maskLen)), int8(maskLen), nil
 		}
-	} else {
-		addr, err := NewIPV4Addr(prefix)
+		maskLen, err := strconv.Atoi(prefix[slash+1:])
 		if err != nil {
-			return 0, 0, errors.Errorf("NewIPV4Addr: %v", err)
+			return 0, 0, errors.Errorf("invalid masklen %s", err)
 		}
-		return addr, 32, nil
+		if maskLen < 0 || maskLen > 32 {
+			return 0, 0, errors.New("out of range masklen")
+		}
+		return addr.NetAddr(int8(maskLen)), int8(maskLen), nil
 	}
+	addr, err := NewIPV4Addr(prefix)
+	if err != nil {
+		return 0, 0, errors.Errorf("NewIPV4Addr: %v", err)
+	}
+	return addr, 32, nil
 }
 
 func NewIPV4Prefix(prefix string) (IPV4Prefix, error) {
