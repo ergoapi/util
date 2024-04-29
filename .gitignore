@@ -3,3 +3,5 @@
 
 _example/
 report.xml
+*.db
+*.log

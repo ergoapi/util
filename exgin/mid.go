@@ -59,7 +59,7 @@ func exTraceID() gin.HandlerFunc {
 		}
 		g.Header("X-Trace-Id", traceID)
 		g.Set("ex-trace-id", traceID)
-		logrus.AddHook(ltrace.NewTraceIDHook(traceID))
+		logrus.AddHook(ltrace.NewTraceIDHook(traceID, "exgin"))
 		g.Next()
 	}
 }

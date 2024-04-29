@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/ergoapi/util/exctx"
-	"github.com/ergoapi/util/file"
-	"github.com/ergoapi/util/ztime"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -75,7 +73,6 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		case err != nil && mgl.LogLevel >= logger.Error:
 			sql, rows := fc()
 			if rows == -1 || rows == 0 || err == gorm.ErrRecordNotFound {
-				go file.WriteFileWithLine(fmt.Sprintf("%v.dbnotfound.txt", ztime.GetToday()), sql)
 				logrus.WithFields(logrus.Fields{
 					"traceID":         trace.TraceID,
 					"SpanID":          trace.SpanID,
@@ -103,7 +100,6 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		case mgl.SlowThreshold != 0 && elapsed > mgl.SlowThreshold && mgl.LogLevel >= logger.Warn:
 			sql, rows := fc()
 			slowLog := fmt.Sprintf("SLOW SQL >= %v", mgl.SlowThreshold)
-			go file.WriteFileWithLine(fmt.Sprintf("%v.slowsql.txt", ztime.GetToday()), sql+" "+slowLog)
 			if rows == -1 {
 				logrus.WithFields(logrus.Fields{
 					"traceID":         trace.TraceID,
