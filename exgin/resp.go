@@ -16,6 +16,7 @@ func customRespDone(code int, message, tid, data interface{}) gin.H {
 		"timestamp": ztime.NowUnix(),
 		"code":      code,
 		"traceId":   tid,
+		"success":   code == 200,
 	}
 }
 
