@@ -153,14 +153,15 @@ func ExRecovery() gin.HandlerFunc {
 				}
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
+				traceId := c.Writer.Header().Get("X-Trace-Id")
 				if brokenPipe {
 					logrus.Errorf("Recovery from brokenPipe ---> path: %v, err: %v, request: %v",
 						c.Request.URL.Path, err, string(httpRequest))
-					c.AbortWithStatusJSON(200, customRespDone(10500, "请求broken", c.Writer.Header().Get("X-Trace-Id"), nil))
+					c.AbortWithStatusJSON(200, customRespDone(10500, traceId, nil, "请求broken"))
 				} else {
 					logrus.Errorf("Recovery from panic ---> err: %v, request: %v, stack: %v",
 						err, string(httpRequest), string(debug.Stack()))
-					c.AbortWithStatusJSON(200, customRespDone(10500, "请求panic", c.Writer.Header().Get("X-Trace-Id"), nil))
+					c.AbortWithStatusJSON(200, customRespDone(10500, traceId, nil, "请求panic"))
 				}
 				return
 			}
