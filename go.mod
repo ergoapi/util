@@ -38,7 +38,7 @@ require (
 	k8s.io/apimachinery v0.30.1
 	k8s.io/client-go v0.30.1
 	sigs.k8s.io/yaml v1.4.0
-	tailscale.com v1.66.1
+	tailscale.com v1.66.3
 )
 
 require (
