@@ -33,9 +33,9 @@ require (
 	golang.org/x/crypto v0.23.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/gorm v1.25.10
-	k8s.io/api v0.30.0
+	k8s.io/api v0.30.1
 	k8s.io/apiextensions-apiserver v0.30.0
-	k8s.io/apimachinery v0.30.0
+	k8s.io/apimachinery v0.30.1
 	k8s.io/client-go v0.30.0
 	sigs.k8s.io/yaml v1.4.0
 	tailscale.com v1.66.1
