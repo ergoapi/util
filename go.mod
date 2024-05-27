@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/6tail/lunar-go v1.3.13
 	github.com/blang/semver/v4 v4.0.0
-	github.com/cockroachdb/errors v1.11.1
+	github.com/cockroachdb/errors v1.11.2
 	github.com/docker/go-connections v0.5.0
 	github.com/gin-contrib/pprof v1.5.0
 	github.com/gin-gonic/gin v1.10.0
