@@ -15,5 +15,5 @@ const (
 )
 
 var (
-	FakeUA = []string{"masscan", "InternetMeasurement", "internet-measurement", "CensysInspect", "censys"}
+	FakeUA = []string{"masscan", "InternetMeasurement", "internet-measurement", "CensysInspect", "censys", "Go-http-client", "python", "java", "PHP", "Nmap", "Windows NT 6.1", "netcraft", "quic-go-HTTP", "fasthttp"}
 )
