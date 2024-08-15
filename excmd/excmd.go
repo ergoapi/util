@@ -64,9 +64,12 @@ func isURL(u string) bool {
 // DownloadFile 下载文件
 func DownloadFile(url string, location string) {
 	dwncmd := downloadCmd(url)
-	RunCmd("/bin/sh", "-c", "mkdir -p /tmp/ysicing && cd /tmp/ysicing && "+dwncmd)
-	RunCmd("/bin/sh", "-c", "cp -a /tmp/ysicing/* "+location)
-	RunCmd("/bin/sh", "-c", "rm -rf /tmp/ysicing")
+	temp, _ := os.MkdirTemp("", "")
+	args := fmt.Sprintf("mkdir -p %s && cd %s && %s", temp, temp, dwncmd)
+	RunCmd("/bin/sh", "-c", args)
+	args = fmt.Sprintf("cp -a %s/* %s", temp, location)
+	RunCmd("/bin/sh", "-c", args)
+	_ = os.RemoveAll(temp)
 }
 
 // CheckBin 检查二进制是否存在
