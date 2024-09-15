@@ -197,7 +197,7 @@ func OutboundIP() (string, error) {
 
 // OutboundIPv2 获取出口IP
 func OutboundIPv2() (string, error) {
-	resp, err := http.Get("https://ip.ysicing.cloud")
+	resp, err := http.Get("https://ip.ysicing.net")
 	if err != nil {
 		return "", err
 	}
