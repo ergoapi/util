@@ -1,6 +1,7 @@
 module github.com/ergoapi/util
 
-go 1.22.0
+go 1.23
+
 toolchain go1.23.1
 
 require (
@@ -31,6 +32,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+	gopkg.in/telebot.v3 v3.3.8
 	gorm.io/gorm v1.25.12
 	k8s.io/api v0.31.1
 	k8s.io/apiextensions-apiserver v0.31.1
