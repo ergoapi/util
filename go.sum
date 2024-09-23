@@ -365,8 +365,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/imdario/mergo v0.3.16 h1:wwQJbIsHYGMUyLSPrEq1CT16AhnhNJQ51+4fdHUnCl4=
 github.com/imdario/mergo v0.3.16/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
-github.com/imroc/req/v3 v3.46.0 h1:18WVbx5NdlQFpZKCZkYwO/AglIQKAx/UPC/w+rrPWv8=
-github.com/imroc/req/v3 v3.46.0/go.mod h1:weam9gmyb00QnOtu6HXSnk44dNFkIUQb5QdMx13FeUU=
+github.com/imroc/req/v3 v3.46.1 h1:oahr2hBTb3AaFI4P6jkN0Elj2ZVKJcdQ/IjWqeIKjvc=
+github.com/imroc/req/v3 v3.46.1/go.mod h1:weam9gmyb00QnOtu6HXSnk44dNFkIUQb5QdMx13FeUU=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
