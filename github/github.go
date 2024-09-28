@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v65/github"
 )
 
 type Pkg struct {

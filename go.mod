@@ -17,7 +17,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang-module/carbon/v2 v2.3.12
 	github.com/gomodule/redigo v1.9.2
-	github.com/google/go-github/v56 v56.0.0
+	github.com/google/go-github/v65 v65.0.0
 	github.com/google/gops v0.3.28
 	github.com/google/uuid v1.6.0
 	github.com/gosuri/uitable v0.0.4
