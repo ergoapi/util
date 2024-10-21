@@ -1,6 +1,8 @@
 module github.com/ergoapi/util
 
 go 1.23
+toolchain go1.23.2
+
 require (
 	github.com/6tail/lunar-go v1.3.13
 	github.com/blang/semver/v4 v4.0.0
@@ -36,7 +38,7 @@ require (
 	k8s.io/apimachinery v0.31.1
 	k8s.io/client-go v0.31.1
 	sigs.k8s.io/yaml v1.4.0
-	tailscale.com v1.76.1
+	tailscale.com v1.76.3
 )
 
 require (
