@@ -4,3 +4,6 @@ updates:
     directory: /
     schedule:
       interval: daily
+    ignore:
+      - dependency-name: "k8s.io/*"
+      - dependency-name: "github.com/docker/docker"
