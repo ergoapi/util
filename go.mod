@@ -1,7 +1,8 @@
 module github.com/ergoapi/util
 
-go 1.23
-toolchain go1.23.2
+go 1.23.1
+
+toolchain go1.23.4
 
 require (
 	github.com/6tail/lunar-go v1.3.15
