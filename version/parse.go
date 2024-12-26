@@ -12,7 +12,7 @@ func LTv2(v1, v2 string) bool {
 	v2 = strings.TrimPrefix(v2, "v")
 	vv1, _ := semver.Make(v1)
 	vv2, _ := semver.Make(v2)
-	return vv1.LT(vv2) || vv1.EQ(vv2)
+	return vv1.LT(vv2)
 }
 
 // NotGTv3 returns true if v1 is less than or equal to v2
