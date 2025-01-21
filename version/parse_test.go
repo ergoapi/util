@@ -53,3 +53,31 @@ func TestGTv2(t *testing.T) {
 		})
 	}
 }
+
+func TestNext(t *testing.T) {
+	type args struct {
+		now   string
+		major bool
+		minor bool
+		patch bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"next major", args{"1.0.0", true, false, false}, "2.0.0"},
+		{"next minor", args{"1.0.0", false, true, false}, "1.1.0"},
+		{"next patch", args{"1.0.0", false, false, true}, "1.0.1"},
+		{"next major with prefix", args{"v1.0.0", true, false, false}, "v2.0.0"},
+		{"next minor with prefix", args{"v1.0.0", false, true, false}, "v1.1.0"},
+		{"next patch with prefix", args{"v1.0.0", false, false, true}, "v1.0.1"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Next(tt.args.now, tt.args.major, tt.args.minor, tt.args.patch); got != tt.want {
+				t.Errorf("Next() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

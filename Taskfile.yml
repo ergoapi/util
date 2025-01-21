@@ -1,8 +1,6 @@
 # https://taskfile.dev
 
-version: '3'
-
-
+version: "3"
 
 tasks:
   fmt:
@@ -21,5 +19,3 @@ tasks:
     cmds:
       - task: fmt
       - task: lint
-
-
