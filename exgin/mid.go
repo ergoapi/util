@@ -14,16 +14,16 @@ import (
 	errors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/exid"
 	ltrace "github.com/ergoapi/util/log/hooks/trace"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/sirupsen/logrus"
-
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	zh_translations "github.com/go-playground/validator/v10/translations/zh"
+	"github.com/sirupsen/logrus"
 )
 
 var uni = ut.New(en.New(), zh.New())
@@ -138,8 +138,7 @@ func ExRecovery() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				if res, ok := err.(errors.ErgoError); ok {
-					GinsData(c, nil, fmt.Errorf(res.Message))
-					c.Abort()
+					GinsAbort(c, 400, res.Message)
 					return
 				}
 				var brokenPipe bool
@@ -153,15 +152,14 @@ func ExRecovery() gin.HandlerFunc {
 				}
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
-				traceId := c.Writer.Header().Get("X-Trace-Id")
 				if brokenPipe {
 					logrus.Errorf("Recovery from brokenPipe ---> path: %v, err: %v, request: %v",
 						c.Request.URL.Path, err, string(httpRequest))
-					c.AbortWithStatusJSON(200, customRespDone(10500, traceId, nil, "请求broken"))
+					GinsAbort(c, 500, "请求broken")
 				} else {
 					logrus.Errorf("Recovery from panic ---> err: %v, request: %v, stack: %v",
 						err, string(httpRequest), string(debug.Stack()))
-					c.AbortWithStatusJSON(200, customRespDone(10500, traceId, nil, "请求panic"))
+					GinsAbort(c, 500, "请求panic")
 				}
 				return
 			}

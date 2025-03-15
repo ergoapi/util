@@ -28,21 +28,24 @@ import (
 func SetupGracefulStop(srv *http.Server) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+	sig := <-quit
+	logrus.Infof("receive signal %s", sig)
 	ShutDown(srv)
 }
 
 // ShutDown http shutdown
 func ShutDown(srv *http.Server) {
+	logrus.Info("service stopping...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		logrus.Fatal("shutdown err: ", err)
+		logrus.Errorf("service stop failed: %v", err)
 	}
 	select {
 	case <-ctx.Done():
-		logrus.Println("server exit timeout of 5 seconds.")
+		logrus.Warn("service stop timeout")
 	default:
+		logrus.Info("service stopped")
 	}
-	logrus.Println("server exited.")
+	logrus.Info("server exited.")
 }

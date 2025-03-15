@@ -22,8 +22,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cockroachdb/errors"
 	"github.com/ergoapi/util/validation"
+
+	"github.com/cockroachdb/errors"
 )
 
 const (

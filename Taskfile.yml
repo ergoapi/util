@@ -15,7 +15,21 @@ tasks:
     cmds:
       - golangci-lint run -v ./...
 
+  govulncheck:
+    desc: vulnerability detection
+    cmds:
+      - command -v govulncheck || go install golang.org/x/vuln/cmd/govulncheck@latest
+      - govulncheck ./...
+
+  gci:
+    desc: "gci"
+    cmds:
+      - command -v gci || go install github.com/daixiang0/gci@latest
+      - gci write --skip-generated --custom-order -s standard -s "prefix(github.com/ergoapi/util)" -s default -s blank -s dot .
+
   default:
     cmds:
       - task: fmt
+      - task: gci
+      - task: govulncheck
       - task: lint

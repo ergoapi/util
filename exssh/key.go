@@ -17,7 +17,6 @@ import (
 	"runtime"
 
 	"github.com/cockroachdb/errors"
-
 	gossh "golang.org/x/crypto/ssh"
 )
 

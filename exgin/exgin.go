@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ergoapi/util/exnet"
+
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/google/gops/agent"
@@ -96,6 +97,7 @@ func (c *Config) GinSet(r *gin.Engine) {
 // Init init gin engine
 func Init(c *Config) *gin.Engine {
 	r := gin.New()
+	r.HandleMethodNotAllowed = true
 	c.GinSet(r)
 	return r
 }

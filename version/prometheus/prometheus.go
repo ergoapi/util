@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"github.com/ergoapi/util/version"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 

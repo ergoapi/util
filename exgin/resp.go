@@ -5,91 +5,80 @@ import (
 
 	errors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/ztime"
+
 	"github.com/gin-gonic/gin"
 )
 
-// customRespDone done
-func customRespDone(code int, traceId string, data, message interface{}) gin.H {
-	msg := message
-	switch t := message.(type) {
-	case error:
-		msg = t.Error()
-	}
-	return gin.H{
-		"data":      data,
-		"message":   msg,
-		"timestamp": ztime.NowUnix(),
-		"code":      code,
-		"traceId":   traceId,
-		"success":   code == 200,
-	}
+type response struct {
+	Code      int    `json:"code"`
+	Data      any    `json:"data"`
+	Message   string `json:"message"`
+	Timestamp int64  `json:"timestamp"`
+	TraceID   string `json:"traceId"`
 }
 
-// respDone done
-func respDone(code int, traceId string, data interface{}) gin.H {
-	return customRespDone(code, traceId, data, "请求成功")
-}
-
-// respError error
-func respError(code int, traceId string, message interface{}) gin.H {
-	return customRespDone(code, traceId, nil, message)
-}
-
-func renderMessage(c *gin.Context, traceId string, v interface{}) {
-	if v == nil {
-		c.JSON(200, respDone(200, traceId, nil))
-		return
-	}
-
-	switch t := v.(type) {
-	case string:
-		c.JSON(200, respError(10400, traceId, t))
-	case error:
-		c.JSON(200, respError(10400, traceId, t.Error()))
+func newResponse(code int, traceID string, data any, message string) *response {
+	return &response{
+		Timestamp: ztime.NowUnix(),
+		Code:      code,
+		Message:   message,
+		TraceID:   traceID,
+		Data:      data,
 	}
 }
 
-func GinsData(c *gin.Context, data interface{}, err error) {
-	traceId := c.Writer.Header().Get("X-Trace-Id")
+// getTraceID 从上下文获取追踪ID
+func getTraceID(c *gin.Context) string {
+	return c.Writer.Header().Get("X-Trace-Id")
+}
+
+func SucessResponse(c *gin.Context, data any) {
+	traceID := getTraceID(c)
+	c.JSON(200, newResponse(200, traceID, data, "请求成功"))
+}
+
+func ErrorResponse(c *gin.Context, httpcode int, err error) {
+	traceID := getTraceID(c)
+	c.JSON(httpcode, newResponse(httpcode, traceID, nil, err.Error()))
+}
+
+// ErrorResponse2xx 处理错误响应, 状态码为200
+func ErrorResponse2xx(c *gin.Context, code int, err error) {
+	traceID := getTraceID(c)
+	c.JSON(200, newResponse(code, traceID, nil, err.Error()))
+}
+
+// GinsData 处理通用数据响应
+func GinsData(c *gin.Context, code int, data any, err error) {
 	if err == nil {
-		c.JSON(200, respDone(200, traceId, data))
+		SucessResponse(c, data)
 		return
 	}
-	renderMessage(c, traceId, err.Error())
+	ErrorResponse(c, code, err)
 }
 
-func GinsCodeData(c *gin.Context, code int, data interface{}, err error) {
-	traceId := c.Writer.Header().Get("X-Trace-Id")
+// GinsData2xx 处理通用数据响应, 状态码为200
+func GinsData2xx(c *gin.Context, code int, data any, err error) {
 	if err == nil {
-		c.JSON(200, respDone(code, traceId, data))
+		SucessResponse(c, data)
 		return
 	}
-	renderMessage(c, traceId, err.Error())
+	ErrorResponse2xx(c, code, err)
 }
 
-func GinsErrorData(c *gin.Context, code int, data interface{}, err error) {
-	traceId := c.Writer.Header().Get("X-Trace-Id")
-	c.JSON(200, customRespDone(code, traceId, data, err))
+// GinsAbort 中止请求并返回错误信息
+func GinsAbort(c *gin.Context, httpcode int, msg string) {
+	traceID := getTraceID(c)
+	c.AbortWithStatusJSON(httpcode, newResponse(httpcode, traceID, nil, msg))
 }
 
-func GinsAbort(c *gin.Context, msg string, args ...interface{}) {
-	traceId := c.Writer.Header().Get("X-Trace-Id")
-	c.AbortWithStatusJSON(200, respError(10400, traceId, fmt.Sprintf(msg, args...)))
+// GinsAbort200 中止请求并返回自定义状态码
+func GinsAbort200(c *gin.Context, code int, msg string) {
+	traceID := getTraceID(c)
+	c.AbortWithStatusJSON(200, newResponse(code, traceID, nil, msg))
 }
 
-func GinsAbortWithCode(c *gin.Context, respcode int, msg string, args ...interface{}) {
-	traceId := c.Writer.Header().Get("X-Trace-Id")
-	c.AbortWithStatusJSON(200, respError(respcode, traceId, fmt.Sprintf(msg, args...)))
-}
-
-func GinsCustomResp(c *gin.Context, obj interface{}) {
-	c.JSON(200, obj)
-}
-
-func GinsCustomCodeResp(c *gin.Context, code int, obj interface{}) {
-	c.JSON(code, obj)
-}
-
+// Bind 绑定JSON请求体
 func Bind(c *gin.Context, ptr interface{}) {
 	err := c.ShouldBindJSON(ptr)
 	if err != nil {
@@ -97,19 +86,11 @@ func Bind(c *gin.Context, ptr interface{}) {
 	}
 }
 
-// BindWithErr bind with error
+// BindWithErr 绑定JSON请求体并返回错误
 func BindWithErr(c *gin.Context, ptr interface{}) error {
 	err := c.ShouldBindJSON(ptr)
 	if err != nil {
 		return fmt.Errorf("参数不合法: %v", err)
 	}
 	return nil
-}
-
-// APICustomRespBody swag api resp body
-type APICustomRespBody struct {
-	Code      int         `json:"code"`
-	Data      interface{} `json:"data"`
-	Message   string      `json:"message"`
-	Timestamp int         `json:"timestamp"`
 }
