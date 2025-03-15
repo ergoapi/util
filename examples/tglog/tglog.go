@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/ergoapi/util/log/hooks/tg"
+
 	"github.com/sirupsen/logrus"
 )
 

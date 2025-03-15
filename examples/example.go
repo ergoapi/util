@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"os"
 
+	utilerrors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/exgin"
 	"github.com/ergoapi/util/exhttp"
+	"github.com/ergoapi/util/exid"
 	filehook "github.com/ergoapi/util/log/hooks/file"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -31,14 +34,30 @@ func main() {
 		Debug: true,
 	})
 	g.Use(exgin.ExLog(), exgin.ExRecovery())
-	g.NoRoute(func(c *gin.Context) {
-		exgin.GinsErrorData(c, 404, nil, errors.New("not found route"))
+	g.GET("/", func(ctx *gin.Context) {
+		nextid := exid.GenSnowflakeID()
+		exgin.SucessResponse(ctx, map[string]any{
+			"ip": exgin.RealIP(ctx),
+			"snowid": map[string]any{
+				"id":    nextid,
+				"parse": exid.ParseID(nextid),
+			},
+		})
 	})
-	g.Any("/", func(ctx *gin.Context) {
-		exgin.GinsData(ctx, nil, nil)
+	g.POST("/admin", func(ctx *gin.Context) {
+		exgin.GinsData(ctx, 200, nil, nil)
+	})
+	g.POST("/panic", func(ctx *gin.Context) {
+		panic("panic")
+	})
+	g.POST("/panic2", func(ctx *gin.Context) {
+		utilerrors.Bomb("参数不合法")
 	})
 	g.NoMethod(func(c *gin.Context) {
-		exgin.GinsErrorData(c, 404, nil, errors.New("not support method"))
+		exgin.GinsData2xx(c, 400, nil, errors.New("not support method"))
+	})
+	g.NoRoute(func(c *gin.Context) {
+		exgin.GinsData(c, 400, nil, errors.New("not found route"))
 	})
 	addr := "0.0.0.0:65001"
 	srv := &http.Server{
