@@ -27,6 +27,7 @@ func init() {
 		Formatter:  &logrus.JSONFormatter{},
 	}))
 	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetReportCaller(true)
 }
 
 func main() {

@@ -178,6 +178,9 @@ func WriteFile(logPath, msg string, truncate bool) error {
 
 // WriteFileWithLine 换行
 func WriteFileWithLine(logPath, msg string) error {
+	if !CheckFileExists(logPath) {
+		os.MkdirAll(filepath.Dir(logPath), 0755)
+	}
 	file, err := os.OpenFile(logPath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0777)
 	if err != nil {
 		return err
