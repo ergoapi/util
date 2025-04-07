@@ -245,7 +245,7 @@ func CompressDir(src, dst string, excludePaths ...string) error {
 	}
 
 	// Walk through all files in the source directory
-	err = filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
+	return filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -292,7 +292,7 @@ func CompressDir(src, dst string, excludePaths ...string) error {
 			return errors.Wrapf(err, "failed to create zip entry for: %s", header.Name)
 		}
 
-		// If it's a directory, we're done (no content to copy)
+		// If it's a directory, we're done
 		if info.IsDir() {
 			return nil
 		}
@@ -311,12 +311,6 @@ func CompressDir(src, dst string, excludePaths ...string) error {
 
 		return nil
 	})
-
-	if err != nil {
-		return errors.Wrap(err, "error walking directory")
-	}
-
-	return nil
 }
 
 // CompressFile is a convenience function to compress a single file
