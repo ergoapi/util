@@ -46,7 +46,10 @@ func ChownR(path string, uid, gid int) error {
 	})
 }
 
-// MakeZip ...
+// MakeZip compresses a directory or file into a zip archive.
+// inputPath: source directory or file to compress
+// outputFile: destination zip file path
+// Returns true if compression was successful, false otherwise
 func MakeZip(inputPath, outputFile string) (bool, error) {
 	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
 		return false, err
@@ -71,7 +74,11 @@ func fileList(fileDirectory string) ([]string, error) {
 		return nil
 	})
 
-	return files, err
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to walk directory")
+	}
+
+	return files, nil
 }
 
 // Unzip will decompress a zip archive, moving all files and folders
@@ -191,8 +198,6 @@ func addFileToZip(zipWriter *zip.Writer, filename string) error {
 	if err != nil {
 		return err
 	}
-	// header.Name = filepath.Base(filename)
-	// header.Name = filepath.FromSlash("test")
 	header.Name = filename
 
 	// Change to deflate to gain better compression

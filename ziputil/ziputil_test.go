@@ -8,6 +8,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// 辅助函数：创建测试文件
+func createTestFile(t assert.TestingT, path, content string) {
+	err := os.MkdirAll(filepath.Dir(path), 0755)
+	assert.NoError(t, err)
+	err = os.WriteFile(path, []byte(content), 0644)
+	assert.NoError(t, err)
+}
+
+// 辅助函数：验证文件内容
+func assertFileContent(t *testing.T, path, expectedContent string) {
+	content, err := os.ReadFile(path)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedContent, string(content))
+}
+
 func TestCompressDir(t *testing.T) {
 	// 创建临时测试目录
 	tempDir, err := os.MkdirTemp("", "ziputil-test-*")
@@ -226,5 +241,111 @@ func TestCompressDeepDir(t *testing.T) {
 		fullDirPath := filepath.Join(extractDir, dirPath)
 		_, err := os.Stat(fullDirPath)
 		assert.NoError(t, err, "Directory should exist: %s", fullDirPath)
+	}
+}
+
+// TestCompressEmptyDir 测试空目录的压缩
+func TestCompressEmptyDir(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "ziputil-test-*")
+	assert.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	emptyDir := filepath.Join(tempDir, "empty")
+	err = os.MkdirAll(emptyDir, 0755)
+	assert.NoError(t, err)
+
+	zipFile := filepath.Join(tempDir, "empty.zip")
+	err = CompressDir(emptyDir, zipFile)
+	assert.NoError(t, err)
+
+	// 验证zip文件存在
+	_, err = os.Stat(zipFile)
+	assert.NoError(t, err)
+
+	// 测试解压缩
+	extractDir := filepath.Join(tempDir, "extracted")
+	err = os.MkdirAll(extractDir, 0755)
+	assert.NoError(t, err)
+
+	files, err := Unzip(zipFile, extractDir)
+	assert.NoError(t, err)
+	assert.Empty(t, files, "Empty directory should not contain any files")
+}
+
+// TestCompressSpecialChars 测试包含特殊字符的文件名
+func TestCompressSpecialChars(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "ziputil-test-*")
+	assert.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	specialFiles := map[string]string{
+		"file with spaces.txt":     "Content with spaces",
+		"file-with-特殊字符.txt":       "Content with special chars",
+		"dir with spaces/file.txt": "Content in spaced dir",
+		"dir-with-特殊字符/file.txt":   "Content in special dir",
+	}
+
+	for path, content := range specialFiles {
+		fullPath := filepath.Join(tempDir, path)
+		createTestFile(t, fullPath, content)
+	}
+
+	zipFile := filepath.Join(tempDir, "special.zip")
+	err = CompressDir(tempDir, zipFile)
+	assert.NoError(t, err)
+
+	extractDir := filepath.Join(tempDir, "extracted")
+	err = os.MkdirAll(extractDir, 0755)
+	assert.NoError(t, err)
+
+	files, err := Unzip(zipFile, extractDir)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, files)
+
+	for path, content := range specialFiles {
+		fullPath := filepath.Join(extractDir, path)
+		assertFileContent(t, fullPath, content)
+	}
+}
+
+// TestCompressErrorCases 测试错误场景
+func TestCompressErrorCases(t *testing.T) {
+	// 测试源目录不存在
+	err := CompressDir("/non/existent/path", "test.zip")
+	assert.Error(t, err)
+
+	// 测试目标路径无权限
+	tempDir, err := os.MkdirTemp("", "ziputil-test-*")
+	assert.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	// 创建一个只读目录
+	readOnlyDir := filepath.Join(tempDir, "readonly")
+	err = os.MkdirAll(readOnlyDir, 0444)
+	assert.NoError(t, err)
+
+	// 尝试在只读目录中创建zip文件
+	err = CompressDir(tempDir, filepath.Join(readOnlyDir, "test.zip"))
+	assert.Error(t, err)
+}
+
+// BenchmarkCompressDir 基准测试：目录压缩性能
+func BenchmarkCompressDir(b *testing.B) {
+	tempDir, err := os.MkdirTemp("", "ziputil-bench-*")
+	assert.NoError(b, err)
+	defer os.RemoveAll(tempDir)
+
+	// 创建测试数据
+	for i := 0; i < 100; i++ {
+		path := filepath.Join(tempDir, "file", "dir", "subdir", "file.txt")
+		createTestFile(b, path, "Benchmark test content")
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		zipFile := filepath.Join(tempDir, "bench.zip")
+		err := CompressDir(tempDir, zipFile)
+		assert.NoError(b, err)
+		os.Remove(zipFile)
 	}
 }
