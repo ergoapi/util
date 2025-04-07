@@ -67,9 +67,98 @@ func MakeZip(inputPath, outputFile string) (bool, error) {
 
 func fileList(fileDirectory string) ([]string, error) {
 	var files []string
-	err := filepath.Walk(fileDirectory, func(path string, info os.FileInfo, err error) error {
+	// 记录已处理的目录，防止循环软链接导致的无限递归
+	processedDirs := make(map[string]bool)
+
+	// 获取绝对路径
+	absPath, err := filepath.Abs(fileDirectory)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get absolute path")
+	}
+	processedDirs[absPath] = true
+
+	err = filepath.Walk(fileDirectory, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 如果是软链接，解析真实路径
+		if info.Mode()&os.ModeSymlink != 0 {
+			realPath, err := filepath.EvalSymlinks(path)
+			if err != nil {
+				return errors.Wrap(err, "failed to evaluate symlink")
+			}
+
+			// 获取真实文件信息
+			realInfo, err := os.Stat(realPath)
+			if err != nil {
+				return errors.Wrap(err, "failed to get real file info")
+			}
+
+			// 如果真实路径是目录
+			if realInfo.IsDir() {
+				// 检查是否已处理过该目录，防止循环引用
+				absRealPath, err := filepath.Abs(realPath)
+				if err != nil {
+					return errors.Wrap(err, "failed to get absolute path")
+				}
+
+				if processedDirs[absRealPath] {
+					return nil
+				}
+
+				// 标记为已处理
+				processedDirs[absRealPath] = true
+
+				// 遍历真实目录下的所有文件
+				return filepath.Walk(realPath, func(subPath string, subInfo os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+
+					// 跳过目录本身
+					if subPath == realPath {
+						return nil
+					}
+
+					// 处理子目录和文件
+					if subInfo.IsDir() {
+						// 检查是否已处理过该目录
+						absSubPath, err := filepath.Abs(subPath)
+						if err != nil {
+							return errors.Wrap(err, "failed to get absolute path")
+						}
+
+						if processedDirs[absSubPath] {
+							return filepath.SkipDir
+						}
+
+						// 标记为已处理
+						processedDirs[absSubPath] = true
+						return nil
+					}
+
+					// 添加文件
+					files = append(files, subPath)
+					return nil
+				})
+			}
+
+			// 如果是文件，将原路径添加到文件列表中
+			files = append(files, path)
+			return nil
+		}
+
+		// 不是软链接但不是目录，添加到文件列表
 		if !info.IsDir() {
-			files = append(files, filepath.Join(path))
+			files = append(files, path)
+		} else {
+			// 标记目录为已处理
+			absPath, err := filepath.Abs(path)
+			if err != nil {
+				return errors.Wrap(err, "failed to get absolute path")
+			}
+			processedDirs[absPath] = true
 		}
 		return nil
 	})
@@ -119,7 +208,10 @@ func Unzip(src string, dest string) ([]string, error) {
 			return filenames, errors.Wrap(err, "unable to chown directory")
 		}
 
-		if f.FileInfo().IsDir() {
+		// 获取文件信息
+		fileInfo := f.FileInfo()
+
+		if fileInfo.IsDir() {
 			// Make Folder
 			if err := os.MkdirAll(fpath, 0755); err != nil {
 				return filenames, errors.Wrap(err, "unable to create directory")
@@ -182,18 +274,58 @@ func ZipFiles(filename string, files []string) error {
 }
 
 func addFileToZip(zipWriter *zip.Writer, filename string) error {
-	fileToZip, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer fileToZip.Close()
-
-	// Get the file information
-	info, err := fileToZip.Stat()
+	// 获取文件信息
+	info, err := os.Lstat(filename)
 	if err != nil {
 		return err
 	}
 
+	// 检查是否为软链接
+	if info.Mode()&os.ModeSymlink != 0 {
+		// 解析软链接指向的真实路径
+		realPath, err := filepath.EvalSymlinks(filename)
+		if err != nil {
+			return errors.Wrapf(err, "failed to evaluate symlink: %s", filename)
+		}
+
+		// 获取真实文件信息
+		realInfo, err := os.Stat(realPath)
+		if err != nil {
+			return errors.Wrapf(err, "failed to get real file info: %s", realPath)
+		}
+
+		// 如果指向的是目录，跳过
+		if realInfo.IsDir() {
+			return nil
+		}
+
+		// 创建文件头
+		header, err := zip.FileInfoHeader(realInfo)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create zip header for: %s", filename)
+		}
+
+		// 使用原始文件名
+		header.Name = filename
+		header.Method = zip.Deflate
+
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create zip entry for: %s", header.Name)
+		}
+
+		// 打开真实文件并复制内容
+		file, err := os.Open(realPath)
+		if err != nil {
+			return errors.Wrapf(err, "failed to open real file: %s", realPath)
+		}
+		defer file.Close()
+
+		_, err = io.Copy(writer, file)
+		return errors.Wrapf(err, "failed to write file to zip: %s", realPath)
+	}
+
+	// 处理普通文件
 	header, err := zip.FileInfoHeader(info)
 	if err != nil {
 		return err
@@ -207,6 +339,14 @@ func addFileToZip(zipWriter *zip.Writer, filename string) error {
 	if err != nil {
 		return err
 	}
+
+	// 打开文件并复制内容
+	fileToZip, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer fileToZip.Close()
+
 	_, err = io.Copy(writer, fileToZip)
 	return err
 }
@@ -249,6 +389,10 @@ func CompressDir(src, dst string, excludePaths ...string) error {
 		excludeMap[excludePath] = true
 	}
 
+	// 记录已处理的目录路径，防止循环软链接导致无限递归
+	processedDirs := make(map[string]bool)
+	processedDirs[srcPath] = true
+
 	// Walk through all files in the source directory
 	return filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -274,6 +418,137 @@ func CompressDir(src, dst string, excludePaths ...string) error {
 			return nil
 		}
 
+		// 检查是否为软链接
+		if info.Mode()&os.ModeSymlink != 0 {
+			// 解析软链接指向的目标
+			realPath, err := filepath.EvalSymlinks(path)
+			if err != nil {
+				return errors.Wrapf(err, "failed to evaluate symlink: %s", path)
+			}
+
+			// 获取链接目标的文件信息
+			realInfo, err := os.Stat(realPath)
+			if err != nil {
+				return errors.Wrapf(err, "failed to get real file info: %s", realPath)
+			}
+
+			// 如果链接指向的是目录，处理目录
+			if realInfo.IsDir() {
+				// 检查是否已经处理过该目录，防止循环引用
+				if processedDirs[realPath] {
+					return nil
+				}
+
+				// 标记目录为已处理
+				processedDirs[realPath] = true
+
+				// 我们需要遍历真实目录的内容
+				return filepath.Walk(realPath, func(subPath string, subInfo os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+
+					// 跳过目录本身
+					if subPath == realPath {
+						return nil
+					}
+
+					// 获取相对路径，这个路径会是链接目标目录中的路径
+					subRelPath, err := filepath.Rel(realPath, subPath)
+					if err != nil {
+						return errors.Wrapf(err, "failed to get relative path for: %s", subPath)
+					}
+
+					// 创建最终的相对路径（将软链接的路径与链接目标中的相对路径结合）
+					finalRelPath := filepath.Join(relPath, subRelPath)
+
+					// 如果是目录，添加目录条目
+					if subInfo.IsDir() {
+						// 如果目录已处理过，跳过
+						if processedDirs[subPath] {
+							return filepath.SkipDir
+						}
+
+						// 标记目录为已处理
+						processedDirs[subPath] = true
+
+						header, err := zip.FileInfoHeader(subInfo)
+						if err != nil {
+							return errors.Wrapf(err, "failed to create zip header for: %s", subPath)
+						}
+
+						header.Name = filepath.ToSlash(finalRelPath) + "/"
+						header.Method = zip.Store
+
+						_, err = zipWriter.CreateHeader(header)
+						if err != nil {
+							return errors.Wrapf(err, "failed to create zip entry for: %s", header.Name)
+						}
+
+						return nil
+					}
+
+					// 处理文件
+					header, err := zip.FileInfoHeader(subInfo)
+					if err != nil {
+						return errors.Wrapf(err, "failed to create zip header for: %s", subPath)
+					}
+
+					header.Name = filepath.ToSlash(finalRelPath)
+					header.Method = zip.Deflate
+
+					writer, err := zipWriter.CreateHeader(header)
+					if err != nil {
+						return errors.Wrapf(err, "failed to create zip entry for: %s", header.Name)
+					}
+
+					// 打开文件并复制内容
+					file, err := os.Open(subPath)
+					if err != nil {
+						return errors.Wrapf(err, "failed to open file: %s", subPath)
+					}
+					defer file.Close()
+
+					_, err = io.Copy(writer, file)
+					if err != nil {
+						return errors.Wrapf(err, "failed to write file to zip: %s", subPath)
+					}
+
+					return nil
+				})
+			}
+
+			// 如果链接指向的是文件，创建文件头
+			header, err := zip.FileInfoHeader(realInfo)
+			if err != nil {
+				return errors.Wrapf(err, "failed to create zip header for: %s", path)
+			}
+
+			// 使用软链接的相对路径作为文件名
+			header.Name = filepath.ToSlash(relPath)
+			header.Method = zip.Deflate
+
+			// 创建文件条目
+			writer, err := zipWriter.CreateHeader(header)
+			if err != nil {
+				return errors.Wrapf(err, "failed to create zip entry for: %s", header.Name)
+			}
+
+			// 打开真实文件并复制内容
+			file, err := os.Open(realPath)
+			if err != nil {
+				return errors.Wrapf(err, "failed to open real file: %s", realPath)
+			}
+			defer file.Close()
+
+			_, err = io.Copy(writer, file)
+			if err != nil {
+				return errors.Wrapf(err, "failed to write file to zip: %s", realPath)
+			}
+
+			return nil
+		}
+
 		// Create zip header
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
@@ -287,6 +562,9 @@ func CompressDir(src, dst string, excludePaths ...string) error {
 		if info.IsDir() {
 			header.Name += "/" // Ensure trailing slash for directories
 			header.Method = zip.Store
+
+			// 标记目录为已处理
+			processedDirs[path] = true
 		} else {
 			header.Method = zip.Deflate
 		}
@@ -320,12 +598,31 @@ func CompressDir(src, dst string, excludePaths ...string) error {
 
 // CompressFile is a convenience function to compress a single file
 func CompressFile(src, dst string) error {
-	// Check if source file exists
-	srcInfo, err := os.Stat(src)
+	// 检查文件状态
+	info, err := os.Lstat(src)
 	if err != nil {
 		return errors.Wrapf(err, "failed to access source file: %s", src)
 	}
-	if srcInfo.IsDir() {
+
+	realPath := src
+	realInfo := info
+
+	// 如果是软链接，解析真实路径
+	if info.Mode()&os.ModeSymlink != 0 {
+		realPath, err = filepath.EvalSymlinks(src)
+		if err != nil {
+			return errors.Wrapf(err, "failed to evaluate symlink: %s", src)
+		}
+
+		// 获取真实文件信息
+		realInfo, err = os.Stat(realPath)
+		if err != nil {
+			return errors.Wrapf(err, "failed to get real file info: %s", realPath)
+		}
+	}
+
+	// 检查实际文件是否为目录
+	if realInfo.IsDir() {
 		return errors.Newf("%s is a directory, not a file", src)
 	}
 
@@ -341,7 +638,7 @@ func CompressFile(src, dst string) error {
 	defer zipWriter.Close()
 
 	// Create zip header
-	header, err := zip.FileInfoHeader(srcInfo)
+	header, err := zip.FileInfoHeader(realInfo)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create zip header for: %s", src)
 	}
@@ -357,16 +654,16 @@ func CompressFile(src, dst string) error {
 	}
 
 	// Open source file
-	file, err := os.Open(src)
+	file, err := os.Open(realPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open file: %s", src)
+		return errors.Wrapf(err, "failed to open file: %s", realPath)
 	}
 	defer file.Close()
 
 	// Copy file content to zip
 	_, err = io.Copy(writer, file)
 	if err != nil {
-		return errors.Wrapf(err, "failed to write file to zip: %s", src)
+		return errors.Wrapf(err, "failed to write file to zip: %s", realPath)
 	}
 
 	return nil

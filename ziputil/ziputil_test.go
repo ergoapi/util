@@ -349,3 +349,246 @@ func BenchmarkCompressDir(b *testing.B) {
 		os.Remove(zipFile)
 	}
 }
+
+// TestCompressWithSymlinks 测试压缩包含软链接的目录
+func TestCompressWithSymlinks(t *testing.T) {
+	// 创建临时测试目录
+	tempDir, err := os.MkdirTemp("", "ziputil-test-symlink-*")
+	assert.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	// 创建测试文件结构
+	testFiles := map[string]string{
+		"file1.txt":           "Hello, World!",
+		"dir1/file2.txt":      "Hello, Dir1!",
+		"dir1/dir2/file3.txt": "Hello, Dir2!",
+	}
+
+	// 创建文件和目录
+	for path, content := range testFiles {
+		fullPath := filepath.Join(tempDir, path)
+		err := os.MkdirAll(filepath.Dir(fullPath), 0755)
+		assert.NoError(t, err)
+
+		err = os.WriteFile(fullPath, []byte(content), 0644)
+		assert.NoError(t, err)
+	}
+
+	// 创建指向文件的软链接
+	fileSymlinkPath := filepath.Join(tempDir, "symlink-to-file1.txt")
+	err = os.Symlink(filepath.Join(tempDir, "file1.txt"), fileSymlinkPath)
+	assert.NoError(t, err)
+
+	// 创建指向目录的软链接
+	dirSymlinkPath := filepath.Join(tempDir, "symlink-to-dir1")
+	err = os.Symlink(filepath.Join(tempDir, "dir1"), dirSymlinkPath)
+	assert.NoError(t, err)
+
+	// 创建临时zip文件
+	zipFile := filepath.Join(tempDir, "symlink-test.zip")
+
+	// 测试压缩目录
+	err = CompressDir(tempDir, zipFile)
+	assert.NoError(t, err)
+
+	// 验证zip文件存在
+	_, err = os.Stat(zipFile)
+	assert.NoError(t, err)
+
+	// 测试解压缩
+	extractDir := filepath.Join(tempDir, "extracted")
+	err = os.MkdirAll(extractDir, 0755)
+	assert.NoError(t, err)
+
+	files, err := Unzip(zipFile, extractDir)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, files)
+
+	// 验证指向文件的软链接被正确处理
+	// 在解压目录中应该有内容为 "Hello, World!" 的文件
+	extractedSymlinkFile := filepath.Join(extractDir, "symlink-to-file1.txt")
+	content, err := os.ReadFile(extractedSymlinkFile)
+	assert.NoError(t, err)
+	assert.Equal(t, "Hello, World!", string(content))
+
+	// 验证指向目录的软链接内部的文件也被正确解压
+	extractedSymlinkDirFile := filepath.Join(extractDir, "symlink-to-dir1", "file2.txt")
+	content, err = os.ReadFile(extractedSymlinkDirFile)
+	assert.NoError(t, err)
+	assert.Equal(t, "Hello, Dir1!", string(content))
+
+	// 验证所有原始文件也都正确解压
+	for path, expectedContent := range testFiles {
+		fullPath := filepath.Join(extractDir, path)
+		content, err := os.ReadFile(fullPath)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedContent, string(content))
+	}
+}
+
+// TestCompressFileWithSymlink 测试压缩软链接文件
+func TestCompressFileWithSymlink(t *testing.T) {
+	// 创建临时测试目录
+	tempDir, err := os.MkdirTemp("", "ziputil-test-symlink-file-*")
+	assert.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	// 创建目标文件
+	targetFile := filepath.Join(tempDir, "target.txt")
+	targetContent := "This is the target file content"
+	err = os.WriteFile(targetFile, []byte(targetContent), 0644)
+	assert.NoError(t, err)
+
+	// 创建指向文件的软链接
+	symlinkFile := filepath.Join(tempDir, "symlink.txt")
+	err = os.Symlink(targetFile, symlinkFile)
+	assert.NoError(t, err)
+
+	// 创建临时zip文件
+	zipFile := filepath.Join(tempDir, "symlink-file.zip")
+
+	// 测试压缩软链接文件
+	err = CompressFile(symlinkFile, zipFile)
+	assert.NoError(t, err)
+
+	// 验证zip文件存在
+	_, err = os.Stat(zipFile)
+	assert.NoError(t, err)
+
+	// 测试解压缩
+	extractDir := filepath.Join(tempDir, "extracted")
+	err = os.MkdirAll(extractDir, 0755)
+	assert.NoError(t, err)
+
+	files, err := Unzip(zipFile, extractDir)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, files)
+
+	// 验证解压后的文件内容是原始目标文件的内容
+	extractedFile := filepath.Join(extractDir, "symlink.txt")
+	content, err := os.ReadFile(extractedFile)
+	assert.NoError(t, err)
+	assert.Equal(t, targetContent, string(content))
+}
+
+// TestCompressWithRecursiveSymlinks 测试包含循环软链接的情况
+func TestCompressWithRecursiveSymlinks(t *testing.T) {
+	// 创建临时测试目录
+	tempDir, err := os.MkdirTemp("", "ziputil-test-recursive-symlink-*")
+	assert.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	// 创建测试目录结构
+	dir1 := filepath.Join(tempDir, "dir1")
+	err = os.MkdirAll(dir1, 0755)
+	assert.NoError(t, err)
+
+	// 创建文件
+	file1 := filepath.Join(dir1, "file1.txt")
+	err = os.WriteFile(file1, []byte("File in dir1"), 0644)
+	assert.NoError(t, err)
+
+	// 创建从 dir1 指向 tempDir 的软链接，这会形成循环
+	recursiveSymlink := filepath.Join(dir1, "loop")
+	err = os.Symlink(tempDir, recursiveSymlink)
+	assert.NoError(t, err)
+
+	// 创建临时zip文件
+	zipFile := filepath.Join(tempDir, "recursive-symlink.zip")
+
+	// 测试压缩目录，应该可以处理循环软链接而不陷入无限循环
+	err = CompressDir(tempDir, zipFile)
+	assert.NoError(t, err)
+
+	// 验证zip文件存在
+	_, err = os.Stat(zipFile)
+	assert.NoError(t, err)
+
+	// 测试解压缩
+	extractDir := filepath.Join(tempDir, "extracted")
+	err = os.MkdirAll(extractDir, 0755)
+	assert.NoError(t, err)
+
+	files, err := Unzip(zipFile, extractDir)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, files)
+
+	// 验证基本文件被正确解压
+	extractedFile := filepath.Join(extractDir, "dir1", "file1.txt")
+	content, err := os.ReadFile(extractedFile)
+	assert.NoError(t, err)
+	assert.Equal(t, "File in dir1", string(content))
+}
+
+// TestCompressWithExternalSymlinks 测试压缩包含指向外部文件的软链接
+func TestCompressWithExternalSymlinks(t *testing.T) {
+	// 创建临时测试目录
+	tempDir, err := os.MkdirTemp("", "ziputil-test-ext-symlink-*")
+	assert.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	// 创建测试目录结构
+	srcDir := filepath.Join(tempDir, "src")
+	externalDir := filepath.Join(tempDir, "external")
+
+	err = os.MkdirAll(srcDir, 0755)
+	assert.NoError(t, err)
+
+	err = os.MkdirAll(externalDir, 0755)
+	assert.NoError(t, err)
+
+	// 在外部目录创建文件
+	externalFile := filepath.Join(externalDir, "external.txt")
+	externalContent := "This is an external file"
+	err = os.WriteFile(externalFile, []byte(externalContent), 0644)
+	assert.NoError(t, err)
+
+	// 在源目录中创建普通文件
+	normalFile := filepath.Join(srcDir, "normal.txt")
+	normalContent := "This is a normal file"
+	err = os.WriteFile(normalFile, []byte(normalContent), 0644)
+	assert.NoError(t, err)
+
+	// 在源目录中创建指向外部文件的软链接
+	symlinkFile := filepath.Join(srcDir, "symlink-to-external.txt")
+	err = os.Symlink(externalFile, symlinkFile)
+	assert.NoError(t, err)
+
+	// 创建临时zip文件
+	zipFile := filepath.Join(tempDir, "external-symlink.zip")
+
+	// 测试压缩目录
+	err = CompressDir(srcDir, zipFile)
+	assert.NoError(t, err)
+
+	// 验证zip文件存在
+	_, err = os.Stat(zipFile)
+	assert.NoError(t, err)
+
+	// 测试解压缩
+	extractDir := filepath.Join(tempDir, "extracted")
+	err = os.MkdirAll(extractDir, 0755)
+	assert.NoError(t, err)
+
+	files, err := Unzip(zipFile, extractDir)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, files)
+
+	// 验证普通文件正确解压
+	extractedNormalFile := filepath.Join(extractDir, "normal.txt")
+	content, err := os.ReadFile(extractedNormalFile)
+	assert.NoError(t, err)
+	assert.Equal(t, normalContent, string(content))
+
+	// 验证指向外部文件的软链接被正确处理
+	// 在解压目录中应该有包含外部文件内容的文件
+	extractedSymlinkFile := filepath.Join(extractDir, "symlink-to-external.txt")
+	content, err = os.ReadFile(extractedSymlinkFile)
+	assert.NoError(t, err)
+	assert.Equal(t, externalContent, string(content))
+
+	// 验证是作为普通文件存储的，而不是作为软链接
+	fileInfo, err := os.Lstat(extractedSymlinkFile)
+	assert.NoError(t, err)
+	assert.False(t, fileInfo.Mode()&os.ModeSymlink != 0, "应该是普通文件，而不是软链接")
+}
