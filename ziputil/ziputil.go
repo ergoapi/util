@@ -205,3 +205,170 @@ func addFileToZip(zipWriter *zip.Writer, filename string) error {
 	_, err = io.Copy(writer, fileToZip)
 	return err
 }
+
+// CompressDir compresses a directory into a zip file
+// src: source directory to compress
+// dst: destination zip file path
+// excludePaths: paths to exclude from compression (relative to src)
+func CompressDir(src, dst string, excludePaths ...string) error {
+	// Check if source directory exists
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return errors.Wrapf(err, "failed to access source directory: %s", src)
+	}
+	if !srcInfo.IsDir() {
+		return errors.Newf("%s is not a directory", src)
+	}
+
+	// Create destination file
+	zipFile, err := os.Create(dst)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create zip file: %s", dst)
+	}
+	defer zipFile.Close()
+
+	// Create a new zip archive.
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Clean the source path and get the absolute path
+	srcPath, err := filepath.Abs(filepath.Clean(src))
+	if err != nil {
+		return errors.Wrapf(err, "failed to get absolute path for: %s", src)
+	}
+
+	// Create a map of excluded paths for faster lookup
+	excludeMap := make(map[string]bool)
+	for _, exclude := range excludePaths {
+		excludePath := filepath.Join(srcPath, exclude)
+		excludeMap[excludePath] = true
+	}
+
+	// Walk through all files in the source directory
+	err = filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip if path is in exclude list
+		if excludeMap[path] {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Get the relative path for the file within the zip
+		relPath, err := filepath.Rel(srcPath, path)
+		if err != nil {
+			return errors.Wrapf(err, "failed to get relative path for: %s", path)
+		}
+
+		// Skip the root directory itself
+		if relPath == "." {
+			return nil
+		}
+
+		// Create zip header
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create zip header for: %s", path)
+		}
+
+		// Use relative path and fix the separator to make it consistent
+		header.Name = filepath.ToSlash(relPath)
+
+		// Set appropriate flags for directories
+		if info.IsDir() {
+			header.Name += "/" // Ensure trailing slash for directories
+			header.Method = zip.Store
+		} else {
+			header.Method = zip.Deflate
+		}
+
+		// Create writer for the file entry
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create zip entry for: %s", header.Name)
+		}
+
+		// If it's a directory, we're done (no content to copy)
+		if info.IsDir() {
+			return nil
+		}
+
+		// If it's a file, open it and copy its content
+		file, err := os.Open(path)
+		if err != nil {
+			return errors.Wrapf(err, "failed to open file: %s", path)
+		}
+		defer file.Close()
+
+		_, err = io.Copy(writer, file)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write file to zip: %s", path)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return errors.Wrap(err, "error walking directory")
+	}
+
+	return nil
+}
+
+// CompressFile is a convenience function to compress a single file
+func CompressFile(src, dst string) error {
+	// Check if source file exists
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return errors.Wrapf(err, "failed to access source file: %s", src)
+	}
+	if srcInfo.IsDir() {
+		return errors.Newf("%s is a directory, not a file", src)
+	}
+
+	// Create destination file
+	zipFile, err := os.Create(dst)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create zip file: %s", dst)
+	}
+	defer zipFile.Close()
+
+	// Create a new zip archive
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Create zip header
+	header, err := zip.FileInfoHeader(srcInfo)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create zip header for: %s", src)
+	}
+
+	// Use the base name of the file for the header
+	header.Name = filepath.Base(src)
+	header.Method = zip.Deflate
+
+	// Create writer for the file entry
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create zip entry for: %s", header.Name)
+	}
+
+	// Open source file
+	file, err := os.Open(src)
+	if err != nil {
+		return errors.Wrapf(err, "failed to open file: %s", src)
+	}
+	defer file.Close()
+
+	// Copy file content to zip
+	_, err = io.Copy(writer, file)
+	if err != nil {
+		return errors.Wrapf(err, "failed to write file to zip: %s", src)
+	}
+
+	return nil
+}
