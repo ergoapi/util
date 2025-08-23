@@ -10,13 +10,13 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cockroachdb/errors v1.11.3
 	github.com/docker/go-connections v0.5.0
+	github.com/dromara/carbon/v2 v2.6.11
 	github.com/gin-contrib/pprof v1.5.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/golang-module/carbon/v2 v2.4.1
 	github.com/gomodule/redigo v1.9.2
 	github.com/google/go-github/v65 v65.0.0
 	github.com/google/gops v0.3.28

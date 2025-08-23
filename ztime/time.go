@@ -21,7 +21,7 @@ import (
 	"github.com/ergoapi/util/common"
 	"github.com/ergoapi/util/exstr"
 
-	"github.com/golang-module/carbon/v2"
+	"github.com/dromara/carbon/v2"
 )
 
 // NowUnixString 当前时间时间戳
