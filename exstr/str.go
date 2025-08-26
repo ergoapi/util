@@ -19,7 +19,7 @@ import (
 	"github.com/ergoapi/util/common"
 )
 
-// Blacklist
+// Blacklist checks if string is blacklisted
 func Blacklist(s string) bool {
 	if strings.Contains(s, "<") {
 		return true
@@ -64,7 +64,7 @@ func Blacklist(s string) bool {
 	return false
 }
 
-// KubeBlacklist
+// KubeBlacklist checks if string is kubernetes blacklisted
 func KubeBlacklist(s string, extlist ...string) bool {
 	if strings.HasPrefix(s, "kube-") {
 		return true

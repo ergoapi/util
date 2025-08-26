@@ -22,11 +22,11 @@ import (
 )
 
 // Struct2Map ...
-func Struct2Map(obj interface{}) map[string]interface{} {
+func Struct2Map(obj any) map[string]any {
 	t := reflect.TypeOf(obj)
 	v := reflect.ValueOf(obj)
 
-	var data = make(map[string]interface{})
+	var data = make(map[string]any)
 	for i := 0; i < t.NumField(); i++ {
 		data[t.Field(i).Name] = v.Field(i).Interface()
 	}
@@ -34,7 +34,7 @@ func Struct2Map(obj interface{}) map[string]interface{} {
 }
 
 // Struct2Json2Map ...
-func Struct2Json2Map(obj interface{}) (result map[string]interface{}, err error) {
+func Struct2Json2Map(obj any) (result map[string]any, err error) {
 	jsonBytes, err := json.Marshal(obj)
 	if err != nil {
 		return
@@ -98,7 +98,7 @@ func MergeLabels(old map[string]string, new map[string]string) map[string]string
 	return old
 }
 
-// Clones the given map and returns a new map with the given key and value added.
+// CloneAndAddLabel clones the given map and returns a new map with the given key and value added.
 // Returns the given map, if labelKey is empty.
 func CloneAndAddLabel(labels map[string]string, labelKey, labelValue string) map[string]string {
 	if labelKey == "" {
@@ -187,15 +187,15 @@ func CopyMap(m map[string]string) map[string]string {
 	return copy
 }
 
-func MergeMaps(a, b map[string]interface{}) map[string]interface{} {
-	out := make(map[string]interface{}, len(a))
+func MergeMaps(a, b map[string]any) map[string]any {
+	out := make(map[string]any, len(a))
 	for k, v := range a {
 		out[k] = v
 	}
 	for k, v := range b {
-		if v, ok := v.(map[string]interface{}); ok {
+		if v, ok := v.(map[string]any); ok {
 			if bv, ok := out[k]; ok {
-				if bv, ok := bv.(map[string]interface{}); ok {
+				if bv, ok := bv.(map[string]any); ok {
 					out[k] = MergeMaps(bv, v)
 					continue
 				}

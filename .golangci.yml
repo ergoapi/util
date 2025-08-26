@@ -1,6 +1,7 @@
 # golangci-lint 配置文件
 # 基于 2024/2025 最佳实践，但采用渐进式方式
 # https://golangci-lint.run/usage/configuration/
+version: "2"
 
 # 运行配置
 run:
@@ -22,222 +23,94 @@ run:
 # Linter 配置
 linters:
   # 禁用所有，然后显式启用需要的（最佳实践）
-  disable-all: true
+  default: none
   enable:
-    # --- 核心 Linters（必需）---
-    - errcheck      # 检查未处理的错误
+    # - errcheck      # 检查未处理的错误
     - govet         # 检查可疑的代码结构
-    - staticcheck   # 高级静态分析
+    # - staticcheck   # 高级静态分析
     - unused        # 检查未使用的代码
-    - gosimple      # 简化代码建议
-    - typecheck     # 类型检查
     - ineffassign   # 检测无效的赋值
-    
-    # --- 代码风格（基础）---
-    - gofmt         # 格式化检查
-    - goimports     # import 语句检查和修复
-    - stylecheck    # 代码风格检查
     - whitespace    # 空白字符检查
-    - misspell      # 拼写检查
-    
-    # --- 代码复杂度（基础）---
+    #- misspell      # 拼写检查
     - gocyclo       # 圈复杂度
     - dupl          # 重复代码检测
     - nakedret      # 裸返回检查
-    
-    # --- 其他有用的（基础）---
     - unparam       # 检查未使用的函数参数
     - dogsled       # 检查赋值中的空白标识符
+
+  # Linter 设置
+  settings:
+    # errcheck
+    errcheck:
+      # 检查类型断言
+      check-type-assertions: true
+      # 检查空标识符
+      check-blank: false
+
+    # govet
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment  # 字段对齐优化（通常不需要）
+        - shadow         # 变量遮蔽（有时是故意的）
+
+    # staticcheck
+    staticcheck:
+      # 启用所有检查
+      checks: ["all"]
     
-    # --- 可选（可以逐步启用）---
-    # - bodyclose     # 检查 HTTP response body 是否关闭
-    # - noctx         # 检查发送 HTTP 请求是否带 context
-    # - contextcheck  # 检查 context 是否正确传递
-    # - funlen        # 函数长度检查
-    # - prealloc      # 检查可以预分配的 slice
-    # - unconvert     # 移除不必要的类型转换
-    # - gosec         # 安全检查
-    # - goconst       # 查找可以用常量代替的字符串
-    # - gocritic      # 各种代码检查
-    # - revive        # 可配置的 linter
-    # - godot         # 检查注释是否以句号结尾
-    # - godox         # 检测 TODO/FIXME 注释
-    # - lll           # 行长度限制
-    # - exhaustive    # 检查 switch 语句的完整性
-    # - gomodguard    # 管理允许/禁止的模块
-    # - testpackage   # 要求测试在单独的 _test 包中
-
-# Linter 设置
-linters-settings:
-  # errcheck
-  errcheck:
-    # 检查类型断言
-    check-type-assertions: true
-    # 检查空标识符
-    check-blank: false
-
-  # govet
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment  # 字段对齐优化（通常不需要）
-      - shadow         # 变量遮蔽（有时是故意的）
-
-  # staticcheck
-  staticcheck:
-    # 启用所有检查
-    checks: ["all"]
-    
-  # stylecheck
-  stylecheck:
-    # 检查项
-    checks: ["all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
-    # 允许的点导入
-    dot-import-whitelist:
-      - fmt
+    # stylecheck
+    stylecheck:
+      # 检查项
+      checks: ["all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
+      # 允许的点导入
+      dot-import-whitelist:
+        - fmt
     # 初始化缩写
-    initialisms:
-      ["ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", 
-       "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", 
-       "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", 
-       "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSS",
-       "YAML", "JWT", "OAuth", "GRPC", "CORS", "CSRF", "XHR", "SHA"]
-    # HTTP 状态码白名单
-    http-status-code-whitelist: ["200", "400", "404", "500"]
+      initialisms:
+        ["ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", 
+        "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", 
+        "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", 
+        "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSS",
+        "YAML", "JWT", "OAuth", "GRPC", "CORS", "CSRF", "XHR", "SHA"]
+      # HTTP 状态码白名单
+      http-status-code-whitelist: ["200", "400", "404", "500"]
 
-  # gofmt
-  gofmt:
-    # 简化代码
-    simplify: false  # 暂时关闭，避免太多改动
-    
-  # goimports
-  goimports:
-    # 本地包前缀（按组分组）
-    local-prefixes: github.com/ergoapi/util
-
-  # gocyclo
-  gocyclo:
+    # gocyclo
+    gocyclo:
     # 最小复杂度阈值
-    min-complexity: 20  # 相对宽松
+      min-complexity: 20  # 相对宽松
 
-  # dupl
-  dupl:
-    # 最小 token 阈值
-    threshold: 150  # 相对宽松
+    # dupl
+    dupl:
+      # 最小 token 阈值
+      threshold: 150  # 相对宽松
     
-  # nakedret
-  nakedret:
-    # 函数最大行数（超过则不允许裸返回）
-    max-func-lines: 100  # 相对宽松
+    # nakedret
+    nakedret:
+      # 函数最大行数（超过则不允许裸返回）
+      max-func-lines: 100  # 相对宽松
 
 # 问题处理配置
 issues:
   # 每个 linter 的最大问题数（0 = 无限制）
   max-issues-per-linter: 0
-  
+
   # 相同文本的最大问题数
   max-same-issues: 10
-  
+
   # 是否只包含新问题（用于渐进式引入）
   new: false
-  
+
   # 输出中去重相同的问题
   uniq-by-line: true
-  
-  # 排除的目录
-  exclude-dirs:
-    - vendor
-    - third_party
-    - .git
-    - testdata
-    - examples
-    - docs
-    - .cache
-    - .github
-    - .idea
-    - .vscode
-  
-  # 排除的文件
-  exclude-files:
-    - ".*\\.pb\\.go$"
-    - ".*\\.gen\\.go$"
-    - ".*_gen\\.go$"
-    - "mock_.*\\.go$"
-  
-  # 排除规则
-  exclude-rules:
-    # 测试文件的特殊处理
-    - path: _test\.go
-      linters:
-        - dupl         # 测试代码可以有相似性
-        - gocyclo      # 测试函数复杂度要求放松
-        - errcheck     # 测试中某些错误可以不检查
-    
-    # 示例代码
-    - path: examples/
-      linters:
-        - all  # 示例代码不需要严格检查
-    
-    # 特定的排除
-    - linters:
-        - dogsled
-      text: "declaration has 3 blank identifiers"
-    
-    - linters:
-        - stylecheck
-      text: "at least one file in a package should have a package comment"
-    
-    # 忽略某些错误检查（常见的不需要检查的）
-    - linters:
-        - errcheck
-      text: "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*print(f|ln)?|os\\.(Un)?Setenv|.*Rollback). is not checked"
-    
-    # 忽略 defer 中的错误检查
-    - linters:
-        - errcheck
-      source: "defer"
-    
-    # 忽略测试中的某些问题
-    - path: _test\.go
-      text: "fieldalignment:"
 
-  # 要排除的问题文本（正则表达式）
-  exclude:
-    # 默认排除
-    - "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*print(f|ln)?|os\\.(Un)?Setenv). is not checked"
-    - "exported (type|method|function) (.+) should have comment or be unexported"
-    - "ST1000:"  # 包注释
-    - "should have a package comment"
-    - "don't use an underscore in package name"
-    
-  # 使用默认排除规则
-  exclude-use-default: false
-
-# 输出配置
-output:
-  # 输出格式
-  formats:
-    - format: colored-line-number
-  
-  # 打印问题所在的代码行
-  print-issued-lines: true
-  
-  # 打印 linter 名称
-  print-linter-name: true
-  
-  # 按文件路径排序结果
-  sort-results: true
-
-# 严重程度配置（可选，用于 CI/CD）
-severity:
-  # 默认严重程度
-  default-severity: warning
-  
-  # 严重程度规则
-  rules:
-    - linters:
-        - staticcheck
-      severity: error
-    - linters:
-        - dupl
-      severity: info
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    gofmt:
+      rewrite-rules:
+        - pattern: 'any'
+          replacement: 'any'

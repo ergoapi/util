@@ -1,3 +1,10 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
+// Package exjwt provides utilities.
 package exjwt
 
 import (
@@ -32,7 +39,7 @@ func Auth(username string, uuid string) (t string, err error) {
 }
 
 func Parse(ts string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(ts, func(token *jwt.Token) (i interface{}, err error) {
+	token, err := jwt.Parse(ts, func(token *jwt.Token) (i any, err error) {
 		return secret, nil
 	})
 	if err != nil || !token.Valid {

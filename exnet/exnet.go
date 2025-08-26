@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package exnet
 
 import (
@@ -211,7 +217,7 @@ func OutboundIPv2() (string, error) {
 
 	ip := string(txt)
 
-	if CheckIP(ip) == false {
+	if !CheckIP(ip) {
 		return ip, errors.New(ip + ": not ipv4")
 	}
 
@@ -278,7 +284,7 @@ func GetHostByIP(ipAddress string) (string, error) {
 	return "", err
 }
 
-var equalHostIPs = map[string]interface{}{
+var equalHostIPs = map[string]any{
 	"":          nil,
 	"127.0.0.1": nil,
 	"0.0.0.0":   nil,

@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package version
 
 import (
@@ -56,9 +62,7 @@ func shortDate(dateStr string) string {
 		}
 	}
 	dateStr = buf.String()
-	if strings.HasPrefix(dateStr, "20") {
-		dateStr = dateStr[2:]
-	}
+	dateStr = strings.TrimPrefix(dateStr, "20")
 	if len(dateStr) > 8 {
 		dateStr = dateStr[:8]
 	}

@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package glog
 
 import (
@@ -44,7 +50,7 @@ func (mgl *GLogger) logPath(key string) string {
 }
 
 // logWithLevel 是一个辅助函数，用于处理通用的日志格式化和输出逻辑
-func (mgl *GLogger) logWithLevel(ctx context.Context, level logrus.Level, message string, values ...interface{}) {
+func (mgl *GLogger) logWithLevel(ctx context.Context, level logrus.Level, message string, values ...any) {
 	trace := exctx.GetTraceContext(ctx)
 	msg := fmt.Sprintf("message=%+v||values=%+v", message, fmt.Sprint(values...))
 	msg = strings.Trim(fmt.Sprintf("%q", msg), "\"")
@@ -65,15 +71,15 @@ func (mgl *GLogger) logWithLevel(ctx context.Context, level logrus.Level, messag
 	}
 }
 
-func (mgl *GLogger) Info(ctx context.Context, message string, values ...interface{}) {
+func (mgl *GLogger) Info(ctx context.Context, message string, values ...any) {
 	mgl.logWithLevel(ctx, logrus.InfoLevel, message, values...)
 }
 
-func (mgl *GLogger) Warn(ctx context.Context, message string, values ...interface{}) {
+func (mgl *GLogger) Warn(ctx context.Context, message string, values ...any) {
 	mgl.logWithLevel(ctx, logrus.WarnLevel, message, values...)
 }
 
-func (mgl *GLogger) Error(ctx context.Context, message string, values ...interface{}) {
+func (mgl *GLogger) Error(ctx context.Context, message string, values ...any) {
 	mgl.logWithLevel(ctx, logrus.ErrorLevel, message, values...)
 }
 

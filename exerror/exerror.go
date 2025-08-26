@@ -1,3 +1,10 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
+// Package exerror provides utilities.
 package exerror
 
 import "fmt"
@@ -14,11 +21,11 @@ func (ee *ErgoError) String() string {
 	return ee.Message
 }
 
-func Bomb(format string, args ...interface{}) {
+func Bomb(format string, args ...any) {
 	panic(ErgoError{Message: fmt.Sprintf(format, args...)})
 }
 
-func Dangerous(v interface{}) {
+func Dangerous(v any) {
 	if v == nil {
 		return
 	}
@@ -33,7 +40,7 @@ func Dangerous(v interface{}) {
 	}
 }
 
-func Boka(value string, v interface{}) {
+func Boka(value string, v any) {
 	if v == nil {
 		return
 	}

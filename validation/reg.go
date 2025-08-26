@@ -1,3 +1,10 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
+// Package validation provides validation utilities.
 package validation
 
 import (
@@ -8,69 +15,69 @@ import (
 
 var FunctionReg *regexp.Regexp
 var UUIDReg *regexp.Regexp
-var UUID_EXACT_REG *regexp.Regexp
-var INTEGER_REG *regexp.Regexp
-var FLOAT_REG *regexp.Regexp
-var MACADDR_REG *regexp.Regexp
-var COMPACT_MACADDR_REG *regexp.Regexp
-var NSPTR_REG *regexp.Regexp
-var NAME_REG *regexp.Regexp
-var DOMAINNAME_REG *regexp.Regexp
-var DOMAINSRV_REG *regexp.Regexp
-var SIZE_REG *regexp.Regexp
-var MONTH_REG *regexp.Regexp
-var DATE_REG *regexp.Regexp
-var DATE_COMPACT_REG *regexp.Regexp
-var ISO_TIME_REG *regexp.Regexp
-var ISO_NO_SECOND_TIME_REG *regexp.Regexp
-var FULLISO_TIME_REG *regexp.Regexp
-var ISO_TIME_REG2 *regexp.Regexp
-var ISO_NO_SECOND_TIME_REG2 *regexp.Regexp
-var FULLISO_TIME_REG2 *regexp.Regexp
-var ZSTACK_TIME_REG *regexp.Regexp
-var COMPACT_TIME_REG *regexp.Regexp
-var MYSQL_TIME_REG *regexp.Regexp
-var NORMAL_TIME_REG *regexp.Regexp
-var FULLNORMAL_TIME_REG *regexp.Regexp
-var RFC2882_TIME_REG *regexp.Regexp
-var EMAIL_REG *regexp.Regexp
-var CHINA_MOBILE_REG *regexp.Regexp
-var FS_FORMAT_REG *regexp.Regexp
-var US_CURRENCY_REG *regexp.Regexp
-var EU_CURRENCY_REG *regexp.Regexp
+var UUIDExactReg *regexp.Regexp
+var IntegerReg *regexp.Regexp
+var FloatReg *regexp.Regexp
+var MacaddrReg *regexp.Regexp
+var CompactMacaddrReg *regexp.Regexp
+var NsptrReg *regexp.Regexp
+var NameReg *regexp.Regexp
+var DomainnameReg *regexp.Regexp
+var DomainsrvReg *regexp.Regexp
+var SizeReg *regexp.Regexp
+var MonthReg *regexp.Regexp
+var DateReg *regexp.Regexp
+var DateCompactReg *regexp.Regexp
+var IsoTimeReg *regexp.Regexp
+var IsoNoSecondTimeReg *regexp.Regexp
+var FullisoTimeReg *regexp.Regexp
+var IsoTimeReg2 *regexp.Regexp
+var IsoNoSecondTimeReg2 *regexp.Regexp
+var FullisoTimeReg2 *regexp.Regexp
+var ZstackTimeReg *regexp.Regexp
+var CompactTimeReg *regexp.Regexp
+var MysqlTimeReg *regexp.Regexp
+var NormalTimeReg *regexp.Regexp
+var FullnormalTimeReg *regexp.Regexp
+var Rfc2882TimeReg *regexp.Regexp
+var EmailReg *regexp.Regexp
+var ChinaMobileReg *regexp.Regexp
+var FsFormatReg *regexp.Regexp
+var UsCurrencyReg *regexp.Regexp
+var EuCurrencyReg *regexp.Regexp
 
 func init() {
 	FunctionReg = regexp.MustCompile(`^\w+\(.*\)$`)
 	UUIDReg = regexp.MustCompile(`[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`)
-	UUID_EXACT_REG = regexp.MustCompile(`^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$`)
-	INTEGER_REG = regexp.MustCompile(`^[0-9]+$`)
-	FLOAT_REG = regexp.MustCompile(`^\d+(\.\d*)?$`)
-	MACADDR_REG = regexp.MustCompile(`^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$`)
-	COMPACT_MACADDR_REG = regexp.MustCompile(`^[0-9a-fA-F]{12}$`)
-	NSPTR_REG = regexp.MustCompile(`^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.in-addr\.arpa$`)
-	NAME_REG = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9._@-]*$`)
-	DOMAINNAME_REG = regexp.MustCompile(`^([a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*[\._]?$`)
-	SIZE_REG = regexp.MustCompile(`^\d+[bBkKmMgG]?$`)
-	MONTH_REG = regexp.MustCompile(`^\d{4}-\d{2}$`)
-	DATE_REG = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-	DATE_COMPACT_REG = regexp.MustCompile(`^\d{8}$`)
-	ISO_TIME_REG = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
-	ISO_NO_SECOND_TIME_REG = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
-	FULLISO_TIME_REG = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,9}(Z|[+-]\d{2}:\d{2})$`)
-	ISO_TIME_REG2 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
-	ISO_NO_SECOND_TIME_REG2 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
-	FULLISO_TIME_REG2 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3,9}(Z|[+-]\d{2}:\d{2})$`)
-	COMPACT_TIME_REG = regexp.MustCompile(`^\d{14}$`)
-	ZSTACK_TIME_REG = regexp.MustCompile(`^\w+ \d{1,2}, \d{4} \d{1,2}:\d{1,2}:\d{1,2} (AM|PM)$`) //ZStack time format "Apr 1, 2019 3:23:17 PM"
-	MYSQL_TIME_REG = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`)
-	NORMAL_TIME_REG = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$`)
-	FULLNORMAL_TIME_REG = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}$`)
-	RFC2882_TIME_REG = regexp.MustCompile(`[A-Z][a-z]{2}, [0-9]{1,2} [A-Z][a-z]{2} [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2} [A-Z]{3}`)
-	EMAIL_REG = regexp.MustCompile(`^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$`)
-	CHINA_MOBILE_REG = regexp.MustCompile(`^1[0-9-]{10}$`)
-	FS_FORMAT_REG = regexp.MustCompile(`^(ext|fat|hfs|xfs|swap|ntfs|reiserfs|ufs|btrfs)`)
-	US_CURRENCY_REG = regexp.MustCompile(`^[+-]?(\d{0,3}|((\d{1,3},)+\d{3}))(\.\d*)?$`)
-	EU_CURRENCY_REG = regexp.MustCompile(`^[+-]?(\d{0,3}|((\d{1,3}\.)+\d{3}))(,\d*)?$`)
+	UUIDExactReg = regexp.MustCompile(`^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$`)
+	IntegerReg = regexp.MustCompile(`^[0-9]+$`)
+	FloatReg = regexp.MustCompile(`^\d+(\.\d*)?$`)
+	MacaddrReg = regexp.MustCompile(`^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$`)
+	CompactMacaddrReg = regexp.MustCompile(`^[0-9a-fA-F]{12}$`)
+	NsptrReg = regexp.MustCompile(`^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.in-addr\.arpa$`)
+	NameReg = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9._@-]*$`)
+	DomainnameReg = regexp.MustCompile(`^([a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*[\._]?$`)
+	SizeReg = regexp.MustCompile(`^\d+[bBkKmMgG]?$`)
+	MonthReg = regexp.MustCompile(`^\d{4}-\d{2}$`)
+	DateReg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	DateCompactReg = regexp.MustCompile(`^\d{8}$`)
+	IsoTimeReg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
+	IsoNoSecondTimeReg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
+	FullisoTimeReg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,9}(Z|[+-]\d{2}:\d{2})$`)
+	IsoTimeReg2 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
+	IsoNoSecondTimeReg2 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$`)
+	FullisoTimeReg2 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3,9}(Z|[+-]\d{2}:\d{2})$`)
+	CompactTimeReg = regexp.MustCompile(`^\d{14}$`)
+	ZstackTimeReg = regexp.MustCompile(`^\w+ \d{1,2}, \d{4} \d{1,2}:\d{1,2}:\d{1,2} (AM|PM)$`) //ZStack time format "Apr 1, 2019 3:23:17 PM"
+	MysqlTimeReg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`)
+	NormalTimeReg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$`)
+	FullnormalTimeReg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}$`)
+	Rfc2882TimeReg = regexp.MustCompile(`[A-Z][a-z]{2}, [0-9]{1,2} [A-Z][a-z]{2} [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2} [A-Z]{3}`)
+	EmailReg = regexp.MustCompile(`^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$`)
+	ChinaMobileReg = regexp.MustCompile(`^1[0-9-]{10}$`)
+	FsFormatReg = regexp.MustCompile(`^(ext|fat|hfs|xfs|swap|ntfs|reiserfs|ufs|btrfs)`)
+	UsCurrencyReg = regexp.MustCompile(`^[+-]?(\d{0,3}|((\d{1,3},)+\d{3}))(\.\d*)?$`)
+	EuCurrencyReg = regexp.MustCompile(`^[+-]?(\d{0,3}|((\d{1,3}\.)+\d{3}))(,\d*)?$`)
 }
 
 func MatchFunction(str string) bool {
@@ -82,23 +89,23 @@ func MatchUUID(str string) bool {
 }
 
 func MatchUUIDExact(str string) bool {
-	return UUID_EXACT_REG.MatchString(str)
+	return UUIDExactReg.MatchString(str)
 }
 
 func MatchInteger(str string) bool {
-	return INTEGER_REG.MatchString(str)
+	return IntegerReg.MatchString(str)
 }
 
 func MatchFloat(str string) bool {
-	return FLOAT_REG.MatchString(str)
+	return FloatReg.MatchString(str)
 }
 
 func MatchMacAddr(str string) bool {
-	return MACADDR_REG.MatchString(str)
+	return MacaddrReg.MatchString(str)
 }
 
 func MatchCompactMacAddr(str string) bool {
-	return COMPACT_MACADDR_REG.MatchString(str)
+	return CompactMacaddrReg.MatchString(str)
 }
 
 func MatchIP4Addr(str string) bool {
@@ -125,18 +132,18 @@ func MatchIPAddr(str string) bool {
 }
 
 func MatchPtr(str string) bool {
-	return NSPTR_REG.MatchString(str)
+	return NsptrReg.MatchString(str)
 }
 
 func MatchName(str string) bool {
-	return NAME_REG.MatchString(str)
+	return NameReg.MatchString(str)
 }
 
 func MatchDomainName(str string) bool {
-	if str == "" || len(strings.Replace(str, ".", "", -1)) > 255 {
+	if str == "" || len(strings.ReplaceAll(str, ".", "")) > 255 {
 		return false
 	}
-	return !MatchIPAddr(str) && DOMAINNAME_REG.MatchString(str)
+	return !MatchIPAddr(str) && DomainnameReg.MatchString(str)
 }
 
 func MatchDomainSRV(str string) bool {
@@ -156,92 +163,89 @@ func MatchDomainSRV(str string) bool {
 			return false
 		}
 	}
-	if len(parts[2]) == 0 {
-		return false
-	}
-	return true
+	return len(parts[2]) != 0
 }
 
 func MatchSize(str string) bool {
-	return SIZE_REG.MatchString(str)
+	return SizeReg.MatchString(str)
 }
 
 func MatchMonth(str string) bool {
-	return MONTH_REG.MatchString(str)
+	return MonthReg.MatchString(str)
 }
 
 func MatchDate(str string) bool {
-	return DATE_REG.MatchString(str)
+	return DateReg.MatchString(str)
 }
 
 func MatchDateCompact(str string) bool {
-	return DATE_COMPACT_REG.MatchString(str)
+	return DateCompactReg.MatchString(str)
 }
 
 func MatchZStackTime(str string) bool {
-	return ZSTACK_TIME_REG.MatchString(str)
+	return ZstackTimeReg.MatchString(str)
 }
 
 func MatchISOTime(str string) bool {
-	return ISO_TIME_REG.MatchString(str)
+	return IsoTimeReg.MatchString(str)
 }
 
 func MatchISONoSecondTime(str string) bool {
-	return ISO_NO_SECOND_TIME_REG.MatchString(str)
+	return IsoNoSecondTimeReg.MatchString(str)
 }
 
 func MatchFullISOTime(str string) bool {
-	return FULLISO_TIME_REG.MatchString(str)
+	return FullisoTimeReg.MatchString(str)
 }
 
 func MatchISOTime2(str string) bool {
-	return ISO_TIME_REG2.MatchString(str)
+	return IsoTimeReg2.MatchString(str)
 }
 
 func MatchISONoSecondTime2(str string) bool {
-	return ISO_NO_SECOND_TIME_REG2.MatchString(str)
+	return IsoNoSecondTimeReg2.MatchString(str)
 }
 
 func MatchFullISOTime2(str string) bool {
-	return FULLISO_TIME_REG2.MatchString(str)
+	return FullisoTimeReg2.MatchString(str)
 }
 
 func MatchCompactTime(str string) bool {
-	return COMPACT_TIME_REG.MatchString(str)
+	return CompactTimeReg.MatchString(str)
 }
 
 func MatchMySQLTime(str string) bool {
-	return MYSQL_TIME_REG.MatchString(str)
+	return MysqlTimeReg.MatchString(str)
 }
 
 func MatchNormalTime(str string) bool {
-	return NORMAL_TIME_REG.MatchString(str)
+	return NormalTimeReg.MatchString(str)
 }
 
 func MatchFullNormalTime(str string) bool {
-	return FULLNORMAL_TIME_REG.MatchString(str)
+	return FullnormalTimeReg.MatchString(str)
 }
 
 func MatchRFC2882Time(str string) bool {
-	return RFC2882_TIME_REG.MatchString(str)
+	return Rfc2882TimeReg.MatchString(str)
 }
 
 func MatchEmail(str string) bool {
-	return EMAIL_REG.MatchString(str)
+	return EmailReg.MatchString(str)
 }
 
 func MatchMobile(str string) bool {
-	return CHINA_MOBILE_REG.MatchString(str)
+	return ChinaMobileReg.MatchString(str)
 }
 
 func MatchFS(str string) bool {
-	return FS_FORMAT_REG.MatchString(str)
+	return FsFormatReg.MatchString(str)
 }
 
 func MatchUSCurrency(str string) bool {
-	return US_CURRENCY_REG.MatchString(str)
+	return UsCurrencyReg.MatchString(str)
 }
 
 func MatchEUCurrency(str string) bool {
-	return EU_CURRENCY_REG.MatchString(str)
+	return EuCurrencyReg.MatchString(str)
 }

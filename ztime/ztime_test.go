@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package ztime
 
 import (
@@ -17,9 +23,9 @@ func TestYesterday(t *testing.T) {
 	assert.NotEmpty(t, yesterdayDate)
 	assert.Equal(t, 10, len(yesterdayDate)) // YYYY-MM-DD
 
-	yesterdayTs := YesterdayTimestamp()
-	assert.Greater(t, yesterdayTs, int64(0))
-	assert.Less(t, yesterdayTs, time.Now().Unix())
+	yesterdayTS := YesterdayTimestamp()
+	assert.Greater(t, yesterdayTS, int64(0))
+	assert.Less(t, yesterdayTS, time.Now().Unix())
 }
 
 func TestNow(t *testing.T) {
@@ -32,8 +38,8 @@ func TestNow(t *testing.T) {
 	assert.NotEmpty(t, nowDate)
 	assert.Equal(t, 10, len(nowDate)) // YYYY-MM-DD
 
-	nowTs := NowTimestamp()
-	assert.Greater(t, nowTs, int64(0))
+	nowTS := NowTimestamp()
+	assert.Greater(t, nowTS, int64(0))
 }
 
 func TestTomorrow(t *testing.T) {
@@ -46,8 +52,8 @@ func TestTomorrow(t *testing.T) {
 	assert.NotEmpty(t, tomorrowDate)
 	assert.Equal(t, 10, len(tomorrowDate)) // YYYY-MM-DD
 
-	tomorrowTs := TomorrowTimestamp()
-	assert.Greater(t, tomorrowTs, time.Now().Unix())
+	tomorrowTS := TomorrowTimestamp()
+	assert.Greater(t, tomorrowTS, time.Now().Unix())
 }
 
 func TestMinute(t *testing.T) {
@@ -56,15 +62,15 @@ func TestMinute(t *testing.T) {
 	after5Min := Minute(5)
 	assert.NotEmpty(t, after5Min)
 
-	after5MinTs := MinuteTimestamp(5)
-	assert.Greater(t, after5MinTs, time.Now().Unix())
+	after5MinTS := MinuteTimestamp(5)
+	assert.Greater(t, after5MinTS, time.Now().Unix())
 
 	// 负数减少
 	before5Min := Minute(-5)
 	assert.NotEmpty(t, before5Min)
 
-	before5MinTs := MinuteTimestamp(-5)
-	assert.Less(t, before5MinTs, time.Now().Unix())
+	before5MinTS := MinuteTimestamp(-5)
+	assert.Less(t, before5MinTS, time.Now().Unix())
 }
 
 func TestHour(t *testing.T) {
@@ -73,8 +79,8 @@ func TestHour(t *testing.T) {
 	after2Hour := Hour(2)
 	assert.NotEmpty(t, after2Hour)
 
-	after2HourTs := HourTimestamp(2)
-	assert.Greater(t, after2HourTs, time.Now().Unix())
+	after2HourTS := HourTimestamp(2)
+	assert.Greater(t, after2HourTS, time.Now().Unix())
 
 	after2HourDate := HourDate(2)
 	assert.NotEmpty(t, after2HourDate)
@@ -83,8 +89,8 @@ func TestHour(t *testing.T) {
 	before2Hour := Hour(-2)
 	assert.NotEmpty(t, before2Hour)
 
-	before2HourTs := HourTimestamp(-2)
-	assert.Less(t, before2HourTs, time.Now().Unix())
+	before2HourTS := HourTimestamp(-2)
+	assert.Less(t, before2HourTS, time.Now().Unix())
 
 	before2HourDate := HourDate(-2)
 	assert.NotEmpty(t, before2HourDate)
@@ -196,9 +202,9 @@ func TestYearStartEnd(t *testing.T) {
 	assert.Contains(t, startStr, "-01-01 00:00:00")
 	assert.Contains(t, endStr, "-12-31 23:59:59")
 
-	startTs, endTs := YearStartEndTimestamp()
-	assert.Greater(t, startTs, int64(0))
-	assert.Greater(t, endTs, startTs)
+	startTS, endTS := YearStartEndTimestamp()
+	assert.Greater(t, startTS, int64(0))
+	assert.Greater(t, endTS, startTS)
 
 	startDate, endDate := YearStartEndDate()
 	assert.Contains(t, startDate, "-01-01")
@@ -216,9 +222,9 @@ func TestQuarterStartEnd(t *testing.T) {
 	assert.NotEmpty(t, startStr)
 	assert.NotEmpty(t, endStr)
 
-	startTs, endTs := QuarterStartEndTimestamp()
-	assert.Greater(t, startTs, int64(0))
-	assert.Greater(t, endTs, startTs)
+	startTS, endTS := QuarterStartEndTimestamp()
+	assert.Greater(t, startTS, int64(0))
+	assert.Greater(t, endTS, startTS)
 
 	startDate, endDate := QuarterStartEndDate()
 	assert.NotEmpty(t, startDate)
@@ -236,9 +242,9 @@ func TestMonthStartEnd(t *testing.T) {
 	assert.NotEmpty(t, startStr)
 	assert.NotEmpty(t, endStr)
 
-	startTs, endTs := MonthStartEndTimestamp()
-	assert.Greater(t, startTs, int64(0))
-	assert.Greater(t, endTs, startTs)
+	startTS, endTS := MonthStartEndTimestamp()
+	assert.Greater(t, startTS, int64(0))
+	assert.Greater(t, endTS, startTS)
 
 	startDate, endDate := MonthStartEndDate()
 	assert.NotEmpty(t, startDate)
@@ -256,9 +262,9 @@ func TestWeekStartEnd(t *testing.T) {
 	assert.NotEmpty(t, startStr)
 	assert.NotEmpty(t, endStr)
 
-	startTs, endTs := WeekStartEndTimestamp()
-	assert.Greater(t, startTs, int64(0))
-	assert.Greater(t, endTs, startTs)
+	startTS, endTS := WeekStartEndTimestamp()
+	assert.Greater(t, startTS, int64(0))
+	assert.Greater(t, endTS, startTS)
 
 	startDate, endDate := WeekStartEndDate()
 	assert.NotEmpty(t, startDate)
@@ -273,9 +279,9 @@ func TestDayStartEnd(t *testing.T) {
 	assert.Contains(t, startStr, " 00:00:00")
 	assert.Contains(t, endStr, " 23:59:59")
 
-	startTs, endTs := DayStartEndTimestamp()
-	assert.Greater(t, startTs, int64(0))
-	assert.Greater(t, endTs, startTs)
+	startTS, endTS := DayStartEndTimestamp()
+	assert.Greater(t, startTS, int64(0))
+	assert.Greater(t, endTS, startTS)
 
 	startDate, endDate := DayStartEndDate()
 	assert.NotEmpty(t, startDate)
@@ -296,9 +302,9 @@ func TestHourStartEnd(t *testing.T) {
 	assert.Contains(t, startStr, ":00:00")
 	assert.Contains(t, endStr, ":59:59")
 
-	startTs, endTs := HourStartEndTimestamp()
-	assert.Greater(t, startTs, int64(0))
-	assert.Greater(t, endTs, startTs)
+	startTS, endTS := HourStartEndTimestamp()
+	assert.Greater(t, startTS, int64(0))
+	assert.Greater(t, endTS, startTS)
 
 	// 测试特定时间
 	start15, end15 := HourStartEnd("2024-01-01 15:30:45")
@@ -371,9 +377,9 @@ func TestStartEndFunctionsWithParam(t *testing.T) {
 	testDate := "2024-06-15 12:30:45"
 
 	// YearStartEndTimestamp with param
-	yearStartTs, yearEndTs := YearStartEndTimestamp(testDate)
-	assert.Greater(t, yearStartTs, int64(0))
-	assert.Greater(t, yearEndTs, yearStartTs)
+	yearStartTS, yearEndTS := YearStartEndTimestamp(testDate)
+	assert.Greater(t, yearStartTS, int64(0))
+	assert.Greater(t, yearEndTS, yearStartTS)
 
 	// YearStartEndDate with param
 	yearStartDate, yearEndDate := YearStartEndDate(testDate)
@@ -381,9 +387,9 @@ func TestStartEndFunctionsWithParam(t *testing.T) {
 	assert.Equal(t, "2024-12-31", yearEndDate)
 
 	// QuarterStartEndTimestamp with param
-	qStartTs, qEndTs := QuarterStartEndTimestamp(testDate)
-	assert.Greater(t, qStartTs, int64(0))
-	assert.Greater(t, qEndTs, qStartTs)
+	qStartTS, qEndTS := QuarterStartEndTimestamp(testDate)
+	assert.Greater(t, qStartTS, int64(0))
+	assert.Greater(t, qEndTS, qStartTS)
 
 	// QuarterStartEndDate with param
 	qStartDate, qEndDate := QuarterStartEndDate(testDate)
@@ -391,9 +397,9 @@ func TestStartEndFunctionsWithParam(t *testing.T) {
 	assert.Equal(t, "2024-06-30", qEndDate)
 
 	// MonthStartEndTimestamp with param
-	mStartTs, mEndTs := MonthStartEndTimestamp(testDate)
-	assert.Greater(t, mStartTs, int64(0))
-	assert.Greater(t, mEndTs, mStartTs)
+	mStartTS, mEndTS := MonthStartEndTimestamp(testDate)
+	assert.Greater(t, mStartTS, int64(0))
+	assert.Greater(t, mEndTS, mStartTS)
 
 	// MonthStartEndDate with param
 	mStartDate, mEndDate := MonthStartEndDate(testDate)
@@ -406,9 +412,9 @@ func TestStartEndFunctionsWithParam(t *testing.T) {
 	assert.Contains(t, wEnd, "2024-06-16")   // 周日是06-16
 
 	// WeekStartEndTimestamp with param
-	wStartTs, wEndTs := WeekStartEndTimestamp(testDate)
-	assert.Greater(t, wStartTs, int64(0))
-	assert.Greater(t, wEndTs, wStartTs)
+	wStartTS, wEndTS := WeekStartEndTimestamp(testDate)
+	assert.Greater(t, wStartTS, int64(0))
+	assert.Greater(t, wEndTS, wStartTS)
 
 	// WeekStartEndDate with param
 	wStartDate, wEndDate := WeekStartEndDate(testDate)
@@ -416,9 +422,9 @@ func TestStartEndFunctionsWithParam(t *testing.T) {
 	assert.Equal(t, "2024-06-16", wEndDate)
 
 	// DayStartEndTimestamp with param
-	dStartTs, dEndTs := DayStartEndTimestamp(testDate)
-	assert.Greater(t, dStartTs, int64(0))
-	assert.Greater(t, dEndTs, dStartTs)
+	dStartTS, dEndTS := DayStartEndTimestamp(testDate)
+	assert.Greater(t, dStartTS, int64(0))
+	assert.Greater(t, dEndTS, dStartTS)
 
 	// DayStartEndDate with param
 	dStartDate, dEndDate := DayStartEndDate(testDate)
@@ -426,9 +432,9 @@ func TestStartEndFunctionsWithParam(t *testing.T) {
 	assert.Equal(t, "2024-06-15", dEndDate)
 
 	// HourStartEndTimestamp with param
-	hStartTs, hEndTs := HourStartEndTimestamp(testDate)
-	assert.Greater(t, hStartTs, int64(0))
-	assert.Greater(t, hEndTs, hStartTs)
+	hStartTS, hEndTS := HourStartEndTimestamp(testDate)
+	assert.Greater(t, hStartTS, int64(0))
+	assert.Greater(t, hEndTS, hStartTS)
 }
 
 func BenchmarkNow(b *testing.B) {

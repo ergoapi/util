@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package exgin
 
 import (
@@ -79,7 +85,7 @@ func GinsAbort200(c *gin.Context, code int, msg string) {
 }
 
 // Bind 绑定JSON请求体
-func Bind(c *gin.Context, ptr interface{}) {
+func Bind(c *gin.Context, ptr any) {
 	err := c.ShouldBindJSON(ptr)
 	if err != nil {
 		errors.Bomb("参数不合法: %v", err)
@@ -87,7 +93,7 @@ func Bind(c *gin.Context, ptr interface{}) {
 }
 
 // BindWithErr 绑定JSON请求体并返回错误
-func BindWithErr(c *gin.Context, ptr interface{}) error {
+func BindWithErr(c *gin.Context, ptr any) error {
 	err := c.ShouldBindJSON(ptr)
 	if err != nil {
 		return fmt.Errorf("参数不合法: %v", err)

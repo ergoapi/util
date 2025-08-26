@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package ratelimit
 
 import (
@@ -14,7 +20,7 @@ type user struct {
 
 func clearInBackground(data *sync.Map, rate int64) {
 	for {
-		data.Range(func(k, v interface{}) bool {
+		data.Range(func(k, v any) bool {
 			if v.(user).ts+rate <= time.Now().Unix() {
 				data.Delete(k)
 			}

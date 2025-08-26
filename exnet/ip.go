@@ -148,7 +148,7 @@ func NewIPV4AddrRange(ip1 IPV4Addr, ip2 IPV4Addr) IPV4AddrRange {
 	}
 }
 
-// n.IP and n.Mask must be ipv4 type.  n.Mask must be canonical
+// NewIPV4AddrRangeFromIPNet creates new range. n.IP and n.Mask must be ipv4 type.  n.Mask must be canonical
 func NewIPV4AddrRangeFromIPNet(n *net.IPNet) IPV4AddrRange {
 	pref, err := NewIPV4Prefix(n.String())
 	if err != nil {
@@ -374,14 +374,14 @@ func NewIPV4Prefix(prefix string) (IPV4Prefix, error) {
 	return pref, nil
 }
 
-func (prefix IPV4Prefix) ToIPRange() IPV4AddrRange {
-	start := prefix.Address.NetAddr(prefix.MaskLen)
-	end := prefix.Address.BroadcastAddr(prefix.MaskLen)
+func (pref IPV4Prefix) ToIPRange() IPV4AddrRange {
+	start := pref.Address.NetAddr(pref.MaskLen)
+	end := pref.Address.BroadcastAddr(pref.MaskLen)
 	return IPV4AddrRange{start: start, end: end}
 }
 
-func (prefix IPV4Prefix) Contains(ip IPV4Addr) bool {
-	return prefix.ipRange.Contains(ip)
+func (pref IPV4Prefix) Contains(ip IPV4Addr) bool {
+	return pref.ipRange.Contains(ip)
 }
 
 const (

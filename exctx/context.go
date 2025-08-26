@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package exctx
 
 import (
@@ -96,12 +102,9 @@ func GetTraceContext(ctx context.Context) *TraceContext {
 		return NewTrace()
 	}
 
-	if contextInterface, ok := ctx.(context.Context); ok {
-		traceContext, ok := contextInterface.Value(traceKey).(*TraceContext)
-		if ok {
-			return traceContext
-		}
-		return NewTrace()
+	traceContext, ok := ctx.Value(traceKey).(*TraceContext)
+	if ok {
+		return traceContext
 	}
 	return NewTrace()
 }

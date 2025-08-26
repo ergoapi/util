@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package exmap
 
 import (
@@ -136,24 +142,24 @@ func TestCheckLabel(t *testing.T) {
 }
 
 func TestMergeValues(t *testing.T) {
-	nestedMap := map[string]interface{}{
+	nestedMap := map[string]any{
 		"foo": "bar",
 		"baz": map[string]string{
 			"cool": "stuff",
 		},
 	}
-	anotherNestedMap := map[string]interface{}{
+	anotherNestedMap := map[string]any{
 		"foo": "bar",
 		"baz": map[string]string{
 			"cool":    "things",
 			"awesome": "stuff",
 		},
 	}
-	flatMap := map[string]interface{}{
+	flatMap := map[string]any{
 		"foo": "bar",
 		"baz": "stuff",
 	}
-	anotherFlatMap := map[string]interface{}{
+	anotherFlatMap := map[string]any{
 		"testing": "fun",
 	}
 
@@ -176,7 +182,7 @@ func TestMergeValues(t *testing.T) {
 	}
 
 	testMap = MergeMaps(anotherFlatMap, anotherNestedMap)
-	expectedMap := map[string]interface{}{
+	expectedMap := map[string]any{
 		"testing": "fun",
 		"foo":     "bar",
 		"baz": map[string]string{

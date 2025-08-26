@@ -3,6 +3,12 @@
 version: "3"
 
 tasks:
+
+  gencopyright:
+    desc: generate code license
+    cmds:
+      - ./gencopyright.sh
+
   fmt:
     desc: "fmt code"
     cmds:

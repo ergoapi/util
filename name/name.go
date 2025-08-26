@@ -1,3 +1,9 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package name
 
 import (
@@ -9,7 +15,7 @@ import (
 	"github.com/ergoapi/util/exhash"
 )
 
-// PluralName returns the plural form of the word
+// GuessPluralName returns the plural form of the word
 func GuessPluralName(name string) string {
 	if name == "" {
 		return name

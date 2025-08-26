@@ -1,9 +1,16 @@
+// Copyright (c) 2025-2025 All rights reserved.
+//
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
+//
+// You may review the terms of licenses in the LICENSE file.
+
 package expass
 
 import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	cryptorand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -67,15 +74,12 @@ func SaltPbkdf2PassDefault(salt, password string) string {
 	return SaltPbkdf2Pass(salt, password, DefaultConfig().PBKDF2Iterations)
 }
 
-// deriveKey derives a key from password using PBKDF2
-func deriveKey(password string, salt []byte, keySize int) []byte {
-	if keySize <= 0 {
-		keySize = 32 // Default to AES-256
-	}
-	return pbkdf2.Key([]byte(password), salt, DefaultConfig().PBKDF2Iterations, keySize, sha256.New)
+// deriveKey derives a 32-byte key from password using PBKDF2 (for AES-256)
+func deriveKey(password string, salt []byte) []byte {
+	return pbkdf2.Key([]byte(password), salt, DefaultConfig().PBKDF2Iterations, 32, sha256.New)
 }
 
-// AesEncryptCBC encrypts data using AES-CBC with a random IV
+// AesEncryptCBC encrypts data using AES-CBC with a random IV and HMAC for authentication
 func AesEncryptCBC(data, password string) (string, error) {
 	if data == "" {
 		return "", errors.New("data cannot be empty")
@@ -90,8 +94,9 @@ func AesEncryptCBC(data, password string) (string, error) {
 		return "", errors.Wrap(err, "failed to generate salt")
 	}
 
-	// Derive key from password
-	key := deriveKey(password, salt, 32)
+	// Derive keys from password (one for encryption, one for HMAC)
+	key := deriveKey(password, salt)
+	hmacKey := deriveKey(password+"_hmac", salt) // Separate key for HMAC
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -113,14 +118,22 @@ func AesEncryptCBC(data, password string) (string, error) {
 	encrypted := make([]byte, len(origData))
 	blockMode.CryptBlocks(encrypted, origData)
 
-	// Combine salt + iv + encrypted and encode
+	// Calculate HMAC over salt + iv + encrypted
+	h := hmac.New(sha256.New, hmacKey)
+	h.Write(salt)
+	h.Write(iv)
+	h.Write(encrypted)
+	mac := h.Sum(nil)
+
+	// Combine salt + iv + encrypted + mac and encode
 	result := append(salt, iv...)
 	result = append(result, encrypted...)
+	result = append(result, mac...)
 
 	return base64.StdEncoding.EncodeToString(result), nil
 }
 
-// AesDecryptCBC decrypts data encrypted with AesEncryptCBC
+// AesDecryptCBC decrypts data encrypted with AesEncryptCBC and verifies HMAC
 func AesDecryptCBC(data, password string) (string, error) {
 	if data == "" {
 		return "", errors.New("encrypted data cannot be empty")
@@ -135,18 +148,36 @@ func AesDecryptCBC(data, password string) (string, error) {
 		return "", errors.Wrap(err, "failed to decode base64")
 	}
 
-	// Extract salt, IV, and ciphertext
-	if len(encrypted) < 48 { // 32 bytes salt + 16 bytes IV
+	// Extract salt, IV, ciphertext, and MAC
+	// Minimum size: 32 bytes salt + 16 bytes IV + 32 bytes HMAC
+	if len(encrypted) < 80 {
 		return "", errors.New("invalid encrypted data format")
 	}
 
 	salt := encrypted[:32]
 	iv := encrypted[32:48]
-	ciphertext := encrypted[48:]
 
-	// Derive key from password
-	key := deriveKey(password, salt, 32)
+	// Extract MAC from the end
+	macStart := len(encrypted) - 32
+	mac := encrypted[macStart:]
+	ciphertext := encrypted[48:macStart]
 
+	// Derive keys from password
+	key := deriveKey(password, salt)
+	hmacKey := deriveKey(password+"_hmac", salt)
+
+	// Verify HMAC first (fail fast if tampered)
+	h := hmac.New(sha256.New, hmacKey)
+	h.Write(salt)
+	h.Write(iv)
+	h.Write(ciphertext)
+	expectedMac := h.Sum(nil)
+
+	if !hmac.Equal(mac, expectedMac) {
+		return "", errors.New("HMAC verification failed: data may have been tampered with")
+	}
+
+	// Now decrypt
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create cipher")
@@ -179,7 +210,7 @@ func paddingPKCS7(ciphertext []byte, blocksize int) []byte {
 
 // unPaddingPKCS7 removes PKCS7 padding
 func unPaddingPKCS7(origData []byte) ([]byte, error) {
-	if origData == nil || len(origData) == 0 {
+	if len(origData) == 0 {
 		return nil, errors.New("invalid data: empty input")
 	}
 
