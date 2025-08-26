@@ -58,4 +58,3 @@ func String(s string) string {
 	_, _ = io.WriteString(hash, s)
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
-

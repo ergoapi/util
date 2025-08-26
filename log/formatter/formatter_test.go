@@ -30,7 +30,7 @@ func TestFilteredTextFormatter_Format(t *testing.T) {
 
 	result, err := formatter.Format(entry)
 	require.NoError(t, err)
-	
+
 	// 验证基本格式化功能正常
 	assert.Contains(t, string(result), "test message")
 	assert.Contains(t, string(result), "level=info")
@@ -67,7 +67,7 @@ func TestFindLibraryCallerInternal(t *testing.T) {
 	// 测试查找不存在的路径
 	result := findLibraryCallerInternal("nonexistent/package/path")
 	assert.Nil(t, result)
-	
+
 	// 注意：findLibraryCallerInternal 从第4帧开始查找
 	// 在直接调用时可能找不到匹配的路径
 }
@@ -75,7 +75,7 @@ func TestFindLibraryCallerInternal(t *testing.T) {
 func TestNewFilteredTextFormatter(t *testing.T) {
 	prefix := "test/prefix"
 	formatter := NewFilteredTextFormatter(prefix)
-	
+
 	assert.NotNil(t, formatter)
 	assert.Equal(t, prefix, formatter.LibraryPathPrefix)
 	assert.IsType(t, logrus.TextFormatter{}, formatter.TextFormatter)
@@ -84,7 +84,7 @@ func TestNewFilteredTextFormatter(t *testing.T) {
 func TestNewFilteredJSONFormatter(t *testing.T) {
 	prefix := "test/prefix"
 	formatter := NewFilteredJSONFormatter(prefix)
-	
+
 	assert.NotNil(t, formatter)
 	assert.Equal(t, prefix, formatter.LibraryPathPrefix)
 	assert.IsType(t, logrus.JSONFormatter{}, formatter.JSONFormatter)
@@ -185,7 +185,7 @@ func BenchmarkFilteredTextFormatter_Format(b *testing.B) {
 
 func BenchmarkFindLibraryCallerInternal(b *testing.B) {
 	prefix := "github.com/ergoapi/util"
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		findLibraryCallerInternal(prefix)
@@ -214,7 +214,7 @@ func TestFormatterConcurrent(t *testing.T) {
 
 	var wg sync.WaitGroup
 	wg.Add(len(entries))
-	
+
 	for _, entry := range entries {
 		go func(e *logrus.Entry) {
 			defer wg.Done()
@@ -222,7 +222,7 @@ func TestFormatterConcurrent(t *testing.T) {
 			assert.NoError(t, err)
 		}(entry)
 	}
-	
+
 	wg.Wait()
 }
 
@@ -253,17 +253,17 @@ func TestFindLibraryCaller_Performance(t *testing.T) {
 			start := time.Now()
 			result := deepCall(depth)
 			elapsed := time.Since(start)
-			
+
 			t.Logf("深度%d的查找时间: %v", depth, elapsed)
-			
+
 			// 确保即使深层调用也能在合理时间内完成
 			assert.Less(t, elapsed, 10*time.Millisecond)
-			
+
 			// 验证结果
 			if result != nil {
 				t.Logf("找到调用者: %s:%d", result.File, result.Line)
 			}
-			
+
 			if strings.Contains(runtime.GOARCH, "wasm") {
 				t.Skip("WebAssembly环境跳过性能断言")
 			}

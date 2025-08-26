@@ -9,7 +9,6 @@ import (
 
 	"github.com/ergoapi/util/exctx"
 	"github.com/ergoapi/util/file"
-	"github.com/ergoapi/util/ztime"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -37,11 +36,11 @@ func (mgl *GLogger) LogMode(logLevel logger.LogLevel) logger.Interface {
 func (mgl *GLogger) logPath(key string) string {
 	mgl.mu.Lock()
 	defer mgl.mu.Unlock()
-	
+
 	if len(mgl.LogPath) != 0 && !strings.HasSuffix(mgl.LogPath, "/") {
 		mgl.LogPath = mgl.LogPath + "/"
 	}
-	return fmt.Sprintf("%s%s.%s.log", mgl.LogPath, ztime.GetToday(), key)
+	return fmt.Sprintf("%s%s.%s.log", mgl.LogPath, time.Now().Format("20060102"), key)
 }
 
 // logWithLevel 是一个辅助函数，用于处理通用的日志格式化和输出逻辑
@@ -120,7 +119,7 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		case mgl.SlowThreshold != 0 && elapsed > mgl.SlowThreshold && mgl.LogLevel >= logger.Warn:
 			sql, rows := fc()
 			slowLog := fmt.Sprintf("SLOW SQL >= %v", mgl.SlowThreshold)
-			// 异步保存到文件，错误只记录不panic  
+			// 异步保存到文件，错误只记录不panic
 			go func() {
 				if err := file.WriteFileWithLine(mgl.logPath("slowsql"), sql+" "+slowLog); err != nil {
 					logrus.WithError(err).Error("Failed to write slowsql log")

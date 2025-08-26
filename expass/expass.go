@@ -6,8 +6,9 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/cockroachdb/errors"
 	"github.com/ergoapi/util/common"
+
+	"github.com/cockroachdb/errors"
 )
 
 var (
@@ -25,10 +26,10 @@ func NewPwGen(length int, chars string) (string, error) {
 	if len(chars) == 0 {
 		return "", errors.New("chars cannot be empty")
 	}
-	
+
 	result := make([]byte, length)
 	charLen := big.NewInt(int64(len(chars)))
-	
+
 	for i := 0; i < length; i++ {
 		// Use crypto/rand.Int for uniform distribution
 		n, err := cryptorand.Int(cryptorand.Reader, charLen)

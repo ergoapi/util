@@ -2,9 +2,9 @@ package exgin
 
 import (
 	"fmt"
+	"time"
 
 	errors "github.com/ergoapi/util/exerror"
-	"github.com/ergoapi/util/ztime"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +19,7 @@ type response struct {
 
 func newResponse(code int, traceID string, data any, message string) *response {
 	return &response{
-		Timestamp: ztime.NowUnix(),
+		Timestamp: time.Now().Unix(),
 		Code:      code,
 		Message:   message,
 		TraceID:   traceID,

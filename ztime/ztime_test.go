@@ -369,62 +369,62 @@ func TestParseString(t *testing.T) {
 func TestStartEndFunctionsWithParam(t *testing.T) {
 	// 测试所有 StartEnd 函数传入参数的情况
 	testDate := "2024-06-15 12:30:45"
-	
+
 	// YearStartEndTimestamp with param
 	yearStartTs, yearEndTs := YearStartEndTimestamp(testDate)
 	assert.Greater(t, yearStartTs, int64(0))
 	assert.Greater(t, yearEndTs, yearStartTs)
-	
+
 	// YearStartEndDate with param
 	yearStartDate, yearEndDate := YearStartEndDate(testDate)
 	assert.Equal(t, "2024-01-01", yearStartDate)
 	assert.Equal(t, "2024-12-31", yearEndDate)
-	
+
 	// QuarterStartEndTimestamp with param
 	qStartTs, qEndTs := QuarterStartEndTimestamp(testDate)
 	assert.Greater(t, qStartTs, int64(0))
 	assert.Greater(t, qEndTs, qStartTs)
-	
+
 	// QuarterStartEndDate with param
 	qStartDate, qEndDate := QuarterStartEndDate(testDate)
 	assert.Equal(t, "2024-04-01", qStartDate)
 	assert.Equal(t, "2024-06-30", qEndDate)
-	
+
 	// MonthStartEndTimestamp with param
 	mStartTs, mEndTs := MonthStartEndTimestamp(testDate)
 	assert.Greater(t, mStartTs, int64(0))
 	assert.Greater(t, mEndTs, mStartTs)
-	
+
 	// MonthStartEndDate with param
 	mStartDate, mEndDate := MonthStartEndDate(testDate)
 	assert.Equal(t, "2024-06-01", mStartDate)
 	assert.Equal(t, "2024-06-30", mEndDate)
-	
+
 	// WeekStartEnd with param
 	wStart, wEnd := WeekStartEnd(testDate)
 	assert.Contains(t, wStart, "2024-06-10") // 2024-06-15是周六，周一是06-10
 	assert.Contains(t, wEnd, "2024-06-16")   // 周日是06-16
-	
+
 	// WeekStartEndTimestamp with param
 	wStartTs, wEndTs := WeekStartEndTimestamp(testDate)
 	assert.Greater(t, wStartTs, int64(0))
 	assert.Greater(t, wEndTs, wStartTs)
-	
+
 	// WeekStartEndDate with param
 	wStartDate, wEndDate := WeekStartEndDate(testDate)
 	assert.Equal(t, "2024-06-10", wStartDate)
 	assert.Equal(t, "2024-06-16", wEndDate)
-	
+
 	// DayStartEndTimestamp with param
 	dStartTs, dEndTs := DayStartEndTimestamp(testDate)
 	assert.Greater(t, dStartTs, int64(0))
 	assert.Greater(t, dEndTs, dStartTs)
-	
+
 	// DayStartEndDate with param
 	dStartDate, dEndDate := DayStartEndDate(testDate)
 	assert.Equal(t, "2024-06-15", dStartDate)
 	assert.Equal(t, "2024-06-15", dEndDate)
-	
+
 	// HourStartEndTimestamp with param
 	hStartTs, hEndTs := HourStartEndTimestamp(testDate)
 	assert.Greater(t, hStartTs, int64(0))

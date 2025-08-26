@@ -32,10 +32,10 @@ func TestPkg_LastTag(t *testing.T) {
 				assert.NotEmpty(t, tag.Name, "Tag name should not be empty")
 				assert.NotEmpty(t, tag.Commit.SHA, "Commit SHA should not be empty")
 				assert.NotEmpty(t, tag.Commit.URL, "Commit URL should not be empty")
-				
+
 				// 验证版本号格式（假设使用语义化版本）
 				assert.Regexp(t, `^v?\d+\.\d+\.\d+`, tag.Name, "Tag should follow semantic versioning")
-				
+
 				// 验证URL格式
 				assert.Contains(t, tag.Commit.URL, "github.com/repos/ergoapi/util/commits/",
 					"URL should point to the correct repository")
@@ -56,21 +56,21 @@ func TestPkg_LastTag(t *testing.T) {
 				Owner: tt.owner,
 				Repo:  tt.repo,
 			}
-			
+
 			got, err := p.LastTag()
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
-			
+
 			require.NoError(t, err)
 			require.NotNil(t, got)
-			
+
 			if tt.checks != nil {
 				tt.checks(t, got)
 			}
-			
+
 			// 可选：打印实际获取的标签信息用于调试
 			t.Logf("Latest tag: %s (SHA: %s)", got.Name, got.Commit.SHA)
 		})
@@ -119,21 +119,21 @@ func TestPkg_LastTag_Mock(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Pkg{
 				Owner: "test",
 				Repo:  "repo",
 			}
-			
+
 			client := &MockGitHubClient{
 				tags: tt.tags,
 				err:  tt.err,
 			}
-			
+
 			got, err := p.LastTagWithClient(client)
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -154,16 +154,16 @@ func TestPkg_ListTags(t *testing.T) {
 		Owner: "golang",
 		Repo:  "go",
 	}
-	
+
 	tags, err := p.listTags()
 	require.NoError(t, err)
 	assert.NotEmpty(t, tags, "Go repository should have tags")
-	
+
 	// 验证标签按时间排序（最新的在前）
 	for i, tag := range tags {
 		assert.NotEmpty(t, tag.Name)
 		assert.NotEmpty(t, tag.Commit.SHA)
-		
+
 		if i > 10 {
 			break // 只检查前10个标签
 		}
@@ -175,12 +175,12 @@ func BenchmarkPkg_LastTag(b *testing.B) {
 	if os.Getenv("GITHUB_INTEGRATION_TEST") == "" {
 		b.Skip("Skipping benchmark. Set GITHUB_INTEGRATION_TEST=1 to run")
 	}
-	
+
 	p := &Pkg{
 		Owner: "ergoapi",
 		Repo:  "util",
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := p.LastTag()

@@ -83,40 +83,40 @@ func AesEncryptCBC(data, password string) (string, error) {
 	if password == "" {
 		return "", errors.New("password cannot be empty")
 	}
-	
+
 	// Generate random salt for key derivation
 	salt := make([]byte, 32)
 	if _, err := io.ReadFull(cryptorand.Reader, salt); err != nil {
 		return "", errors.Wrap(err, "failed to generate salt")
 	}
-	
+
 	// Derive key from password
 	key := deriveKey(password, salt, 32)
-	
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create cipher")
 	}
-	
+
 	// Generate random IV
 	iv := make([]byte, aes.BlockSize)
 	if _, err := io.ReadFull(cryptorand.Reader, iv); err != nil {
 		return "", errors.Wrap(err, "failed to generate IV")
 	}
-	
+
 	// Pad plaintext
 	origData := []byte(data)
 	origData = paddingPKCS7(origData, block.BlockSize())
-	
+
 	// Encrypt
 	blockMode := cipher.NewCBCEncrypter(block, iv)
 	encrypted := make([]byte, len(origData))
 	blockMode.CryptBlocks(encrypted, origData)
-	
+
 	// Combine salt + iv + encrypted and encode
 	result := append(salt, iv...)
 	result = append(result, encrypted...)
-	
+
 	return base64.StdEncoding.EncodeToString(result), nil
 }
 
@@ -128,45 +128,45 @@ func AesDecryptCBC(data, password string) (string, error) {
 	if password == "" {
 		return "", errors.New("password cannot be empty")
 	}
-	
+
 	// Decode from base64
 	encrypted, err := base64.StdEncoding.DecodeString(data)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to decode base64")
 	}
-	
+
 	// Extract salt, IV, and ciphertext
 	if len(encrypted) < 48 { // 32 bytes salt + 16 bytes IV
 		return "", errors.New("invalid encrypted data format")
 	}
-	
+
 	salt := encrypted[:32]
 	iv := encrypted[32:48]
 	ciphertext := encrypted[48:]
-	
+
 	// Derive key from password
 	key := deriveKey(password, salt, 32)
-	
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create cipher")
 	}
-	
+
 	if len(ciphertext)%block.BlockSize() != 0 {
 		return "", errors.New("ciphertext is not a multiple of the block size")
 	}
-	
+
 	// Decrypt
 	blockMode := cipher.NewCBCDecrypter(block, iv)
 	origData := make([]byte, len(ciphertext))
 	blockMode.CryptBlocks(origData, ciphertext)
-	
+
 	// Remove padding
 	origData, err = unPaddingPKCS7(origData)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to remove padding")
 	}
-	
+
 	return string(origData), nil
 }
 
@@ -182,21 +182,21 @@ func unPaddingPKCS7(origData []byte) ([]byte, error) {
 	if origData == nil || len(origData) == 0 {
 		return nil, errors.New("invalid data: empty input")
 	}
-	
+
 	length := len(origData)
 	unpadding := int(origData[length-1])
-	
+
 	// Validate padding
 	if unpadding > length || unpadding == 0 {
 		return nil, errors.New("invalid PKCS7 padding")
 	}
-	
+
 	// Check all padding bytes are the same
 	for i := length - unpadding; i < length; i++ {
 		if origData[i] != byte(unpadding) {
 			return nil, errors.New("invalid PKCS7 padding")
 		}
 	}
-	
+
 	return origData[:(length - unpadding)], nil
 }

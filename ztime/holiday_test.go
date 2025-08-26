@@ -114,7 +114,7 @@ func TestNextPrevWorkdayEdgeCases(t *testing.T) {
 		}
 		t.Logf("Day %d (%s): isWorkday=%v", i, date, isWork)
 	}
-	
+
 	// 测试 PrevWorkday 的循环逻辑
 	for i := -1; i >= -5; i-- {
 		date := DayDate(i)
@@ -135,13 +135,13 @@ func TestHolidayErrorCases(t *testing.T) {
 	// 测试无效日期格式
 	_, err = GetHoliday("invalid-date")
 	assert.Error(t, err, "Invalid date should return error")
-	
+
 	// 测试 IsHoliday 错误处理
 	_, err = IsHoliday("")
 	assert.Error(t, err)
 	_, err = IsHoliday("invalid")
 	assert.Error(t, err)
-	
+
 	// 测试 IsWorkday 错误处理
 	_, err = IsWorkday("")
 	assert.Error(t, err)

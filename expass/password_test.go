@@ -60,7 +60,7 @@ func TestNewPwGen(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := NewPwGen(tt.length, tt.chars)
-			
+
 			if tt.wantErr {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errMsg)
@@ -68,7 +68,7 @@ func TestNewPwGen(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				assert.Len(t, result, tt.length)
-				
+
 				// 验证所有字符都在指定字符集中
 				for _, char := range result {
 					assert.Contains(t, tt.chars, string(char))
@@ -83,7 +83,7 @@ func TestPwGenFunctions(t *testing.T) {
 		result, err := PwGenNum(10)
 		require.NoError(t, err)
 		assert.Len(t, result, 10)
-		
+
 		// 验证只包含数字
 		for _, char := range result {
 			assert.True(t, char >= '0' && char <= '9', "期望数字，得到: %c", char)
@@ -94,7 +94,7 @@ func TestPwGenFunctions(t *testing.T) {
 		result, err := PwGenAlpha(15)
 		require.NoError(t, err)
 		assert.Len(t, result, 15)
-		
+
 		// 验证只包含字母
 		for _, char := range result {
 			isLetter := (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
@@ -106,7 +106,7 @@ func TestPwGenFunctions(t *testing.T) {
 		result, err := PwGenSymbols(8)
 		require.NoError(t, err)
 		assert.Len(t, result, 8)
-		
+
 		// 验证只包含符号
 		for _, char := range result {
 			isLetter := (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
@@ -133,24 +133,24 @@ func TestPasswordDistribution(t *testing.T) {
 	chars := "ab"
 	iterations := 10000
 	length := 1
-	
+
 	counts := make(map[rune]int)
 	for i := 0; i < iterations; i++ {
 		result, err := NewPwGen(length, chars)
 		require.NoError(t, err)
 		counts[rune(result[0])]++
 	}
-	
+
 	// 检查分布是否相对均匀（容差20%）
 	expectedCount := iterations / len(chars)
 	tolerance := float64(expectedCount) * 0.2
-	
+
 	for char, count := range counts {
 		diff := float64(count - expectedCount)
 		if diff < 0 {
 			diff = -diff
 		}
-		assert.LessOrEqual(t, diff, tolerance, 
+		assert.LessOrEqual(t, diff, tolerance,
 			"字符 %c 分布不均: 期望约 %d 次，实际 %d 次", char, expectedCount, count)
 	}
 }
@@ -191,7 +191,7 @@ func TestGenerateHash(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			hash, err := GenerateHash(tt.password)
-			
+
 			if tt.wantErr {
 				require.Error(t, err)
 				assert.Nil(t, hash)
@@ -199,7 +199,7 @@ func TestGenerateHash(t *testing.T) {
 				require.NoError(t, err)
 				assert.NotNil(t, hash)
 				assert.NotEmpty(t, hash)
-				
+
 				// 验证相同密码生成的哈希不同（因为包含随机盐）
 				hash2, err2 := GenerateHash(tt.password)
 				require.NoError(t, err2)
@@ -212,10 +212,10 @@ func TestGenerateHash(t *testing.T) {
 func TestCompareHash(t *testing.T) {
 	password := []byte("testPassword123")
 	wrongPassword := []byte("wrongPassword456")
-	
+
 	hash, err := GenerateHash(password)
 	require.NoError(t, err)
-	
+
 	tests := []struct {
 		name     string
 		hash     []byte
@@ -258,21 +258,21 @@ func TestCompareHash(t *testing.T) {
 
 func TestGenerateHashWithCost(t *testing.T) {
 	password := []byte("testPassword")
-	
+
 	t.Run("默认成本", func(t *testing.T) {
 		hash, err := GenerateHashWithCost(password, 10)
 		require.NoError(t, err)
 		assert.NotEmpty(t, hash)
 		assert.True(t, CompareHash(hash, password))
 	})
-	
+
 	t.Run("最小成本", func(t *testing.T) {
 		hash, err := GenerateHashWithCost(password, 4)
 		require.NoError(t, err)
 		assert.NotEmpty(t, hash)
 		assert.True(t, CompareHash(hash, password))
 	})
-	
+
 	t.Run("较高成本", func(t *testing.T) {
 		hash, err := GenerateHashWithCost(password, 12)
 		require.NoError(t, err)
@@ -311,18 +311,18 @@ func TestSaltPbkdf2Pass(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := SaltPbkdf2Pass(tt.salt, tt.password, tt.iterations)
-			
+
 			// 验证格式
 			assert.True(t, strings.HasPrefix(result, "pbkdf2_sha256$"))
 			parts := strings.Split(result, "$")
 			assert.Len(t, parts, 4)
 			assert.Equal(t, "pbkdf2_sha256", parts[0])
 			assert.Equal(t, tt.salt, parts[2])
-			
+
 			// 验证相同输入产生相同输出
 			result2 := SaltPbkdf2Pass(tt.salt, tt.password, tt.iterations)
 			assert.Equal(t, result, result2)
-			
+
 			// 验证不同密码产生不同输出
 			result3 := SaltPbkdf2Pass(tt.salt, tt.password+"diff", tt.iterations)
 			assert.NotEqual(t, result, result3)
@@ -384,27 +384,27 @@ func TestAesEncryptDecrypt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			encrypted, err := AesEncryptCBC(tt.data, tt.password)
-			
+
 			if tt.wantErr {
 				require.Error(t, err)
 				assert.Empty(t, encrypted)
 				return
 			}
-			
+
 			require.NoError(t, err)
 			assert.NotEmpty(t, encrypted)
 			assert.NotEqual(t, tt.data, encrypted)
-			
+
 			// 验证相同输入产生不同输出（因为随机IV和盐）
 			encrypted2, err2 := AesEncryptCBC(tt.data, tt.password)
 			require.NoError(t, err2)
 			assert.NotEqual(t, encrypted, encrypted2)
-			
+
 			// 解密测试
 			decrypted, err := AesDecryptCBC(encrypted, tt.password)
 			require.NoError(t, err)
 			assert.Equal(t, tt.data, decrypted)
-			
+
 			// 错误密码解密失败
 			_, err = AesDecryptCBC(encrypted, tt.password+"wrong")
 			assert.Error(t, err)
@@ -415,10 +415,10 @@ func TestAesEncryptDecrypt(t *testing.T) {
 func TestAesDecryptCBC_ErrorCases(t *testing.T) {
 	validData := "test data"
 	validPassword := "password"
-	
+
 	encrypted, err := AesEncryptCBC(validData, validPassword)
 	require.NoError(t, err)
-	
+
 	tests := []struct {
 		name     string
 		data     string
@@ -523,7 +523,7 @@ func TestUnPaddingPKCS7(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := unPaddingPKCS7(tt.input)
-			
+
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -536,7 +536,7 @@ func TestUnPaddingPKCS7(t *testing.T) {
 
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
-	
+
 	assert.NotNil(t, config)
 	assert.Equal(t, 600000, config.PBKDF2Iterations)
 	assert.Equal(t, 32, config.SaltLength)
@@ -545,19 +545,19 @@ func TestDefaultConfig(t *testing.T) {
 
 func BenchmarkNewPwGen(b *testing.B) {
 	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	
+
 	b.Run("Length10", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_, _ = NewPwGen(10, chars)
 		}
 	})
-	
+
 	b.Run("Length32", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_, _ = NewPwGen(32, chars)
 		}
 	})
-	
+
 	b.Run("Length128", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			_, _ = NewPwGen(128, chars)
@@ -567,7 +567,7 @@ func BenchmarkNewPwGen(b *testing.B) {
 
 func BenchmarkGenerateHash(b *testing.B) {
 	password := []byte("benchmarkPassword123!")
-	
+
 	for i := 0; i < b.N; i++ {
 		_, _ = GenerateHash(password)
 	}
@@ -576,7 +576,7 @@ func BenchmarkGenerateHash(b *testing.B) {
 func BenchmarkCompareHash(b *testing.B) {
 	password := []byte("benchmarkPassword123!")
 	hash, _ := GenerateHash(password)
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = CompareHash(hash, password)
@@ -586,7 +586,7 @@ func BenchmarkCompareHash(b *testing.B) {
 func BenchmarkAesEncryptCBC(b *testing.B) {
 	data := "benchmark test data for encryption"
 	password := "benchmarkPassword"
-	
+
 	for i := 0; i < b.N; i++ {
 		_, _ = AesEncryptCBC(data, password)
 	}
@@ -596,7 +596,7 @@ func BenchmarkAesDecryptCBC(b *testing.B) {
 	data := "benchmark test data for decryption"
 	password := "benchmarkPassword"
 	encrypted, _ := AesEncryptCBC(data, password)
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = AesDecryptCBC(encrypted, password)

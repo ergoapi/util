@@ -30,20 +30,20 @@ func TestMakeZip(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "ziputil-test-*")
 	assert.NoError(t, err)
 	defer os.RemoveAll(tempDir)
-	
+
 	// 创建测试文件
 	testFile := filepath.Join(tempDir, "test.txt")
 	createTestFile(t, testFile, "Hello, World!")
-	
+
 	// 测试压缩文件
 	zipFile := filepath.Join(tempDir, "test.zip")
 	err = MakeZip(testFile, zipFile)
 	assert.NoError(t, err)
-	
+
 	// 验证zip文件存在
 	_, err = os.Stat(zipFile)
 	assert.NoError(t, err)
-	
+
 	// 测试压缩不存在的文件
 	err = MakeZip("/non/existent/path", "test.zip")
 	assert.Error(t, err)
@@ -343,12 +343,12 @@ func TestCompressErrorCases(t *testing.T) {
 	// 测试源文件不存在
 	err = CompressFile("/non/existent/file", "test.zip")
 	assert.Error(t, err)
-	
+
 	// 测试压缩目录到文件失败
 	tempDir, err := os.MkdirTemp("", "ziputil-test-*")
 	assert.NoError(t, err)
 	defer os.RemoveAll(tempDir)
-	
+
 	// 尝试压缩目录作为文件
 	err = CompressFile(tempDir, "test.zip")
 	assert.Error(t, err)
@@ -362,11 +362,11 @@ func TestCompressErrorCases(t *testing.T) {
 	// 尝试在只读目录中创建zip文件
 	err = CompressDir(tempDir, filepath.Join(readOnlyDir, "test.zip"))
 	assert.Error(t, err)
-	
+
 	// 测试解压不存在的zip文件
 	_, err = Unzip("/non/existent.zip", tempDir)
 	assert.Error(t, err)
-	
+
 	// 测试ZipFiles错误处理
 	err = ZipFiles("test.zip", []string{"/non/existent/file"})
 	assert.Error(t, err)
@@ -403,7 +403,7 @@ func TestZipSlipProtection(t *testing.T) {
 	// 创建一个恶意的zip文件（模拟）
 	// 注意：实际创建恶意zip文件需要特殊工具
 	// 这里只是测试防护逻辑
-	
+
 	// 测试extractFile函数的防护逻辑
 	// 由于无法直接测试私有函数，通过Unzip间接测试
 }
@@ -675,22 +675,22 @@ func TestCompressWithExternalSymlinks(t *testing.T) {
 // TestSymlinkHandler 测试软链接处理器
 func TestSymlinkHandler(t *testing.T) {
 	handler := newSymlinkHandler("/test/path")
-	
+
 	// 测试初始路径已被标记
 	assert.True(t, handler.isProcessed("/test/path"))
-	
+
 	// 测试新路径未被标记
 	assert.False(t, handler.isProcessed("/other/path"))
-	
+
 	// 标记新路径
 	handler.markProcessed("/other/path")
 	assert.True(t, handler.isProcessed("/other/path"))
-	
+
 	// 测试相对路径转换
 	currentDir, _ := os.Getwd()
 	relPath := "relative/path"
 	handler.markProcessed(relPath)
-	
+
 	absPath := filepath.Join(currentDir, relPath)
 	assert.True(t, handler.isProcessed(absPath))
 }
@@ -701,31 +701,31 @@ func TestFilePermissions(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "ziputil-test-perm-*")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
-	
+
 	// 创建具有特定权限的文件
 	testFile := filepath.Join(tempDir, "test.txt")
 	err = os.WriteFile(testFile, []byte("test"), 0755)
 	require.NoError(t, err)
-	
+
 	// 设置特定权限
 	err = os.Chmod(testFile, 0755)
 	require.NoError(t, err)
-	
+
 	// 压缩文件
 	zipFile := filepath.Join(tempDir, "test.zip")
 	err = CompressFile(testFile, zipFile)
 	require.NoError(t, err)
-	
+
 	// 解压缩
 	extractDir := filepath.Join(tempDir, "extracted")
 	_, err = Unzip(zipFile, extractDir)
 	require.NoError(t, err)
-	
+
 	// 验证权限（注意：Windows上权限可能不同）
 	extractedFile := filepath.Join(extractDir, "test.txt")
 	info, err := os.Stat(extractedFile)
 	require.NoError(t, err)
-	
+
 	if runtime.GOOS != "windows" {
 		// Unix系统上验证权限
 		assert.Equal(t, os.FileMode(0755), info.Mode()&os.ModePerm)

@@ -19,8 +19,9 @@ import (
 	b64 "encoding/base64"
 	"math/big"
 
-	"github.com/cockroachdb/errors"
 	"github.com/ergoapi/util/common"
+
+	"github.com/cockroachdb/errors"
 )
 
 // B64Encode base64编码
@@ -64,10 +65,10 @@ func B58Encode(data []byte) string {
 	if len(data) == 0 {
 		return ""
 	}
-	
+
 	// 将字节数组转换为大整数
 	intBytes := big.NewInt(0).SetBytes(data)
-	
+
 	// 计算前导零的数量
 	leadingZeros := 0
 	for _, b := range data {
@@ -77,21 +78,21 @@ func B58Encode(data []byte) string {
 			break
 		}
 	}
-	
+
 	// 转换为base58
 	var result []byte
 	int0, int58 := big.NewInt(0), big.NewInt(58)
-	
+
 	for intBytes.Cmp(big.NewInt(0)) > 0 {
 		intBytes.DivMod(intBytes, int58, int0)
 		result = append(result, common.Base58table[int0.Int64()])
 	}
-	
+
 	// 添加前导1（代表前导零）
 	for i := 0; i < leadingZeros; i++ {
 		result = append(result, '1')
 	}
-	
+
 	// 反转结果
 	return string(reverseBytes(result))
 }
@@ -107,7 +108,7 @@ func B58Decode(data string) ([]byte, error) {
 	if data == "" {
 		return nil, errors.New("empty input")
 	}
-	
+
 	// 计算前导1的数量（代表前导零）
 	leadingOnes := 0
 	for _, c := range data {
@@ -117,7 +118,7 @@ func B58Decode(data string) ([]byte, error) {
 			break
 		}
 	}
-	
+
 	// 转换为大整数
 	int0 := big.NewInt(0)
 	for _, c := range []byte(data) {
@@ -128,15 +129,15 @@ func B58Decode(data string) ([]byte, error) {
 		int0.Mul(int0, big.NewInt(58))
 		int0.Add(int0, big.NewInt(int64(index)))
 	}
-	
+
 	// 转换为字节数组
 	result := int0.Bytes()
-	
+
 	// 添加前导零
 	for i := 0; i < leadingOnes; i++ {
 		result = append([]byte{0}, result...)
 	}
-	
+
 	return result, nil
 }
 

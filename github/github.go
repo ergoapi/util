@@ -49,7 +49,7 @@ func (c *DefaultClient) ListTags(ctx context.Context, owner, repo string) ([]Tag
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var result []Tag
 	for _, tag := range tags {
 		result = append(result, Tag{

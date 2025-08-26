@@ -31,11 +31,11 @@ func ensureDir(dirName string, perm os.FileMode) error {
 	if perm == 0 {
 		perm = 0755
 	}
-	
+
 	err := os.MkdirAll(dirName, perm)
 	if err != nil && !os.IsExist(err) {
 		return errors.Wrap(err, "failed to create directory")
 	}
-	
+
 	return nil
 }
