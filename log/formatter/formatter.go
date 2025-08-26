@@ -7,6 +7,32 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// findLibraryCallerInternal 内部共享的查找逻辑
+func findLibraryCallerInternal(libraryPathPrefix string) *runtime.Frame {
+	// 从调用堆栈的第4帧开始查找（跳过本函数、findLibraryCaller、Format函数）
+	pcs := make([]uintptr, 50)
+	n := runtime.Callers(4, pcs)
+	frames := runtime.CallersFrames(pcs[:n])
+
+	for {
+		frame, more := frames.Next()
+		// 检查是否是库内的调用
+		if strings.Contains(frame.File, libraryPathPrefix) {
+			return &runtime.Frame{
+				PC:       frame.PC,
+				Func:     frame.Func,
+				Function: frame.Function,
+				File:     frame.File,
+				Line:     frame.Line,
+			}
+		}
+		if !more {
+			break
+		}
+	}
+	return nil
+}
+
 // FilteredTextFormatter 是一个自定义的logrus.TextFormatter，它可以过滤调用堆栈
 // 只显示特定库路径前缀的调用信息
 type FilteredTextFormatter struct {
@@ -36,28 +62,7 @@ func (f *FilteredTextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 // findLibraryCaller 在调用堆栈中查找第一个匹配库路径前缀的调用者
 func (f *FilteredTextFormatter) findLibraryCaller() *runtime.Frame {
-	// 从调用堆栈的第3帧开始查找（跳过当前函数和Format函数）
-	pcs := make([]uintptr, 50)
-	n := runtime.Callers(3, pcs)
-	frames := runtime.CallersFrames(pcs[:n])
-
-	for {
-		frame, more := frames.Next()
-		// 检查是否是库内的调用
-		if strings.Contains(frame.File, f.LibraryPathPrefix) {
-			return &runtime.Frame{
-				PC:       frame.PC,
-				Func:     frame.Func,
-				Function: frame.Function,
-				File:     frame.File,
-				Line:     frame.Line,
-			}
-		}
-		if !more {
-			break
-		}
-	}
-	return nil
+	return findLibraryCallerInternal(f.LibraryPathPrefix)
 }
 
 // FilteredJSONFormatter 是一个自定义的logrus.JSONFormatter，它可以过滤调用堆栈
@@ -89,28 +94,7 @@ func (f *FilteredJSONFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 // findLibraryCaller 在调用堆栈中查找第一个匹配库路径前缀的调用者
 func (f *FilteredJSONFormatter) findLibraryCaller() *runtime.Frame {
-	// 从调用堆栈的第3帧开始查找（跳过当前函数和Format函数）
-	pcs := make([]uintptr, 50)
-	n := runtime.Callers(3, pcs)
-	frames := runtime.CallersFrames(pcs[:n])
-
-	for {
-		frame, more := frames.Next()
-		// 检查是否是库内的调用
-		if strings.Contains(frame.File, f.LibraryPathPrefix) {
-			return &runtime.Frame{
-				PC:       frame.PC,
-				Func:     frame.Func,
-				Function: frame.Function,
-				File:     frame.File,
-				Line:     frame.Line,
-			}
-		}
-		if !more {
-			break
-		}
-	}
-	return nil
+	return findLibraryCallerInternal(f.LibraryPathPrefix)
 }
 
 // NewFilteredTextFormatter 创建一个新的FilteredTextFormatter实例

@@ -55,6 +55,6 @@ func (hook *RotateFileHook) Fire(entry *logrus.Entry) (err error) {
 	if err != nil {
 		return err
 	}
-	hook.logWriter.Write(b)
-	return nil
+	_, err = hook.logWriter.Write(b)
+	return err
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ergoapi/util/exctx"
@@ -25,6 +26,7 @@ type GLogger struct {
 	LogLevel      logger.LogLevel
 	LogPath       string
 	SlowThreshold time.Duration
+	mu            sync.RWMutex // 保护LogPath的并发访问
 }
 
 func (mgl *GLogger) LogMode(logLevel logger.LogLevel) logger.Interface {
@@ -33,6 +35,9 @@ func (mgl *GLogger) LogMode(logLevel logger.LogLevel) logger.Interface {
 }
 
 func (mgl *GLogger) logPath(key string) string {
+	mgl.mu.Lock()
+	defer mgl.mu.Unlock()
+	
 	if len(mgl.LogPath) != 0 && !strings.HasSuffix(mgl.LogPath, "/") {
 		mgl.LogPath = mgl.LogPath + "/"
 	}
@@ -82,10 +87,10 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		case err != nil && mgl.LogLevel >= logger.Error:
 			sql, rows := fc()
 			if rows == -1 || rows == 0 || err == gorm.ErrRecordNotFound {
-				// TODO: 保存到文件
+				// 异步保存到文件，错误只记录不panic
 				go func() {
 					if err := file.WriteFileWithLine(mgl.logPath("dbnotfound"), sql); err != nil {
-						panic(err)
+						logrus.WithError(err).Error("Failed to write dbnotfound log")
 					}
 				}()
 				logrus.WithFields(logrus.Fields{
@@ -115,10 +120,10 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		case mgl.SlowThreshold != 0 && elapsed > mgl.SlowThreshold && mgl.LogLevel >= logger.Warn:
 			sql, rows := fc()
 			slowLog := fmt.Sprintf("SLOW SQL >= %v", mgl.SlowThreshold)
-			// TODO: 保存到文件
+			// 异步保存到文件，错误只记录不panic  
 			go func() {
 				if err := file.WriteFileWithLine(mgl.logPath("slowsql"), sql+" "+slowLog); err != nil {
-					panic(err)
+					logrus.WithError(err).Error("Failed to write slowsql log")
 				}
 			}()
 			if rows == -1 {
