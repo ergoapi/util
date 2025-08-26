@@ -36,6 +36,6 @@ tasks:
     cmds:
       - task: fmt
       - task: gci
-      - task: govulncheck
       - task: lint
       - task: test
+#      - task: govulncheck

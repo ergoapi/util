@@ -388,10 +388,8 @@ func TestChownR(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		// Windows上应该成功（空操作）
 		assert.NoError(t, err)
-	} else {
-		// Unix系统上可能成功或失败（取决于权限）
-		// 不做强制断言
 	}
+	// Unix系统上可能成功或失败（取决于权限），不做强制断言
 }
 
 // TestZipSlipProtection 测试ZipSlip攻击防护

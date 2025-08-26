@@ -49,10 +49,8 @@ func ensureDir(dirName string, perm os.FileMode) error {
 
 	// Unix系统上设置所有者
 	uid, gid := getFileOwnership()
-	if err := chownR(dirName, uid, gid); err != nil {
-		// 非致命错误，继续执行
-		// 某些文件系统可能不支持chown
-	}
+	// 忽略chown错误，因为某些文件系统可能不支持
+	_ = chownR(dirName, uid, gid)
 
 	return nil
 }

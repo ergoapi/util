@@ -78,7 +78,7 @@ func TestNewFilteredTextFormatter(t *testing.T) {
 
 	assert.NotNil(t, formatter)
 	assert.Equal(t, prefix, formatter.LibraryPathPrefix)
-	assert.IsType(t, logrus.TextFormatter{}, formatter.TextFormatter)
+	assert.IsType(t, &logrus.TextFormatter{}, &formatter.TextFormatter)
 }
 
 func TestNewFilteredJSONFormatter(t *testing.T) {

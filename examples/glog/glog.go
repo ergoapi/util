@@ -16,7 +16,7 @@ func main() {
 	ctx := context.Background()
 
 	// 创建glog实例
-	glogger := glog.DefaultGLogger
+	glogger := &glog.DefaultGLogger
 
 	// 设置日志路径（可选）
 	// glogger.LogPath = "/tmp/glog-test"
