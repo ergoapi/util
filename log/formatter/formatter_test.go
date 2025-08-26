@@ -119,7 +119,7 @@ func TestFilteredFormatter_ComplexPath(t *testing.T) {
 		{
 			name:       "Windows路径",
 			prefix:     "github.com/ergoapi",
-			callerFile: `C:\Users\test\go\src\github.com\other\main.go`,
+			callerFile: `C:\Users\test\go\src\github.com\other\main.go`, // "other" 是故意的，用于测试不匹配的路径
 			shouldFind: false,
 		},
 		{
