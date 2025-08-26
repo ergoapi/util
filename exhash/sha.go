@@ -14,7 +14,6 @@
 package exhash
 
 import (
-	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -38,7 +37,8 @@ func GenSha512(code string) string {
 	return hex.EncodeToString(s.Sum(nil))
 }
 
-// GenSha1 生成sha1
+// GenSha1 生成SHA1哈希值
+// Deprecated: SHA1已不安全，仅用于向后兼容。新代码应使用SHA256或更安全的哈希算法
 func GenSha1(code string) string {
 	s := sha1.New()
 	s.Write([]byte(code))
@@ -59,8 +59,3 @@ func String(s string) string {
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
-func Hex(s string, length int) string {
-	h := md5.Sum([]byte(s))
-	d := hex.EncodeToString(h[:])
-	return d[:length]
-}

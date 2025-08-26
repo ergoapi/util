@@ -1,159 +1,440 @@
 package ztime
 
 import (
-	"time"
-
-	"github.com/ergoapi/util/common"
+	"github.com/dromara/carbon/v2"
 )
 
-// https://github.com/golang-module/carbon 参考
-
-type ZTime struct {
-	time time.Time
-	loc  *time.Location
+func init() {
+	carbon.SetTimezone("Asia/Shanghai")
 }
 
-func NewZTime() ZTime {
-	loc, _ := time.LoadLocation("Asia/Shanghai")
-	return ZTime{loc: loc}
+// YesterdayNow 昨天此刻
+func YesterdayNow() string {
+	return carbon.Yesterday().ToDateTimeString()
 }
 
-// Time2ZTime time.Time 转化成Ztime
-func Time2ZTime(tt time.Time) ZTime {
-	zt := NewZTime()
-	zt.time = tt
-	return zt
+// YesterdayDate 昨天日期
+func YesterdayDate() string {
+	return carbon.Yesterday().ToDateString()
 }
 
-func (zt ZTime) ZTime2Time() time.Time {
-	return zt.time.In(zt.loc)
-}
-
-func (zt ZTime) Now() ZTime {
-	zt.time = time.Now().In(zt.loc)
-	return zt
+// YesterdayTimestamp 昨天时间戳秒
+func YesterdayTimestamp() int64 {
+	return carbon.Yesterday().Timestamp()
 }
 
 // Now 当前时间
-func Now() ZTime {
-	return NewZTime().Now()
+func Now() string {
+	return carbon.Now().ToDateTimeString()
 }
 
-func (zt ZTime) Tomorrow() ZTime {
-	if zt.IsZero() {
-		zt.time = time.Now().In(zt.loc).AddDate(0, 0, 1)
+// NowDate 今天日期
+func NowDate() string {
+	return carbon.Now().ToDateString()
+}
+
+// NowTimestamp 当前时间戳秒
+func NowTimestamp() int64 {
+	return carbon.Now().Timestamp()
+}
+
+// TomorrowNow 明天此刻
+func TomorrowNow() string {
+	return carbon.Tomorrow().ToDateTimeString()
+}
+
+// TomorrowDate 明天日期
+func TomorrowDate() string {
+	return carbon.Tomorrow().ToDateString()
+}
+
+// TomorrowTimestamp 明天时间戳秒
+func TomorrowTimestamp() int64 {
+	return carbon.Tomorrow().Timestamp()
+}
+
+// Minute 当前时间minutes分钟数后
+func Minute(minutes int) string {
+	if minutes >= 0 {
+		return carbon.Now().AddMinutes(minutes).ToDateTimeString()
+	}
+	// 负数则减去minutes分钟
+	minutes = -minutes
+	return carbon.Now().SubMinutes(minutes).ToDateTimeString()
+}
+
+// MinuteTimestamp 当前时间minutes分钟数后时间戳秒
+func MinuteTimestamp(minutes int) int64 {
+	if minutes >= 0 {
+		return carbon.Now().AddMinutes(minutes).Timestamp()
+	}
+	// 负数则减去minutes分钟
+	minutes = -minutes
+	return carbon.Now().SubMinutes(minutes).Timestamp()
+}
+
+// Hour 当前时间hours小时数后
+func Hour(hours int) string {
+	if hours >= 0 {
+		return carbon.Now().AddHours(hours).ToDateTimeString()
+	}
+	// 负数则减去hours小时
+	hours = -hours
+	return carbon.Now().SubHours(hours).ToDateTimeString()
+}
+
+// HourTimestamp 当前时间hours小时数后时间戳秒
+func HourTimestamp(hours int) int64 {
+	if hours >= 0 {
+		return carbon.Now().AddHours(hours).Timestamp()
+	}
+	// 负数则减去hours小时
+	hours = -hours
+	return carbon.Now().SubHours(hours).Timestamp()
+}
+
+// HourDate 当前时间hours小时数后日期
+func HourDate(hours int) string {
+	if hours >= 0 {
+		return carbon.Now().AddHours(hours).ToDateString()
+	}
+	// 负数则减去hours小时
+	hours = -hours
+	return carbon.Now().SubHours(hours).ToDateString()
+}
+
+// Day 当前时间day天数后
+func Day(day int) string {
+	if day >= 0 {
+		return carbon.Now().AddDays(day).ToDateTimeString()
+	}
+	// 负数则减去days天
+	day = -day
+	return carbon.Now().SubDays(day).ToDateTimeString()
+}
+
+// DayDate 当前时间day天数后日期
+func DayDate(day int) string {
+	if day >= 0 {
+		return carbon.Now().AddDays(day).ToDateString()
+	}
+	// 负数则减去days天
+	day = -day
+	return carbon.Now().SubDays(day).ToDateString()
+}
+
+// Month 当前时间month月数后
+func Month(month int) string {
+	if month >= 0 {
+		return carbon.Now().AddMonthsNoOverflow(month).ToDateTimeString()
+	}
+	// 负数则减去months月
+	month = -month
+	return carbon.Now().SubMonthsNoOverflow(month).ToDateTimeString()
+}
+
+// MonthDate 当前时间month月数后日期
+func MonthDate(month int) string {
+	if month >= 0 {
+		return carbon.Now().AddMonthsNoOverflow(month).ToDateString()
+	}
+	// 负数则减去months月
+	month = -month
+	return carbon.Now().SubMonthsNoOverflow(month).ToDateString()
+}
+
+// DaysInYear 获取指定时间所在年份的天数, 如果未指定时间, 则获取当前时间所在年份的天数
+func DaysInYear(t ...string) int {
+	if len(t) == 0 {
+		return carbon.Now().DaysInYear()
+	}
+	// t 格式为 2019-08-05 13:14:15
+	return carbon.Parse(t[0]).DaysInYear()
+}
+
+// DaysInMonth 获取指定时间所在月份的天数, 如果未指定时间, 则获取当前时间所在月份的天数
+func DaysInMonth(t ...string) int {
+	if len(t) == 0 {
+		return carbon.Now().DaysInMonth()
+	}
+	// t 格式为 2019-08-05 13:14:15
+	return carbon.Parse(t[0]).DaysInMonth()
+}
+
+// Age 获取年龄
+func Age(t string) int {
+	return carbon.Parse(t).Age()
+}
+
+// Season 获取当前季节
+func Season() string {
+	return carbon.Now().SetLocale("en").Season()
+}
+
+// Constellation 获取星座
+func Constellation(t ...string) string {
+	if len(t) == 0 {
+		return carbon.Now().SetLocale("en").Constellation()
+	}
+	// t 格式为 2019-08-05 13:14:15
+	return carbon.Parse(t[0]).SetLocale("en").Constellation()
+}
+
+// WeekOfYear 获取当前时间所在周数
+func WeekOfYear() int {
+	return carbon.Now().WeekOfYear()
+}
+
+// DayOfYear 获取当前时间所在年的第几天
+func DayOfYear() int {
+	return carbon.Now().DayOfYear()
+}
+
+// DayOfWeek 获取当前时间所在周的第几天
+func DayOfWeek() int {
+	return carbon.Now().DayOfWeek()
+}
+
+// YearStartEnd 获取年份开始和结束时间
+func YearStartEnd(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
 	} else {
-		zt.time = zt.time.In(zt.loc).AddDate(0, 0, 1)
+		c = carbon.Parse(t[0])
 	}
-	return zt
+	return c.StartOfYear().ToDateTimeString(), c.EndOfYear().ToDateTimeString()
 }
 
-// Tomorrow
-func Tomorrow() ZTime {
-	return NewZTime().Tomorrow()
-}
-
-func (zt ZTime) Yesterday() ZTime {
-	if zt.IsZero() {
-		zt.time = time.Now().In(zt.loc).AddDate(0, 0, -1)
+// YearStartEndTimestamp 获取年份开始和结束时间戳
+func YearStartEndTimestamp(t ...string) (int64, int64) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
 	} else {
-		zt.time = zt.time.In(zt.loc).AddDate(0, 0, -1)
+		c = carbon.Parse(t[0])
 	}
-	return zt
+	return c.StartOfYear().Timestamp(), c.EndOfYear().Timestamp()
 }
 
-// Yesterday 昨天
-func Yesterday() ZTime {
-	return NewZTime().Yesterday()
-}
-
-// IsZero 是否是零值时间
-func (zt ZTime) IsZero() bool {
-	return zt.time.IsZero()
-}
-
-// 是否是无效时间
-func (zt ZTime) IsInvalid() bool {
-	if zt.IsZero() {
-		return true
+// YearStartEndDate 获取年份开始和结束日期
+func YearStartEndDate(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return false
+	return c.StartOfYear().ToDateString(), c.EndOfYear().ToDateString()
 }
 
-// 是否是闰年
-func (zt ZTime) IsLeapYear() bool {
-	if zt.IsInvalid() {
-		return false
+// QuarterStartEnd 获取当前时间所在季度的开始和结束时间
+func QuarterStartEnd(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	year := zt.time.Year()
-	if year%400 == 0 || (year%4 == 0 && year%100 != 0) {
-		return true
+	return c.StartOfQuarter().ToDateTimeString(), c.EndOfQuarter().ToDateTimeString()
+}
+
+// QuarterStartEndTimestamp 获取当前时间所在季度的开始和结束时间戳
+func QuarterStartEndTimestamp(t ...string) (int64, int64) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return false
+	return c.StartOfQuarter().Timestamp(), c.EndOfQuarter().Timestamp()
 }
 
-func (zt ZTime) Weekday() time.Weekday {
-	return zt.time.Weekday()
-}
-
-// IsSaturday 是否是周六
-func (zt ZTime) IsSaturday() bool {
-	if zt.IsInvalid() {
-		return false
+// QuarterStartEndDate 获取当前时间所在季度的开始和结束日期
+func QuarterStartEndDate(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return zt.time.In(zt.loc).Weekday() == time.Saturday
+	return c.StartOfQuarter().ToDateString(), c.EndOfQuarter().ToDateString()
 }
 
-// IsSunday 是否是周日
-func (zt ZTime) IsSunday() bool {
-	if zt.IsInvalid() {
-		return false
+// MonthStartEnd 获取月份开始和结束时间
+func MonthStartEnd(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return zt.time.In(zt.loc).Weekday() == time.Sunday
+	return c.StartOfMonth().ToDateTimeString(), c.EndOfMonth().ToDateTimeString()
 }
 
-// IsWeekday 是否是工作日
-func (zt ZTime) IsWeekday() bool {
-	if zt.IsInvalid() {
-		return false
+// MonthStartEndTimestamp 获取月份开始和结束时间戳
+func MonthStartEndTimestamp(t ...string) (int64, int64) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return !zt.IsSaturday() && !zt.IsSunday()
+	return c.StartOfMonth().Timestamp(), c.EndOfMonth().Timestamp()
 }
 
-// IsWeekend reports whether is weekend.
-// 是否是周末
-func (zt ZTime) IsWeekend() bool {
-	if zt.IsInvalid() {
-		return false
+// MonthStartEndDate 获取月份开始和结束日期
+func MonthStartEndDate(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return zt.IsSaturday() || zt.IsSunday()
+	return c.StartOfMonth().ToDateString(), c.EndOfMonth().ToDateString()
 }
 
-func (zt ZTime) NeedWork() bool {
-	today := zt.DateTimeLayout()
-	h := HolidayGet(today)
-	return h.NeedWork
-}
-
-// NeedWork 需要工作
-func NeedWork() bool {
-	today := NewZTime().Now().DateTimeLayout()
-	h := HolidayGet(today)
-	return h.NeedWork
-}
-
-// DefaultTimeLayout 输出日期字符串
-func (zt ZTime) DefaultTimeLayout() string {
-	if zt.IsInvalid() {
-		return ""
+// WeekStartEnd 获取周开始和结束时间
+func WeekStartEnd(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return zt.time.In(zt.loc).Format(common.DefaultTimeLayout)
+	return c.StartOfWeek().ToDateTimeString(), c.EndOfWeek().ToDateTimeString()
 }
 
-// DateTimeLayout 输出日期字符串
-func (zt ZTime) DateTimeLayout() string {
-	if zt.IsInvalid() {
-		return ""
+// WeekStartEndTimestamp 获取周开始和结束时间戳
+func WeekStartEndTimestamp(t ...string) (int64, int64) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
 	}
-	return zt.time.In(zt.loc).Format(common.DateTimeLayout)
+	return c.StartOfWeek().Timestamp(), c.EndOfWeek().Timestamp()
+}
+
+// WeekStartEndDate 获取周开始和结束日期
+func WeekStartEndDate(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
+	}
+	return c.StartOfWeek().ToDateString(), c.EndOfWeek().ToDateString()
+}
+
+// DayStartEnd 获取日开始和结束时间
+func DayStartEnd(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
+	}
+	return c.StartOfDay().ToDateTimeString(), c.EndOfDay().ToDateTimeString()
+}
+
+// DayStartEndTimestamp 获取日开始和结束时间戳
+func DayStartEndTimestamp(t ...string) (int64, int64) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
+	}
+	return c.StartOfDay().Timestamp(), c.EndOfDay().Timestamp()
+}
+
+// DayStartEndDate 获取日开始和结束日期
+func DayStartEndDate(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
+	}
+	return c.StartOfDay().ToDateString(), c.EndOfDay().ToDateString()
+}
+
+// HourStartEnd 获取小时开始和结束时间
+func HourStartEnd(t ...string) (string, string) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
+	}
+	return c.StartOfHour().ToDateTimeString(), c.EndOfHour().ToDateTimeString()
+}
+
+// HourStartEndTimestamp 获取小时开始和结束时间戳
+func HourStartEndTimestamp(t ...string) (int64, int64) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
+	}
+	return c.StartOfHour().Timestamp(), c.EndOfHour().Timestamp()
+}
+
+// ToLunar 转换为农历日期 2020-06-16
+func ToLunar(t ...string) string {
+	if len(t) == 0 {
+		return carbon.Now().Lunar().String()
+	}
+	// t 格式为 2020-08-05
+	return carbon.Parse(t[0]).Lunar().String()
+}
+
+// ToLunarDate 转换为农历日期 二零二零年六月十六
+func ToLunarDate(t ...string) string {
+	if len(t) == 0 {
+		return carbon.Now().Lunar().ToDateString()
+	}
+	// t 格式为 2020-08-05
+	return carbon.Parse(t[0]).Lunar().ToDateString()
+}
+
+// LunarAnimal 获取农历生肖
+func LunarAnimal(t ...string) string {
+	if len(t) == 0 {
+		return carbon.Now().Lunar().Animal()
+	}
+	// t 格式为 2020-08-05
+	return carbon.Parse(t[0]).Lunar().Animal()
+}
+
+// ParseTimestamp 解析时间戳为时间字符串
+func ParseTimestamp(t int64) string {
+	return carbon.CreateFromTimestamp(t).ToDateTimeString()
+}
+
+// ParseTimestampDate 解析时间戳为日期字符串
+func ParseTimestampDate(t int64) string {
+	return carbon.CreateFromTimestamp(t).ToDateString()
+}
+
+// ParseTimestampMilli 解析毫秒时间戳为时间字符串
+func ParseTimestampMilli(t int64) string {
+	return carbon.CreateFromTimestampMilli(t).ToDateTimeString()
+}
+
+// ParseTimestampMilliDate 解析毫秒时间戳为日期字符串
+func ParseTimestampMilliDate(t int64) string {
+	return carbon.CreateFromTimestampMilli(t).ToDateString()
+}
+
+// ParseString 解析时间字符串为时间字符串
+func ParseString(t string) string {
+	return carbon.Parse(t).ToDateTimeString()
+}
+
+// ParseStringDate 解析时间字符串为日期字符串
+func ParseStringDate(t string) string {
+	return carbon.Parse(t).ToDateString()
 }

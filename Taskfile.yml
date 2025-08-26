@@ -27,9 +27,15 @@ tasks:
       - command -v gci || go install github.com/daixiang0/gci@latest
       - gci write --skip-generated --custom-order -s standard -s "prefix(github.com/ergoapi/util)" -s default -s blank -s dot .
 
+  test:
+    desc: test code
+    cmds:
+      - GITHUB_INTEGRATION_TEST=1 go test -v ./...
+
   default:
     cmds:
       - task: fmt
       - task: gci
       - task: govulncheck
       - task: lint
+      - task: test

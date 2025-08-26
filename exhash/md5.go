@@ -18,9 +18,18 @@ import (
 	"encoding/hex"
 )
 
-// MD5 md5
+// MD5 计算MD5哈希值
+// Deprecated: MD5已不安全，仅用于向后兼容。新代码应使用SHA256或更安全的哈希算法
 func MD5(str string) string {
 	s := md5.New()
 	s.Write([]byte(str))
 	return hex.EncodeToString(s.Sum(nil))
+}
+
+// Hex 生成指定长度的MD5十六进制字符串
+// Deprecated: MD5已不安全，仅用于向后兼容。新代码应使用SHA256或更安全的哈希算法
+func Hex(s string, length int) string {
+	h := md5.Sum([]byte(s))
+	d := hex.EncodeToString(h[:])
+	return d[:length]
 }
