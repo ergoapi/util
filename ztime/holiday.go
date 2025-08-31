@@ -15,10 +15,11 @@ import (
 
 // Holiday 节假日信息
 type Holiday struct {
-	Date     string `json:"date"`      // 日期
-	Name     string `json:"name"`      // 名称
-	IsWork   bool   `json:"is_work"`   // 是否需要工作
-	IsAdjust bool   `json:"is_adjust"` // 是否是调休
+	Date      string `json:"date"`       // 日期
+	Name      string `json:"name"`       // 名称
+	IsHoliday bool   `json:"is_holiday"` // 是否是节假日
+	IsWork    bool   `json:"is_work"`    // 是否需要工作
+	IsAdjust  bool   `json:"is_adjust"`  // 是否是调休
 }
 
 // GetHoliday 获取指定日期的节假日信息
@@ -35,15 +36,19 @@ func GetHoliday(date string) (*Holiday, error) {
 
 	// 查询节假日信息
 	h := &Holiday{
-		Date: date,
+		// 规范化为 YYYY-MM-DD
+		Date: c.ToDateString(),
 	}
 
-	// 查询外部节假日数据
-	d := HolidayUtil.GetHoliday(date)
+	// 查询外部节假日数据（使用规范化日期）
+	d := HolidayUtil.GetHoliday(h.Date)
 	if d != nil {
 		h.Name = d.GetName()
 		h.IsWork = d.IsWork()
-		h.IsAdjust = d.IsWork() // 如果节假日需要工作，说明是调休
+		// 如果该日存在节假日数据且为工作日，通常为调休上班
+		h.IsAdjust = d.IsWork()
+		// 是否为休息日：与是否上班相反
+		h.IsHoliday = !h.IsWork
 
 		if h.IsAdjust {
 			h.Name = h.Name + "调休"
@@ -51,16 +56,18 @@ func GetHoliday(date string) (*Holiday, error) {
 		return h, nil
 	}
 
-	// 判断是否是周末
+	// 判断是否是周末（兼容不同返回范围：0=Sunday..6=Saturday 或 1=Monday..7=Sunday）
 	weekday := c.DayOfWeek()
-	if weekday == 6 || weekday == 7 { // 6=Saturday, 7=Sunday in carbon
+	if weekday == 6 || weekday == 7 || weekday == 0 {
 		h.Name = "周末"
 		h.IsWork = false
 		h.IsAdjust = false
+		h.IsHoliday = true
 	} else {
 		h.Name = "工作日"
 		h.IsWork = true
 		h.IsAdjust = false
+		h.IsHoliday = false
 	}
 
 	return h, nil
@@ -84,10 +91,20 @@ func IsWorkday(date string) (bool, error) {
 	return h.IsWork, nil
 }
 
-// NeedWork 判断今天是否需要工作
-func NeedWork() bool {
-	today := NowDate() // 使用新的 NowDate 函数
+// TodayNeedWork 判断今天是否需要工作
+func TodayNeedWork() bool {
+	today := NowDate()
 	h, err := GetHoliday(today)
+	if err != nil {
+		return true // 出错默认需要工作
+	}
+	return h.IsWork
+}
+
+// Deprecated: use IsWorkday instead
+// NeedWork 判断今天是否需要工作（兼容旧接口，无参数）
+func NeedWork() bool {
+	h, err := GetHoliday(NowDate())
 	if err != nil {
 		return true // 出错默认需要工作
 	}

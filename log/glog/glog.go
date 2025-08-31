@@ -9,6 +9,8 @@ package glog
 import (
 	"context"
 	"fmt"
+	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -25,6 +27,32 @@ import (
 var DefaultGLogger = GLogger{
 	LogLevel:      logger.Info,
 	SlowThreshold: 200 * time.Millisecond,
+}
+
+// getFilteredFileWithLineNum 获取过滤后的文件和行号信息
+// 跳过包含 "github.com/ergoapi/util" 的调用栈帧，返回应用代码的文件和行号
+func getFilteredFileWithLineNum() string {
+	// 使用与 gorm utils.FileWithLineNum() 相似的逻辑
+	pcs := [13]uintptr{}
+	// 从第3帧开始，跳过本函数和调用者
+	length := runtime.Callers(3, pcs[:])
+	frames := runtime.CallersFrames(pcs[:length])
+
+	for i := 0; i < length; i++ {
+		frame, _ := frames.Next()
+		// 跳过包含 "github.com/ergoapi/util" 的调用栈帧
+		// 同时跳过 gorm 内部文件、Go 标准库和生成的文件
+		if (!strings.Contains(frame.File, "github.com/ergoapi/util") &&
+			!strings.Contains(frame.File, "gorm.io/") &&
+			!strings.HasSuffix(frame.File, "_test.go")) &&
+			!strings.HasSuffix(frame.File, ".gen.go") &&
+			frame.File != "" {
+			return string(strconv.AppendInt(append([]byte(frame.File), ':'), int64(frame.Line), 10))
+		}
+	}
+
+	// 如果没有找到合适的调用栈帧，回退到原始方法
+	return utils.FileWithLineNum()
 }
 
 type GLogger struct {
@@ -103,7 +131,7 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 					"SpanID":          trace.SpanID,
 					"childSpanID":     trace.CSpanID,
 					"Tag":             "gorm",
-					"FileWithLineNum": utils.FileWithLineNum(),
+					"FileWithLineNum": getFilteredFileWithLineNum(),
 					"current_time":    currentTime,
 					"proc_time":       float64(elapsed.Milliseconds()),
 					"rows":            "-",
@@ -115,7 +143,7 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 					"SpanID":          trace.SpanID,
 					"childSpanID":     trace.CSpanID,
 					"Tag":             "gorm",
-					"FileWithLineNum": utils.FileWithLineNum(),
+					"FileWithLineNum": getFilteredFileWithLineNum(),
 					"current_time":    currentTime,
 					"proc_time":       float64(elapsed.Milliseconds()),
 					"rows":            rows,
@@ -137,7 +165,7 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 					"SpanID":          trace.SpanID,
 					"childSpanID":     trace.CSpanID,
 					"Tag":             "gorm",
-					"FileWithLineNum": utils.FileWithLineNum(),
+					"FileWithLineNum": getFilteredFileWithLineNum(),
 					"current_time":    currentTime,
 					"proc_time":       float64(elapsed.Milliseconds()),
 					"rows":            "-",
@@ -150,7 +178,7 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 					"SpanID":          trace.SpanID,
 					"childSpanID":     trace.CSpanID,
 					"Tag":             "gorm",
-					"FileWithLineNum": utils.FileWithLineNum(),
+					"FileWithLineNum": getFilteredFileWithLineNum(),
 					"current_time":    currentTime,
 					"proc_time":       float64(elapsed.Milliseconds()),
 					"rows":            rows,
@@ -166,7 +194,7 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 					"SpanID":          trace.SpanID,
 					"childSpanID":     trace.CSpanID,
 					"Tag":             "gorm",
-					"FileWithLineNum": utils.FileWithLineNum(),
+					"FileWithLineNum": getFilteredFileWithLineNum(),
 					"current_time":    currentTime,
 					"proc_time":       float64(elapsed.Milliseconds()),
 					"rows":            "-",
@@ -178,7 +206,7 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 					"SpanID":          trace.SpanID,
 					"childSpanID":     trace.CSpanID,
 					"Tag":             "gorm",
-					"FileWithLineNum": utils.FileWithLineNum(),
+					"FileWithLineNum": getFilteredFileWithLineNum(),
 					"current_time":    currentTime,
 					"proc_time":       float64(elapsed.Milliseconds()),
 					"rows":            rows,

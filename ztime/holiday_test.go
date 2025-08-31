@@ -165,12 +165,73 @@ func TestHolidayDetails(t *testing.T) {
 	// 测试春节
 	h, err = GetHoliday("2024-02-10") // 春节初一
 	assert.NoError(t, err)
+	assert.False(t, h.IsWork)
+	assert.True(t, h.IsHoliday)
 	t.Logf("2024-02-10: %s, IsWork: %v, IsAdjust: %v", h.Name, h.IsWork, h.IsAdjust)
 
 	// 测试调休日
 	h, err = GetHoliday("2024-02-04") // 春节前调休上班
 	assert.NoError(t, err)
+	assert.True(t, h.IsWork)
+	assert.False(t, h.IsHoliday)
+	assert.True(t, h.IsAdjust)
+	assert.Contains(t, h.Name, "调休")
 	t.Logf("2024-02-04: %s, IsWork: %v, IsAdjust: %v", h.Name, h.IsWork, h.IsAdjust)
+}
+
+func TestHolidayIsHolidayField(t *testing.T) {
+	// 正常工作日（大概率不在法定节假日表）
+	h, err := GetHoliday("2024-01-03")
+	assert.NoError(t, err)
+	assert.Equal(t, !h.IsWork, h.IsHoliday)
+	if h.IsWork {
+		assert.Equal(t, "工作日", h.Name)
+	}
+
+	// 周末（非调休）
+	h, err = GetHoliday("2024-01-06") // 周六
+	assert.NoError(t, err)
+	assert.False(t, h.IsWork)
+	assert.True(t, h.IsHoliday)
+	assert.Equal(t, "周末", h.Name)
+
+	// 法定节假日
+	h, err = GetHoliday("2024-01-01")
+	assert.NoError(t, err)
+	assert.False(t, h.IsWork)
+	assert.True(t, h.IsHoliday)
+}
+
+func TestHolidayDateNormalization(t *testing.T) {
+	h, err := GetHoliday("2024-02-10 12:34:56")
+	assert.NoError(t, err)
+	assert.Equal(t, "2024-02-10", h.Date)
+}
+
+func TestHolidayFallbackNames(t *testing.T) {
+	// 工作日回退名称
+	h, err := GetHoliday("2024-01-02") // 周二
+	assert.NoError(t, err)
+	if h.IsWork { // 若未命中法定数据，名称应为工作日
+		assert.Equal(t, "工作日", h.Name)
+	}
+
+	// 周末回退名称
+	h, err = GetHoliday("2024-01-07") // 周日
+	assert.NoError(t, err)
+	if !h.IsWork { // 若未命中法定数据，名称应为周末
+		assert.Equal(t, "周末", h.Name)
+	}
+}
+
+func TestSundayWeekendRecognition(t *testing.T) {
+	// 确认周日也能识别为周末（兼容 DayOfWeek 返回 0 的情况）
+	h, err := GetHoliday("2024-01-07") // 周日
+	assert.NoError(t, err)
+	if !h.IsAdjust { // 不是调休上班
+		assert.False(t, h.IsWork)
+		assert.True(t, h.IsHoliday)
+	}
 }
 
 func BenchmarkGetHoliday(b *testing.B) {
