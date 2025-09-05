@@ -9,10 +9,8 @@ package formatter
 import (
 	"fmt"
 	"runtime"
-	"strings"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -69,13 +67,56 @@ func TestFilteredJSONFormatter_Format(t *testing.T) {
 	assert.Contains(t, string(result), `"key":"value"`)
 }
 
-func TestFindLibraryCallerInternal(t *testing.T) {
-	// 测试查找不存在的路径
-	result := findLibraryCallerInternal("nonexistent/package/path")
-	assert.Nil(t, result)
+func TestFilteredTextFormatter_HideLibraryCaller(t *testing.T) {
+	// 测试：当调用者来自库内时，应该隐藏调用者信息
+	formatter := &FilteredTextFormatter{
+		TextFormatter:     logrus.TextFormatter{DisableTimestamp: true},
+		LibraryPathPrefix: "github.com/ergoapi/util",
+	}
 
-	// 注意：findLibraryCallerInternal 从第4帧开始查找
-	// 在直接调用时可能找不到匹配的路径
+	// 测试库内调用者（应该被隐藏）
+	t.Run("LibraryCaller", func(t *testing.T) {
+		entry := &logrus.Entry{
+			Message: "from library",
+			Level:   logrus.InfoLevel,
+			Caller: &runtime.Frame{
+				File:     "/Users/test/go/src/github.com/ergoapi/util/log/glog/glog.go",
+				Line:     214,
+				Function: "github.com/ergoapi/util/log/glog.(*GLogger).Trace",
+			},
+		}
+
+		result, err := formatter.Format(entry)
+		require.NoError(t, err)
+
+		// 验证消息存在但没有调用者信息
+		assert.Contains(t, string(result), "from library")
+		assert.NotContains(t, string(result), "file=")
+		assert.NotContains(t, string(result), "func=")
+	})
+
+	// 测试外部调用者（不应该被隐藏）
+	t.Run("ExternalCaller", func(t *testing.T) {
+		entry := &logrus.Entry{
+			Message: "from external",
+			Level:   logrus.InfoLevel,
+			Caller: &runtime.Frame{
+				File:     "/Users/test/app/main.go",
+				Line:     42,
+				Function: "main.main",
+			},
+		}
+
+		result, err := formatter.Format(entry)
+		require.NoError(t, err)
+
+		// 验证消息存在且有调用者信息
+		assert.Contains(t, string(result), "from external")
+		// 当启用了 ReportCaller 时，这些字段会出现
+		if formatter.CallerPrettyfier == nil && !formatter.DisableTimestamp {
+			assert.Contains(t, string(result), "main.go:42")
+		}
+	})
 }
 
 func TestNewFilteredTextFormatter(t *testing.T) {
@@ -189,13 +230,61 @@ func BenchmarkFilteredTextFormatter_Format(b *testing.B) {
 	}
 }
 
-func BenchmarkFindLibraryCallerInternal(b *testing.B) {
-	prefix := "github.com/ergoapi/util"
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		findLibraryCallerInternal(prefix)
+func TestFilteredJSONFormatter_HideLibraryCaller(t *testing.T) {
+	// 测试JSON格式化器的调用者隐藏功能
+	formatter := &FilteredJSONFormatter{
+		JSONFormatter:     logrus.JSONFormatter{DisableTimestamp: true},
+		LibraryPathPrefix: "github.com/ergoapi/util",
 	}
+
+	// 测试库内调用者（应该被隐藏）
+	t.Run("LibraryCaller", func(t *testing.T) {
+		entry := &logrus.Entry{
+			Message: "from library",
+			Level:   logrus.InfoLevel,
+			Caller: &runtime.Frame{
+				File:     "/go/pkg/mod/github.com/ergoapi/util@v1.1.0/log/glog/glog.go",
+				Line:     214,
+				Function: "github.com/ergoapi/util/log/glog.(*GLogger).Trace",
+			},
+			Data: logrus.Fields{
+				"traceID": "test-trace-id",
+			},
+		}
+
+		// Caller 会被设置为 nil
+		originalCaller := entry.Caller
+		result, err := formatter.Format(entry)
+		require.NoError(t, err)
+
+		// 验证 Caller 被设置为 nil（库内路径被隐藏）
+		assert.Nil(t, entry.Caller)
+		assert.Contains(t, string(result), `"traceID":"test-trace-id"`)
+
+		// 恢复以便其他测试
+		entry.Caller = originalCaller
+	})
+
+	// 测试外部调用者（不应该被隐藏）
+	t.Run("ExternalCaller", func(t *testing.T) {
+		entry := &logrus.Entry{
+			Message: "from external",
+			Level:   logrus.InfoLevel,
+			Caller: &runtime.Frame{
+				File:     "/Users/test/app/main.go",
+				Line:     42,
+				Function: "main.main",
+			},
+		}
+
+		originalCaller := entry.Caller
+		result, err := formatter.Format(entry)
+		require.NoError(t, err)
+
+		// 验证 Caller 没有被修改（外部路径保留）
+		assert.Equal(t, originalCaller, entry.Caller)
+		assert.Contains(t, string(result), `"msg":"from external"`)
+	})
 }
 
 // TestFormatterConcurrent 测试并发格式化
@@ -230,49 +319,4 @@ func TestFormatterConcurrent(t *testing.T) {
 	}
 
 	wg.Wait()
-}
-
-// TestFindLibraryCaller_Performance 性能退化测试
-func TestFindLibraryCaller_Performance(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过性能测试")
-	}
-
-	formatter := &FilteredTextFormatter{
-		TextFormatter:     logrus.TextFormatter{},
-		LibraryPathPrefix: "github.com/ergoapi/util",
-	}
-
-	// 创建深层调用栈
-	var deepCall func(depth int) *runtime.Frame
-	deepCall = func(depth int) *runtime.Frame {
-		if depth <= 0 {
-			return formatter.findLibraryCaller()
-		}
-		return deepCall(depth - 1)
-	}
-
-	// 测试不同深度的性能
-	depths := []int{10, 50, 100}
-	for _, depth := range depths {
-		t.Run(fmt.Sprintf("depth_%d", depth), func(t *testing.T) {
-			start := time.Now()
-			result := deepCall(depth)
-			elapsed := time.Since(start)
-
-			t.Logf("深度%d的查找时间: %v", depth, elapsed)
-
-			// 确保即使深层调用也能在合理时间内完成
-			assert.Less(t, elapsed, 10*time.Millisecond)
-
-			// 验证结果
-			if result != nil {
-				t.Logf("找到调用者: %s:%d", result.File, result.Line)
-			}
-
-			if strings.Contains(runtime.GOARCH, "wasm") {
-				t.Skip("WebAssembly环境跳过性能断言")
-			}
-		})
-	}
 }
