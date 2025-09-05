@@ -24,14 +24,18 @@ import (
 func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{})
 	logrus.SetOutput(os.Stdout)
-	logrus.AddHook(filehook.NewRotateFileHook(filehook.RotateFileConfig{
+	hook, err := filehook.NewRotateFileHook(filehook.RotateFileConfig{
 		Filename:   "/tmp/ergoapi.log",
 		MaxSize:    10,
 		MaxBackups: 1,
 		MaxAge:     1,
 		Level:      logrus.DebugLevel,
 		Formatter:  &logrus.JSONFormatter{},
-	}))
+	})
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	logrus.AddHook(hook)
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetReportCaller(true)
 }

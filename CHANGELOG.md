@@ -9,25 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2025-09-05]
 
-### Removed
-- **glog**: 完全移除文件写入功能，包括 `LogPath` 字段、`logPath()` 方法和所有异步 goroutine
-- **glog**: 移除 `sync.RWMutex`，不再需要并发控制
-- **formatter**: 移除 `findLibraryCaller` 和 `findLibraryCallerInternal` 辅助函数
+### Security
+- 日志文件 Hook 路径遍历漏洞修复：修复 `LevelSplitHook` 中缺少路径验证的安全漏洞，防止恶意路径写入任意位置
+  - 使用 `filepath.Clean()`、`filepath.Abs()` 与 `filepath.Rel()` 校验路径边界
+  - 通过 `strings.HasPrefix(rel, "..")` 拦截目录逃逸
+  - 确保所有日志文件只能写入指定目录内
+- 资源泄漏防护：为文件 Hook 添加 `Close()` 方法，防止文件句柄泄漏
+  - `LevelSplitHook.Close()` 正确关闭所有级别的 writer
+  - `RotateFileHook.Close()` 关闭 lumberjack writer
+  - 示例代码添加 `defer hook.Close()` 资源清理
+- 可靠性：`RotateFileHook` 和 `LevelSplitHook` 在初始化时自动创建日志目录，避免因目录不存在导致的写入失败
 
-### Changed
+### Added
+- **log/hooks/file**: 新增 `LevelSplitHook.Close()` 方法，支持优雅关闭和资源清理
+- **log/hooks/file**: 新增 `RotateFileHook.Close()` 方法，实现io.Closer接口
+- **examples/log**: 新增日志Hook使用示例，展示正确的资源管理模式
+- **examples/log_hooks**: 新增Hook示例代码，包含defer清理的最佳实践
+- **tests**: 新增Hook资源管理和路径安全的测试用例
+- **tests**: 新增 `trace_test.go`，包含全面的链路追踪上下文测试
+- **tests**: 验证 `FilteredFormatter` 不影响 trace 上下文传递
+- **examples**: 更新示例代码展示新的使用模式
+
+### Changed  
+- **log/hooks/file**: 优化 `LevelSplitHook` 路径处理逻辑，使用Go标准库进行安全路径验证
+- **examples**: 更新所有日志相关示例代码，添加资源清理的最佳实践
 - **formatter**: 简化 `FilteredTextFormatter` 和 `FilteredJSONFormatter` 实现，直接设置 `entry.Caller = nil` 来隐藏库内部调用信息
 - **glog**: 优化 `Trace` 方法，提取 `createTraceFields` 辅助函数消除重复代码
 - **glog**: 优化 `Info/Warn/Error` 方法，使用统一的 `logWithLevel` 辅助函数
 - **glog**: 改进 `getFilteredFileWithLineNum` 函数，更精确地过滤调用栈
 
 ### Fixed
+- **log/hooks/file**: 修复 `createWriter` 方法中潜在的路径遍历安全风险
+- **examples**: 修复示例代码中缺少资源清理的问题
 - **formatter**: 修复库内部路径（`github.com/ergoapi/util`）的调用者信息过滤问题
 - **glog**: 修复测试中的 `exctx.TraceContext` 结构体字段访问问题
 
-### Added
-- **tests**: 新增 `trace_test.go`，包含全面的链路追踪上下文测试
-- **tests**: 验证 `FilteredFormatter` 不影响 trace 上下文传递
-- **examples**: 更新示例代码展示新的使用模式
+### Breaking
+- `log/hooks/file`: `NewRotateFileHook` 签名由 `func(...) logrus.Hook` 变更为 `func(...) (logrus.Hook, error)`，需检查错误后再 `AddHook`
+- `log/formatter`: 结构体字段由 `LibraryPathPrefix string` 变更为 `LibraryPathPrefixes []string`，如使用结构字面量初始化需更新
+
+### Removed
+- **glog**: 完全移除文件写入功能，包括 `LogPath` 字段、`logPath()` 方法和所有异步 goroutine
+- **glog**: 移除 `sync.RWMutex`，不再需要并发控制
+- **formatter**: 移除 `findLibraryCaller` 和 `findLibraryCallerInternal` 辅助函数
 
 ### Performance
 - **glog**: 移除异步文件写入，消除 goroutine 开销

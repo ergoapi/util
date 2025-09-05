@@ -19,8 +19,8 @@ import (
 
 func TestFilteredTextFormatter_Format(t *testing.T) {
 	formatter := &FilteredTextFormatter{
-		TextFormatter:     logrus.TextFormatter{DisableTimestamp: true},
-		LibraryPathPrefix: "github.com/ergoapi/util",
+		TextFormatter:       logrus.TextFormatter{DisableTimestamp: true},
+		LibraryPathPrefixes: []string{"github.com/ergoapi/util"},
 	}
 
 	entry := &logrus.Entry{
@@ -42,8 +42,8 @@ func TestFilteredTextFormatter_Format(t *testing.T) {
 
 func TestFilteredJSONFormatter_Format(t *testing.T) {
 	formatter := &FilteredJSONFormatter{
-		JSONFormatter:     logrus.JSONFormatter{DisableTimestamp: true},
-		LibraryPathPrefix: "github.com/ergoapi/util",
+		JSONFormatter:       logrus.JSONFormatter{DisableTimestamp: true},
+		LibraryPathPrefixes: []string{"github.com/ergoapi/util"},
 	}
 
 	entry := &logrus.Entry{
@@ -70,8 +70,8 @@ func TestFilteredJSONFormatter_Format(t *testing.T) {
 func TestFilteredTextFormatter_HideLibraryCaller(t *testing.T) {
 	// 测试：当调用者来自库内时，应该隐藏调用者信息
 	formatter := &FilteredTextFormatter{
-		TextFormatter:     logrus.TextFormatter{DisableTimestamp: true},
-		LibraryPathPrefix: "github.com/ergoapi/util",
+		TextFormatter:       logrus.TextFormatter{DisableTimestamp: true},
+		LibraryPathPrefixes: []string{"github.com/ergoapi/util"},
 	}
 
 	// 测试库内调用者（应该被隐藏）
@@ -124,7 +124,7 @@ func TestNewFilteredTextFormatter(t *testing.T) {
 	formatter := NewFilteredTextFormatter(prefix)
 
 	assert.NotNil(t, formatter)
-	assert.Equal(t, prefix, formatter.LibraryPathPrefix)
+	assert.Equal(t, []string{"github.com/ergoapi/util", prefix}, formatter.LibraryPathPrefixes)
 	assert.IsType(t, &logrus.TextFormatter{}, &formatter.TextFormatter)
 }
 
@@ -133,15 +133,15 @@ func TestNewFilteredJSONFormatter(t *testing.T) {
 	formatter := NewFilteredJSONFormatter(prefix)
 
 	assert.NotNil(t, formatter)
-	assert.Equal(t, prefix, formatter.LibraryPathPrefix)
+	assert.Equal(t, []string{"github.com/ergoapi/util", prefix}, formatter.LibraryPathPrefixes)
 	assert.IsType(t, logrus.JSONFormatter{}, formatter.JSONFormatter)
 }
 
 func TestFilteredFormatter_NilCaller(t *testing.T) {
 	// 测试没有Caller信息的情况
 	formatter := &FilteredTextFormatter{
-		TextFormatter:     logrus.TextFormatter{DisableTimestamp: true},
-		LibraryPathPrefix: "github.com/ergoapi/util",
+		TextFormatter:       logrus.TextFormatter{DisableTimestamp: true},
+		LibraryPathPrefixes: []string{"github.com/ergoapi/util"},
 	}
 
 	entry := &logrus.Entry{
@@ -186,8 +186,8 @@ func TestFilteredFormatter_ComplexPath(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			formatter := &FilteredTextFormatter{
-				TextFormatter:     logrus.TextFormatter{DisableTimestamp: true},
-				LibraryPathPrefix: tc.prefix,
+				TextFormatter:       logrus.TextFormatter{DisableTimestamp: true},
+				LibraryPathPrefixes: []string{tc.prefix},
 			}
 
 			entry := &logrus.Entry{
@@ -207,8 +207,8 @@ func TestFilteredFormatter_ComplexPath(t *testing.T) {
 
 func BenchmarkFilteredTextFormatter_Format(b *testing.B) {
 	formatter := &FilteredTextFormatter{
-		TextFormatter:     logrus.TextFormatter{},
-		LibraryPathPrefix: "github.com/ergoapi/util",
+		TextFormatter:       logrus.TextFormatter{},
+		LibraryPathPrefixes: []string{"github.com/ergoapi/util"},
 	}
 
 	entry := &logrus.Entry{
@@ -233,8 +233,8 @@ func BenchmarkFilteredTextFormatter_Format(b *testing.B) {
 func TestFilteredJSONFormatter_HideLibraryCaller(t *testing.T) {
 	// 测试JSON格式化器的调用者隐藏功能
 	formatter := &FilteredJSONFormatter{
-		JSONFormatter:     logrus.JSONFormatter{DisableTimestamp: true},
-		LibraryPathPrefix: "github.com/ergoapi/util",
+		JSONFormatter:       logrus.JSONFormatter{DisableTimestamp: true},
+		LibraryPathPrefixes: []string{"github.com/ergoapi/util"},
 	}
 
 	// 测试库内调用者（应该被隐藏）
@@ -290,8 +290,8 @@ func TestFilteredJSONFormatter_HideLibraryCaller(t *testing.T) {
 // TestFormatterConcurrent 测试并发格式化
 func TestFormatterConcurrent(t *testing.T) {
 	formatter := &FilteredTextFormatter{
-		TextFormatter:     logrus.TextFormatter{},
-		LibraryPathPrefix: "github.com/ergoapi/util",
+		TextFormatter:       logrus.TextFormatter{},
+		LibraryPathPrefixes: []string{"github.com/ergoapi/util"},
 	}
 
 	// 并发格式化多个日志条目

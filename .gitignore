@@ -6,3 +6,7 @@ report.xml
 *.db
 *.log
 *.txt
+
+# 示例程序生成的日志目录
+examples/*/logs/
+examples/logs/

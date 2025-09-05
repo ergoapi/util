@@ -14,8 +14,8 @@ import (
 	"github.com/ergoapi/util/exctx"
 	"github.com/ergoapi/util/log/formatter"
 	"github.com/ergoapi/util/log/glog"
+	"github.com/glebarez/sqlite"
 	"github.com/sirupsen/logrus"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -88,7 +88,6 @@ func gormIntegrationExample() {
 	customLogger := &glog.GLogger{
 		LogLevel:      logger.Info,
 		SlowThreshold: 100 * time.Millisecond, // 设置慢查询阈值为100ms
-		LogPath:       "",                     // 可以设置日志文件路径
 	}
 
 	// 初始化 GORM 数据库连接
@@ -139,7 +138,12 @@ func traceContextExample() {
 	logrus.Info("\n--- Trace 上下文示例 ---")
 
 	// 创建带 trace 信息的上下文
-	ctx := exctx.NewTraceContext(context.Background(), "trace-123", "span-456", "child-789")
+	// 创建带有 trace 信息的 context
+	trace := exctx.NewTrace()
+	trace.TraceID = "trace-123"
+	trace.SpanID = "span-456"
+	trace.CSpanID = "child-789"
+	ctx := exctx.SetTraceContext(context.Background(), trace)
 
 	// 使用带 trace 的 logger
 	glogger := &glog.GLogger{
