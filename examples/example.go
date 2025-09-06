@@ -7,9 +7,10 @@
 package main
 
 import (
-	"errors"
 	"net/http"
 	"os"
+
+	"github.com/cockroachdb/errors"
 
 	utilerrors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/exgin"

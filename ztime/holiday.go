@@ -7,7 +7,7 @@
 package ztime
 
 import (
-	"errors"
+	"github.com/cockroachdb/errors"
 
 	"github.com/6tail/lunar-go/HolidayUtil"
 	"github.com/dromara/carbon/v2"

@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cockroachdb/errors"
+
 	"github.com/ergoapi/util/exctx"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -42,6 +44,8 @@ func getFilteredFileWithLineNum() string {
 		if (!strings.Contains(frame.File, "github.com/ergoapi/util") &&
 			!strings.Contains(frame.File, "gorm.io/") &&
 			!strings.HasSuffix(frame.File, "_test.go")) &&
+			!strings.Contains(frame.File, "github.com/glebarez/sqlite") &&
+			!strings.Contains(frame.File, "runtime/") &&
 			!strings.HasSuffix(frame.File, ".gen.go") &&
 			frame.File != "" {
 			return string(strconv.AppendInt(append([]byte(frame.File), ':'), int64(frame.Line), 10))
@@ -121,7 +125,7 @@ func createTraceFields(trace *exctx.TraceContext, begin time.Time, elapsed time.
 
 func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	// 静默模式直接返回
-	if mgl.LogLevel <= 0 {
+	if mgl.LogLevel == logger.Silent {
 		return
 	}
 
@@ -134,22 +138,23 @@ func (mgl *GLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		sql, rows := fc()
 		fields := createTraceFields(trace, begin, elapsed, sql, rows)
 
-		// 记录未找到的错误用 Warn 级别
-		if rows == -1 || rows == 0 || err == gorm.ErrRecordNotFound {
-			logrus.WithFields(fields).Warn(err)
+		// ErrRecordNotFound 或未影响行数时用 Warn，否则用 Error
+		if errors.Is(err, gorm.ErrRecordNotFound) || rows == -1 || rows == 0 {
+			logrus.WithFields(fields).Warn(err.Error())
 		} else {
-			logrus.WithFields(fields).Error(err)
+			logrus.WithFields(fields).Error(err.Error())
 		}
 
 	case mgl.SlowThreshold != 0 && elapsed > mgl.SlowThreshold && mgl.LogLevel >= logger.Warn:
 		sql, rows := fc()
 		fields := createTraceFields(trace, begin, elapsed, sql, rows)
 		fields["slowlog"] = fmt.Sprintf("SLOW SQL >= %v", mgl.SlowThreshold)
-		logrus.WithFields(fields).Warn(err)
+		logrus.WithFields(fields).Warn("slow query executed")
 
 	case mgl.LogLevel >= logger.Info:
 		sql, rows := fc()
 		fields := createTraceFields(trace, begin, elapsed, sql, rows)
-		logrus.WithFields(fields).Info(err)
+		// 正常执行的SQL，msg字段留空
+		logrus.WithFields(fields).Info("")
 	}
 }

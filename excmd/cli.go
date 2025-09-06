@@ -8,12 +8,13 @@ package excmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/cockroachdb/errors"
 )
 
 var (

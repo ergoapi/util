@@ -18,12 +18,13 @@
 package timeversion
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cockroachdb/errors"
 )
 
 // TimeVersion represents a time-based version

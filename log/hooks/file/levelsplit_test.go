@@ -198,3 +198,123 @@ func TestLevelSplitHook_MixedFormat(t *testing.T) {
 	assert.Contains(t, string(errorContent), "{")
 	assert.Contains(t, string(errorContent), `"level":"error"`)
 }
+
+// 确保 Error/Fatal/Panic 级别共用同一个 writer（即顺序无关）
+func TestLevelSplitHook_ErrorWriterReuse_OrderIndependence(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// 将 Fatal、Panic 放在 Error 之前，验证不会重复创建 error 日志 writer
+	hook, err := NewLevelSplitHook(LevelSplitConfig{
+		LogDir: tempDir,
+		Levels: []logrus.Level{
+			logrus.FatalLevel,
+			logrus.PanicLevel,
+			logrus.ErrorLevel,
+		},
+	})
+	require.NoError(t, err)
+
+	split := hook.(*LevelSplitHook)
+
+	wErr, okErr := split.writers[logrus.ErrorLevel]
+	wFatal, okFatal := split.writers[logrus.FatalLevel]
+	wPanic, okPanic := split.writers[logrus.PanicLevel]
+
+	require.True(t, okErr)
+	require.True(t, okFatal)
+	require.True(t, okPanic)
+	require.NotNil(t, wErr)
+	require.NotNil(t, wFatal)
+	require.NotNil(t, wPanic)
+
+	// 指针相等，确保只有一个底层 writer
+	assert.True(t, wErr == wFatal && wErr == wPanic)
+}
+
+// TestLevelSplitHook_ErrorLevelMerging 测试 Error 及以上级别都写入同一个 error.log
+func TestLevelSplitHook_ErrorLevelMerging(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// 创建 Hook，包含 Error、Fatal、Panic 级别
+	hook, err := NewLevelSplitHook(LevelSplitConfig{
+		LogDir: tempDir,
+		Levels: []logrus.Level{
+			logrus.PanicLevel,
+			logrus.FatalLevel,
+			logrus.ErrorLevel,
+			logrus.WarnLevel,
+			logrus.InfoLevel,
+		},
+		Formatter: &logrus.TextFormatter{
+			DisableTimestamp: true,
+		},
+	})
+	require.NoError(t, err)
+
+	// 创建测试 logger
+	logger := logrus.New()
+	logger.SetLevel(logrus.TraceLevel)
+	logger.AddHook(hook)
+	logger.SetOutput(io.Discard)
+
+	// 写入不同级别的日志
+	logger.Info("info message")
+	logger.Warn("warn message")
+	logger.Error("error message")
+
+	// 手动创建 Fatal 和 Panic 的 Entry 并触发 Hook（避免程序退出）
+	fatalEntry := logrus.NewEntry(logger).WithField("level", "fatal")
+	fatalEntry.Level = logrus.FatalLevel
+	fatalEntry.Message = "fatal message"
+	_ = hook.Fire(fatalEntry)
+
+	panicEntry := logrus.NewEntry(logger).WithField("level", "panic")
+	panicEntry.Level = logrus.PanicLevel
+	panicEntry.Message = "panic message"
+	_ = hook.Fire(panicEntry)
+
+	// 关闭 Hook 确保文件写入
+	if closer, ok := hook.(interface{ Close() error }); ok {
+		_ = closer.Close()
+	}
+
+	// 验证 error.log 包含所有错误级别
+	t.Run("error.log contains all error levels", func(t *testing.T) {
+		errorLogPath := filepath.Join(tempDir, "error.log")
+		assert.FileExists(t, errorLogPath)
+
+		content, err := os.ReadFile(errorLogPath)
+		require.NoError(t, err)
+
+		// Error、Fatal、Panic 的日志都应该在 error.log 中
+		assert.Contains(t, string(content), "error message")
+		assert.Contains(t, string(content), "fatal message")
+		assert.Contains(t, string(content), "panic message")
+	})
+
+	// 验证没有创建单独的 fatal.log 和 panic.log
+	t.Run("no separate fatal or panic log files", func(t *testing.T) {
+		fatalLogPath := filepath.Join(tempDir, "fatal.log")
+		panicLogPath := filepath.Join(tempDir, "panic.log")
+
+		assert.NoFileExists(t, fatalLogPath)
+		assert.NoFileExists(t, panicLogPath)
+	})
+
+	// 验证其他级别的日志文件正常
+	t.Run("other level logs work correctly", func(t *testing.T) {
+		// warn.log 只包含 warn
+		warnLogPath := filepath.Join(tempDir, "warn.log")
+		assert.FileExists(t, warnLogPath)
+		content, _ := os.ReadFile(warnLogPath)
+		assert.Contains(t, string(content), "warn message")
+		assert.NotContains(t, string(content), "error message")
+
+		// info.log 只包含 info
+		infoLogPath := filepath.Join(tempDir, "info.log")
+		assert.FileExists(t, infoLogPath)
+		content, _ = os.ReadFile(infoLogPath)
+		assert.Contains(t, string(content), "info message")
+		assert.NotContains(t, string(content), "warn message")
+	})
+}

@@ -7,6 +7,7 @@
 package formatter
 
 import (
+	"maps"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -31,9 +32,12 @@ func (f *FilteredTextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		// 检查调用者文件路径是否包含任何指定的库路径前缀
 		for _, prefix := range f.LibraryPathPrefixes {
 			if strings.Contains(entry.Caller.File, prefix) {
-				// 如果包含库路径前缀，将调用者信息设置为nil以隐藏
-				entry.Caller = nil
-				break
+				// 克隆 entry，避免修改原始 entry 影响其他 Hook/Formatter
+				cloned := *entry
+				// 深拷贝 Data map，防止并发修改
+				cloned.Data = maps.Clone(entry.Data)
+				cloned.Caller = nil
+				return f.TextFormatter.Format(&cloned)
 			}
 		}
 	}
@@ -58,9 +62,12 @@ func (f *FilteredJSONFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		// 检查调用者文件路径是否包含任何指定的库路径前缀
 		for _, prefix := range f.LibraryPathPrefixes {
 			if strings.Contains(entry.Caller.File, prefix) {
-				// 如果包含库路径前缀，将调用者信息设置为nil以隐藏
-				entry.Caller = nil
-				break
+				// 克隆 entry，避免副作用
+				cloned := *entry
+				// 深拷贝 Data map，防止并发修改
+				cloned.Data = maps.Clone(entry.Data)
+				cloned.Caller = nil
+				return f.JSONFormatter.Format(&cloned)
 			}
 		}
 	}
@@ -76,7 +83,9 @@ func NewFilteredTextFormatter(additionalPrefixes ...string) *FilteredTextFormatt
 	prefixes := []string{defaultLibraryPath}
 	prefixes = append(prefixes, additionalPrefixes...)
 	return &FilteredTextFormatter{
-		TextFormatter:       logrus.TextFormatter{},
+		TextFormatter: logrus.TextFormatter{
+			TimestampFormat: "2006-01-02 15:04:05",
+		},
 		LibraryPathPrefixes: prefixes,
 	}
 }
@@ -88,7 +97,9 @@ func NewFilteredJSONFormatter(additionalPrefixes ...string) *FilteredJSONFormatt
 	prefixes := []string{defaultLibraryPath}
 	prefixes = append(prefixes, additionalPrefixes...)
 	return &FilteredJSONFormatter{
-		JSONFormatter:       logrus.JSONFormatter{},
+		JSONFormatter: logrus.JSONFormatter{
+			TimestampFormat: "2006-01-02 15:04:05",
+		},
 		LibraryPathPrefixes: prefixes,
 	}
 }

@@ -78,16 +78,16 @@ func TestFSDecryptWithHMACTamperDetection(t *testing.T) {
 	_, err = FSDecryptWithHMAC(tampered, key)
 	if err == nil {
 		t.Error("Expected error when decrypting tampered data")
-	} else if !strings.Contains(err.Error(), "HMAC") && !strings.Contains(err.Error(), "base64") {
-		t.Errorf("Expected HMAC verification error, got: %v", err)
+	} else if !strings.Contains(err.Error(), "authentication failed") && !strings.Contains(err.Error(), "base64") && !strings.Contains(err.Error(), "decryption failed") {
+		t.Errorf("Expected authentication error, got: %v", err)
 	}
 
 	// Try with wrong key
 	_, err = FSDecryptWithHMAC(encrypted, "wrong-key")
 	if err == nil {
 		t.Error("Expected error with wrong key")
-	} else if !strings.Contains(err.Error(), "HMAC") {
-		t.Errorf("Expected HMAC verification error with wrong key, got: %v", err)
+	} else if !strings.Contains(err.Error(), "authentication failed") && !strings.Contains(err.Error(), "decryption failed") {
+		t.Errorf("Expected authentication error with wrong key, got: %v", err)
 	}
 }
 

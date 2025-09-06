@@ -8,6 +8,9 @@ package exmap
 
 import (
 	"reflect"
+	"strconv"
+	"strings"
+	"sync"
 	"testing"
 )
 
@@ -194,5 +197,81 @@ func TestMergeValues(t *testing.T) {
 	if !equal {
 		t.Errorf("Expected a map with different keys to merge properly with another map. Expected: %v, got %v",
 			expectedMap, testMap)
+	}
+}
+
+func TestStruct2Map(t *testing.T) {
+	type inner struct{ X int }
+	type S struct {
+		A     string
+		B     int
+		c     string // unexported, should be skipped
+		Inner inner
+	}
+	s := S{A: "hello", B: 2, c: "secret", Inner: inner{X: 9}}
+
+	got := Struct2Map(s)
+	if got == nil {
+		t.Fatalf("expected non-nil map")
+	}
+	if v, ok := got["A"]; !ok || v != "hello" {
+		t.Errorf("expected A=hello, got %v (ok=%v)", v, ok)
+	}
+	if _, ok := got["c"]; ok {
+		t.Errorf("did not expect unexported field 'c' in map")
+	}
+
+	// Pointer input should behave the same.
+	gotPtr := Struct2Map(&s)
+	if !reflect.DeepEqual(got, gotPtr) {
+		t.Errorf("pointer and value results differ: %v vs %v", got, gotPtr)
+	}
+
+	// Nil and non-struct should return nil
+	if res := Struct2Map(nil); res != nil {
+		t.Errorf("expected nil for nil input, got %v", res)
+	}
+	if res := Struct2Map(123); res != nil {
+		t.Errorf("expected nil for non-struct input, got %v", res)
+	}
+}
+
+func TestSlice2String(t *testing.T) {
+	cases := []struct {
+		in   []string
+		want string
+	}{
+		{[]string{"a", "b", "c"}, strings.Join([]string{strconv.Quote("a"), strconv.Quote("b"), strconv.Quote("c")}, ",")},
+		{[]string{"a\"b", "x,y", ""}, strings.Join([]string{strconv.Quote("a\"b"), strconv.Quote("x,y"), strconv.Quote("")}, ",")},
+		{nil, ""},
+		{[]string{}, ""},
+	}
+	for _, tc := range cases {
+		got := Slice2String(tc.in)
+		if got != tc.want {
+			t.Errorf("Slice2String(%v) got %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
+
+func TestMapString2StringOrder(t *testing.T) {
+	m := map[string]string{"b": "2", "a": "1", "c": "3"}
+	got := MapString2String(m)
+	want := "a=1,b=2,c=3"
+	if got != want {
+		t.Errorf("MapString2String order deterministic: got %q, want %q", got, want)
+	}
+}
+
+func TestSyncMapLen(t *testing.T) {
+	var nilMap *sync.Map
+	if got := SyncMapLen(nilMap); got != 0 {
+		t.Errorf("nil map length = %d, want 0", got)
+	}
+	m := &sync.Map{}
+	m.Store("a", 1)
+	m.Store("b", 2)
+	if got := SyncMapLen(m); got != 2 {
+		t.Errorf("length = %d, want 2", got)
 	}
 }

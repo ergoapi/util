@@ -7,12 +7,13 @@
 package exnet
 
 import (
-	"errors"
 	"io"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/cockroachdb/errors"
 
 	"github.com/docker/go-connections/nat"
 )

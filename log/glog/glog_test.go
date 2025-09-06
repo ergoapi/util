@@ -8,8 +8,9 @@ package glog
 
 import (
 	"context"
-	"errors"
 	"os"
+
+	"github.com/cockroachdb/errors"
 
 	// "path/filepath" // 文件写入功能已移除
 	"strings"

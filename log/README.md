@@ -116,9 +116,7 @@ log.AddHook(errHook)
 
 查看以下示例了解更多用法：
 
-- `examples/log/main.go` - 核心能力与最佳实践
-- `examples/log_hooks/main.go` - 第三方 Hook（Telegram 等）
-- `examples/log_gorm/main.go` - 与 GORM 集成的日志
+- `examples/log/main.go` - 核心能力与最佳实践（含文件轮转、级别分离、GORM 集成、链路追踪等）
 
 ## 设计理念
 

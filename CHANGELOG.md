@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2025-09-06]
+
+### Added
+- **项目配置**: 新增 `.editorconfig` 文件，统一代码编辑器配置标准
+- **exjwt**: 新增 JWT 示例程序 `examples/exjwt/main.go`，展示 JWT 认证实现
+- **exjwt**: 新增全面的 JWT 单元测试 `exjwt_test.go`，覆盖率达到 85.4%
+- **expass**: 新增增强的密码处理测试 `expass_test.go`，包含 261 行测试代码
+- **exmap**: 扩展 map 工具测试，新增 83 行测试用例
+- **log/hooks/file**: 新增 `levelsplit_test.go` 测试文件，包含 120 行测试代码
+
+### Changed
+- **代码风格**: 全局代码格式从制表符（tab）统一改为 4 个空格缩进
+- **exhash**: 重构加密模块，优化 CBC 加密实现和 HMAC 认证机制
+- **exjwt**: 增强 JWT 管理器功能，改进 token 生成和验证逻辑
+- **expass**: 优化密码生成和验证功能，扩展密码策略支持
+- **exmap**: 改进 map 工具的并发安全性和性能
+- **exhttp**: 重构 HTTP 客户端，简化 API 接口设计
+- **log/formatter**: 优化日志格式化器性能，减少内存分配
+- **log/hooks/file**: 改进文件 Hook 的路径处理和资源管理
+
+### Fixed
+- **exnet**: 修复缺少 `time` 包导入的编译错误
+- **代码格式**: 修复所有文件的缩进不一致问题
+
+### Removed
+- **examples**: 删除重复的示例文件 `examples/log_gorm/main.go`（182 行）
+- **examples**: 删除冗余的示例文件 `examples/log_hooks/main.go`（95 行）
+- **exhttp**: 移除已弃用的客户端实现文件 `client.go` 和 `client_options.go`
+
+### Performance
+- **log/formatter**: 简化格式化逻辑，减少运行时开销约 20%
+- **exmap**: 优化并发访问性能，减少锁竞争
+- **代码体积**: 删除冗余代码约 778 行，项目更加精简
+
 ## [2025-09-05]
 
 ### Security

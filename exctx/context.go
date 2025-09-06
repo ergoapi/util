@@ -11,12 +11,13 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math/rand"
 	"net"
 	"os"
 	"time"
+
+	"github.com/cockroachdb/errors"
 
 	"github.com/ergoapi/util/exnet"
 

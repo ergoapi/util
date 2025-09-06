@@ -8,9 +8,10 @@ package github
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
+
+	"github.com/cockroachdb/errors"
 
 	"github.com/google/go-github/v65/github"
 )

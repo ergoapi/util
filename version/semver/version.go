@@ -10,9 +10,10 @@
 package semver
 
 import (
-	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/cockroachdb/errors"
 
 	"github.com/blang/semver/v4"
 )
@@ -272,7 +273,7 @@ func Sort(versions []string) error {
 	}
 
 	// Sort using semver comparison
-	for i := range len(parsed) {
+	for i := 0; i < len(parsed); i++ {
 		for j := i + 1; j < len(parsed); j++ {
 			if parsed[i].IsGreaterThan(parsed[j]) {
 				parsed[i], parsed[j] = parsed[j], parsed[i]

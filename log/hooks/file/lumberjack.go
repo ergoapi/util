@@ -7,10 +7,11 @@
 package file
 
 import (
-	"errors"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/cockroachdb/errors"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"

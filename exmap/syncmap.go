@@ -9,6 +9,9 @@ package exmap
 import "sync"
 
 func SyncMapLen(m *sync.Map) int {
+	if m == nil {
+		return 0
+	}
 	length := 0
 	m.Range(func(key, value any) bool {
 		length++

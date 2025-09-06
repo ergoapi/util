@@ -7,10 +7,8 @@
 package expass
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/hmac"
 	cryptorand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -79,8 +77,9 @@ func deriveKey(password string, salt []byte) []byte {
 	return pbkdf2.Key([]byte(password), salt, DefaultConfig().PBKDF2Iterations, 32, sha256.New)
 }
 
-// AesEncryptCBC encrypts data using AES-CBC with a random IV and HMAC for authentication
-func AesEncryptCBC(data, password string) (string, error) {
+// AesEncryptGCM encrypts data using AES-GCM for authenticated encryption
+// GCM provides both confidentiality and authenticity in a single operation.
+func AesEncryptGCM(data, password string) (string, error) {
 	if data == "" {
 		return "", errors.New("data cannot be empty")
 	}
@@ -94,47 +93,38 @@ func AesEncryptCBC(data, password string) (string, error) {
 		return "", errors.Wrap(err, "failed to generate salt")
 	}
 
-	// Derive keys from password (one for encryption, one for HMAC)
+	// Derive key from password
 	key := deriveKey(password, salt)
-	hmacKey := deriveKey(password+"_hmac", salt) // Separate key for HMAC
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create cipher")
 	}
 
-	// Generate random IV
-	iv := make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(cryptorand.Reader, iv); err != nil {
-		return "", errors.Wrap(err, "failed to generate IV")
+	// Create GCM mode
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to create GCM")
 	}
 
-	// Pad plaintext
-	origData := []byte(data)
-	origData = paddingPKCS7(origData, block.BlockSize())
+	// Generate random nonce
+	nonce := make([]byte, aesgcm.NonceSize())
+	if _, err := io.ReadFull(cryptorand.Reader, nonce); err != nil {
+		return "", errors.Wrap(err, "failed to generate nonce")
+	}
 
-	// Encrypt
-	blockMode := cipher.NewCBCEncrypter(block, iv)
-	encrypted := make([]byte, len(origData))
-	blockMode.CryptBlocks(encrypted, origData)
+	// Encrypt and authenticate
+	encrypted := aesgcm.Seal(nil, nonce, []byte(data), salt)
 
-	// Calculate HMAC over salt + iv + encrypted
-	h := hmac.New(sha256.New, hmacKey)
-	h.Write(salt)
-	h.Write(iv)
-	h.Write(encrypted)
-	mac := h.Sum(nil)
-
-	// Combine salt + iv + encrypted + mac and encode
-	result := append(salt, iv...)
+	// Combine salt + nonce + encrypted (which includes auth tag)
+	result := append(salt, nonce...)
 	result = append(result, encrypted...)
-	result = append(result, mac...)
 
 	return base64.StdEncoding.EncodeToString(result), nil
 }
 
-// AesDecryptCBC decrypts data encrypted with AesEncryptCBC and verifies HMAC
-func AesDecryptCBC(data, password string) (string, error) {
+// AesDecryptGCM decrypts data encrypted by AesEncryptGCM using AES-GCM.
+func AesDecryptGCM(data, password string) (string, error) {
 	if data == "" {
 		return "", errors.New("encrypted data cannot be empty")
 	}
@@ -148,67 +138,57 @@ func AesDecryptCBC(data, password string) (string, error) {
 		return "", errors.Wrap(err, "failed to decode base64")
 	}
 
-	// Extract salt, IV, ciphertext, and MAC
-	// Minimum size: 32 bytes salt + 16 bytes IV + 32 bytes HMAC
-	if len(encrypted) < 80 {
+	// Extract salt
+	if len(encrypted) < 32 {
 		return "", errors.New("invalid encrypted data format")
 	}
-
 	salt := encrypted[:32]
-	iv := encrypted[32:48]
 
-	// Extract MAC from the end
-	macStart := len(encrypted) - 32
-	mac := encrypted[macStart:]
-	ciphertext := encrypted[48:macStart]
-
-	// Derive keys from password
+	// Derive key from password
 	key := deriveKey(password, salt)
-	hmacKey := deriveKey(password+"_hmac", salt)
 
-	// Verify HMAC first (fail fast if tampered)
-	h := hmac.New(sha256.New, hmacKey)
-	h.Write(salt)
-	h.Write(iv)
-	h.Write(ciphertext)
-	expectedMac := h.Sum(nil)
-
-	if !hmac.Equal(mac, expectedMac) {
-		return "", errors.New("HMAC verification failed: data may have been tampered with")
-	}
-
-	// Now decrypt
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create cipher")
 	}
 
-	if len(ciphertext)%block.BlockSize() != 0 {
-		return "", errors.New("ciphertext is not a multiple of the block size")
-	}
-
-	// Decrypt
-	blockMode := cipher.NewCBCDecrypter(block, iv)
-	origData := make([]byte, len(ciphertext))
-	blockMode.CryptBlocks(origData, ciphertext)
-
-	// Remove padding
-	origData, err = unPaddingPKCS7(origData)
+	// Create GCM mode
+	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to remove padding")
+		return "", errors.Wrap(err, "failed to create GCM")
 	}
 
-	return string(origData), nil
+	// Extract nonce and ciphertext
+	if len(encrypted) < 32+aesgcm.NonceSize()+aesgcm.Overhead() {
+		return "", errors.New("invalid encrypted data format")
+	}
+
+	nonce := encrypted[32 : 32+aesgcm.NonceSize()]
+	ciphertext := encrypted[32+aesgcm.NonceSize():]
+
+	// Decrypt and verify (using salt as additional authenticated data)
+	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, salt)
+	if err != nil {
+		return "", errors.Wrap(err, "decryption failed")
+	}
+
+	return string(plaintext), nil
 }
 
-// paddingPKCS7 补码
-func paddingPKCS7(ciphertext []byte, blocksize int) []byte {
-	padding := blocksize - len(ciphertext)%blocksize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
+// Deprecated: Use AesEncryptGCM instead. The implementation was switched to
+// AES-GCM; this wrapper preserves backward compatibility with the old name.
+func AesEncryptCBC(data, password string) (string, error) {
+	return AesEncryptGCM(data, password)
+}
+
+// Deprecated: Use AesDecryptGCM instead. The implementation was switched to
+// AES-GCM; this wrapper preserves backward compatibility with the old name.
+func AesDecryptCBC(data, password string) (string, error) {
+	return AesDecryptGCM(data, password)
 }
 
 // unPaddingPKCS7 removes PKCS7 padding
+// Note: This function is kept for testing purposes only
 func unPaddingPKCS7(origData []byte) ([]byte, error) {
 	if len(origData) == 0 {
 		return nil, errors.New("invalid data: empty input")

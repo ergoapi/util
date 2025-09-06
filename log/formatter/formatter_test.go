@@ -252,17 +252,17 @@ func TestFilteredJSONFormatter_HideLibraryCaller(t *testing.T) {
 			},
 		}
 
-		// Caller 会被设置为 nil
-		originalCaller := entry.Caller
 		result, err := formatter.Format(entry)
 		require.NoError(t, err)
 
-		// 验证 Caller 被设置为 nil（库内路径被隐藏）
-		assert.Nil(t, entry.Caller)
+		// 验证原始 entry.Caller 保持不变（实现使用克隆避免副作用）
+		assert.NotNil(t, entry.Caller)
+		// 验证输出中不包含 caller 信息（已被隐藏）
+		assert.NotContains(t, string(result), `"caller"`)
+		assert.NotContains(t, string(result), `"file"`)
+		assert.NotContains(t, string(result), `"func"`)
+		// 验证其他字段正常输出
 		assert.Contains(t, string(result), `"traceID":"test-trace-id"`)
-
-		// 恢复以便其他测试
-		entry.Caller = originalCaller
 	})
 
 	// 测试外部调用者（不应该被隐藏）

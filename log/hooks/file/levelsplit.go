@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ergoapi/util/log/formatter"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -89,9 +90,7 @@ func NewLevelSplitHook(config LevelSplitConfig) (logrus.Hook, error) {
 	}
 
 	if config.Formatter == nil {
-		config.Formatter = &logrus.JSONFormatter{
-			TimestampFormat: "2006-01-02T15:04:05.000Z",
-		}
+		config.Formatter = formatter.NewFilteredJSONFormatter()
 	}
 
 	// 默认记录常用级别
@@ -146,8 +145,24 @@ func NewLevelSplitHook(config LevelSplitConfig) (logrus.Hook, error) {
 
 // createWriter 为指定级别创建 writer
 func (h *LevelSplitHook) createWriter(level logrus.Level) error {
+	// 统一将 Panic/Fatal/Error 归并到 Error 的 canonical writer
+	targetLevel := level
+	if level <= logrus.ErrorLevel {
+		targetLevel = logrus.ErrorLevel
+	}
+
+	// 若 canonical writer 已存在，直接复用
+	if existingWriter, exists := h.writers[targetLevel]; exists {
+		h.writers[level] = existingWriter
+		if existingFormatter, ok := h.formatters[targetLevel]; ok {
+			h.formatters[level] = existingFormatter
+		}
+		return nil
+	}
+
 	// 获取级别特定配置
-	levelConfig, hasLevelConfig := h.config.LevelConfig[level]
+	// 对于 Error/Fatal/Panic 的合并，优先使用 Error 级别的配置
+	levelConfig, hasLevelConfig := h.config.LevelConfig[targetLevel]
 
 	// 使用级别配置或全局默认值
 	maxSize := h.config.MaxSize
@@ -175,7 +190,12 @@ func (h *LevelSplitHook) createWriter(level logrus.Level) error {
 	}
 
 	// 构造文件名
-	levelName := getLevelFileName(level)
+	// 将 Error、Fatal、Panic 都映射到 error 文件
+	levelName := getLevelFileName(targetLevel)
+	if targetLevel <= logrus.ErrorLevel {
+		// Panic/Fatal/Error 统一写入 error.*
+		levelName = "error"
+	}
 	filename := levelName + h.config.FileSuffix
 	if h.config.FilePrefix != "" {
 		filename = h.config.FilePrefix + "_" + filename
@@ -209,6 +229,9 @@ func (h *LevelSplitHook) createWriter(level logrus.Level) error {
 		LocalTime:  true,
 	}
 
+	// 将 writer/formatter 记录到 canonical 键，并为当前级别建立映射
+	h.writers[targetLevel] = writer
+	h.formatters[targetLevel] = formatter
 	h.writers[level] = writer
 	h.formatters[level] = formatter
 
@@ -260,6 +283,7 @@ func (h *LevelSplitHook) Fire(entry *logrus.Entry) error {
 	}
 
 	// 写入文件（lumberjack 支持并发写入，这里不持有锁）
+	// 注意：写入与 Close() 之间可能存在短暂竞态，若在关闭后写入，Write 将返回错误，属预期行为
 	_, err = writer.Write(bytes)
 	return err
 }
@@ -282,9 +306,6 @@ func (h *LevelSplitHook) Close() error {
 	h.writers = make(map[logrus.Level]io.Writer)
 	h.formatters = make(map[logrus.Level]logrus.Formatter)
 
-	// 如果有错误，返回第一个错误
-	if len(closeErrs) > 0 {
-		return closeErrs[0]
-	}
-	return nil
+	// 返回所有关闭错误（无错误时返回 nil）
+	return errors.Join(closeErrs...)
 }

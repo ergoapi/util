@@ -1,15 +1,8 @@
-//  Copyright (c) 2021. The EFF Team Authors.
+// Copyright (c) 2025-2025 All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// The original source code is licensed under the DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE.
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// You may review the terms of licenses in the LICENSE file.
 
 package exmap
 
@@ -18,17 +11,35 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 )
 
 // Struct2Map ...
 func Struct2Map(obj any) map[string]any {
-	t := reflect.TypeOf(obj)
+	if obj == nil {
+		return nil
+	}
 	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return nil
+	}
 
-	var data = make(map[string]any)
+	t := v.Type()
+	data := make(map[string]any, v.NumField())
 	for i := 0; i < t.NumField(); i++ {
-		data[t.Field(i).Name] = v.Field(i).Interface()
+		f := t.Field(i)
+		// Skip unexported fields to avoid panics and respect visibility.
+		if f.PkgPath != "" {
+			continue
+		}
+		data[f.Name] = v.Field(i).Interface()
 	}
 	return data
 }
@@ -55,36 +66,38 @@ func Slice(env map[string]string) []string {
 }
 
 // Slice2String slice string to string
-func Slice2String(data []string) (result string) {
-	if len(data) <= 0 {
-		return
+func Slice2String(data []string) string {
+	if len(data) == 0 {
+		return ""
 	}
-	for _, v := range data {
-		if strings.Contains(v, "\"") {
-			result += v
-		} else {
-			result += "\"" + v + "\""
-		}
-		result += ","
+	parts := make([]string, len(data))
+	for i, s := range data {
+		parts[i] = strconv.Quote(s)
 	}
-	result = strings.Trim(result, ",")
-	return
+	return strings.Join(parts, ",")
 }
 
 func MapString2String(labels map[string]string) string {
-	result := make([]string, 0)
-	for k, v := range labels {
-		result = append(result, fmt.Sprintf("%s=%s", k, v))
+	if len(labels) == 0 {
+		return ""
 	}
-
-	return strings.Join(result, ",")
+	keys := make([]string, 0, len(labels))
+	for k := range labels {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	parts := make([]string, 0, len(keys))
+	for _, k := range keys {
+		parts = append(parts, fmt.Sprintf("%s=%s", k, labels[k]))
+	}
+	return strings.Join(parts, ",")
 }
 
 // MergeLabels merge label
 // the new map will overwrite the old one.
 // e.g. new: {"foo": "newbar"} old: {"foo": "bar"} will return {"foo": "newbar"}
-func MergeLabels(old map[string]string, new map[string]string) map[string]string {
-	if new == nil {
+func MergeLabels(old map[string]string, updates map[string]string) map[string]string {
+	if updates == nil {
 		return old
 	}
 
@@ -92,7 +105,7 @@ func MergeLabels(old map[string]string, new map[string]string) map[string]string
 		old = make(map[string]string)
 	}
 
-	for key, value := range new {
+	for key, value := range updates {
 		old[key] = value
 	}
 	return old
@@ -118,7 +131,7 @@ func CloneAndAddLabel(labels map[string]string, labelKey, labelValue string) map
 // Returns the given map, if labelKey is empty.
 func CloneAndRemoveLabel(labels map[string]string, labelKey string) map[string]string {
 	if labelKey == "" {
-		// Don't need to add a label.
+		// Don't need to remove a label.
 		return labels
 	}
 	// Clone.
@@ -146,29 +159,24 @@ func AddLabel(labels map[string]string, labelKey, labelValue string) map[string]
 // CheckLabel returns key exist stauts.
 func CheckLabel(labels map[string]string, labelKey string) bool {
 	if labelKey == "" {
-		// Don't need to add a label.
+		// Treat empty label key as present.
 		return true
 	}
 	if labels == nil {
-		labels = make(map[string]string)
+		return false
 	}
-
-	if _, ok := labels[labelKey]; ok {
-		return true
-	}
-	return false
+	_, ok := labels[labelKey]
+	return ok
 }
 
 // GetLabelValue returns key exist stauts.
 func GetLabelValue(labels map[string]string, labelKey string) string {
 	if labelKey == "" {
-		// Don't need to add a label.
 		return ""
 	}
 	if labels == nil {
-		labels = make(map[string]string)
+		return ""
 	}
-
 	if v, ok := labels[labelKey]; ok {
 		return v
 	}
@@ -180,11 +188,11 @@ func CopyMap(m map[string]string) map[string]string {
 	if m == nil {
 		return nil
 	}
-	copy := make(map[string]string, len(m))
+	out := make(map[string]string, len(m))
 	for k, v := range m {
-		copy[k] = v
+		out[k] = v
 	}
-	return copy
+	return out
 }
 
 func MergeMaps(a, b map[string]any) map[string]any {
@@ -192,16 +200,16 @@ func MergeMaps(a, b map[string]any) map[string]any {
 	for k, v := range a {
 		out[k] = v
 	}
-	for k, v := range b {
-		if v, ok := v.(map[string]any); ok {
-			if bv, ok := out[k]; ok {
-				if bv, ok := bv.(map[string]any); ok {
-					out[k] = MergeMaps(bv, v)
+	for k, bv := range b {
+		if mv, ok := bv.(map[string]any); ok {
+			if ov, ok := out[k]; ok {
+				if ovm, ok := ov.(map[string]any); ok {
+					out[k] = MergeMaps(ovm, mv)
 					continue
 				}
 			}
 		}
-		out[k] = v
+		out[k] = bv
 	}
 	return out
 }

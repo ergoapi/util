@@ -9,15 +9,16 @@ package exhash
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/hmac"
+	cryptorand "crypto/rand"
 	"crypto/sha256"
 	b64 "encoding/base64"
+	"io"
 
 	"github.com/cockroachdb/errors"
 )
 
 // FSDecrypt https://open.feishu.cn/document/ukTMukTMukTM/uYDNxYjL2QTM24iN0EjN/event-subscription-configure-/encrypt-key-encryption-configuration-case
-// Note: This function maintains compatibility with Feishu API. For new implementations, consider using FSDecryptWithHMAC
+// Note: This function maintains compatibility with Feishu API. For new implementations, consider using FSDecryptGCM.
 func FSDecrypt(encrypt string, key string) (string, error) {
 	buf, err := b64.StdEncoding.DecodeString(encrypt)
 	if err != nil {
@@ -56,9 +57,9 @@ func FSDecrypt(encrypt string, key string) (string, error) {
 	return string(buf), nil
 }
 
-// FSEncryptWithHMAC encrypts data using AES-CBC with HMAC for authentication
-// This is a more secure version that adds integrity protection
-func FSEncryptWithHMAC(plaintext string, key string) (string, error) {
+// FSEncryptGCM encrypts data using AES-GCM for authenticated encryption.
+// GCM mode provides both confidentiality and authenticity.
+func FSEncryptGCM(plaintext string, key string) (string, error) {
 	if plaintext == "" {
 		return "", errors.New("plaintext cannot be empty")
 	}
@@ -66,114 +67,86 @@ func FSEncryptWithHMAC(plaintext string, key string) (string, error) {
 		return "", errors.New("key cannot be empty")
 	}
 
-	// Derive keys from the main key
+	// Derive key from the main key
 	keyBs := sha256.Sum256([]byte(key))
-	encKey := keyBs[:sha256.Size]
-
-	// Derive HMAC key using a different salt
-	hmacKeyBs := sha256.Sum256([]byte(key + "_hmac"))
-	hmacKey := hmacKeyBs[:]
+	encKey := keyBs[:32] // Use full 256-bit key for AES-256
 
 	block, err := aes.NewCipher(encKey)
 	if err != nil {
 		return "", errors.Wrap(err, "create cipher error")
 	}
 
-	// Generate random IV
-	iv := make([]byte, aes.BlockSize)
-	for i := range iv {
-		iv[i] = byte(i) // For compatibility with existing implementation
-		// In production, use: io.ReadFull(cryptorand.Reader, iv)
+	// Create GCM mode
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", errors.Wrap(err, "create GCM error")
 	}
 
-	// Add PKCS7 padding
-	plainBytes := addPKCS7Padding([]byte(plaintext), aes.BlockSize)
+	// Generate cryptographically secure random nonce
+	nonce := make([]byte, aesgcm.NonceSize())
+	if _, err := io.ReadFull(cryptorand.Reader, nonce); err != nil {
+		return "", errors.Wrap(err, "generate nonce error")
+	}
 
-	// Encrypt
-	mode := cipher.NewCBCEncrypter(block, iv)
-	encrypted := make([]byte, len(plainBytes))
-	mode.CryptBlocks(encrypted, plainBytes)
+	// Encrypt and authenticate
+	encrypted := aesgcm.Seal(nil, nonce, []byte(plaintext), nil)
 
-	// Calculate HMAC over IV + encrypted
-	h := hmac.New(sha256.New, hmacKey)
-	h.Write(iv)
-	h.Write(encrypted)
-	mac := h.Sum(nil)
-
-	// Combine IV + encrypted + MAC
-	result := append(iv, encrypted...)
-	result = append(result, mac...)
+	// Combine nonce + encrypted (which includes the auth tag)
+	result := append(nonce, encrypted...)
 
 	return b64.StdEncoding.EncodeToString(result), nil
 }
 
-// FSDecryptWithHMAC decrypts data encrypted with FSEncryptWithHMAC and verifies integrity
-func FSDecryptWithHMAC(encrypt string, key string) (string, error) {
+// FSDecryptGCM decrypts data encrypted by FSEncryptGCM using AES-GCM.
+func FSDecryptGCM(encrypt string, key string) (string, error) {
 	buf, err := b64.StdEncoding.DecodeString(encrypt)
 	if err != nil {
 		return "", errors.Wrap(err, "base64 decode error")
 	}
 
-	// Minimum size: IV (16 bytes) + at least one block (16 bytes) + HMAC (32 bytes)
-	if len(buf) < aes.BlockSize*2+32 {
-		return "", errors.New("cipher too short")
-	}
-
-	// Derive keys
+	// Derive key
 	keyBs := sha256.Sum256([]byte(key))
-	encKey := keyBs[:sha256.Size]
+	encKey := keyBs[:32] // Use full 256-bit key for AES-256
 
-	hmacKeyBs := sha256.Sum256([]byte(key + "_hmac"))
-	hmacKey := hmacKeyBs[:]
-
-	// Extract components
-	iv := buf[:aes.BlockSize]
-	macStart := len(buf) - 32
-	mac := buf[macStart:]
-	ciphertext := buf[aes.BlockSize:macStart]
-
-	// Verify HMAC first
-	h := hmac.New(sha256.New, hmacKey)
-	h.Write(iv)
-	h.Write(ciphertext)
-	expectedMac := h.Sum(nil)
-
-	if !hmac.Equal(mac, expectedMac) {
-		return "", errors.New("HMAC verification failed: data may have been tampered with")
-	}
-
-	// CBC模式要求密文长度是块大小的整数倍
-	if len(ciphertext)%aes.BlockSize != 0 {
-		return "", errors.New("ciphertext is not a multiple of the block size")
-	}
-
-	// Decrypt
 	block, err := aes.NewCipher(encKey)
 	if err != nil {
 		return "", errors.Wrap(err, "create cipher error")
 	}
 
-	mode := cipher.NewCBCDecrypter(block, iv)
-	plaintext := make([]byte, len(ciphertext))
-	mode.CryptBlocks(plaintext, ciphertext)
-
-	// Remove PKCS7 padding
-	plaintext, err = removePKCS7Padding(plaintext)
+	// Create GCM mode
+	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", errors.Wrap(err, "remove padding error")
+		return "", errors.Wrap(err, "create GCM error")
+	}
+
+	// Minimum size: nonce + ciphertext + auth tag
+	if len(buf) < aesgcm.NonceSize()+aesgcm.Overhead() {
+		return "", errors.New("cipher too short")
+	}
+
+	// Extract nonce and ciphertext
+	nonce := buf[:aesgcm.NonceSize()]
+	ciphertext := buf[aesgcm.NonceSize():]
+
+	// Decrypt and verify
+	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return "", errors.Wrap(err, "decryption failed")
 	}
 
 	return string(plaintext), nil
 }
 
-// addPKCS7Padding 添加PKCS7填充
-func addPKCS7Padding(data []byte, blockSize int) []byte {
-	padding := blockSize - len(data)%blockSize
-	padtext := make([]byte, padding)
-	for i := range padtext {
-		padtext[i] = byte(padding)
-	}
-	return append(data, padtext...)
+// Deprecated: Use FSEncryptGCM instead. The implementation now uses AES-GCM;
+// this wrapper preserves backward compatibility with the old name.
+func FSEncryptWithHMAC(plaintext string, key string) (string, error) {
+	return FSEncryptGCM(plaintext, key)
+}
+
+// Deprecated: Use FSDecryptGCM instead. The implementation now uses AES-GCM;
+// this wrapper preserves backward compatibility with the old name.
+func FSDecryptWithHMAC(encrypt string, key string) (string, error) {
+	return FSDecryptGCM(encrypt, key)
 }
 
 // removePKCS7Padding 移除PKCS7填充
