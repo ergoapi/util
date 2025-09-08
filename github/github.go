@@ -13,7 +13,7 @@ import (
 
 	"github.com/cockroachdb/errors"
 
-	"github.com/google/go-github/v65/github"
+	"github.com/google/go-github/v74/github"
 )
 
 type Pkg struct {
