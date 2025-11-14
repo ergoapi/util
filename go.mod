@@ -9,7 +9,7 @@ require (
 	github.com/cockroachdb/errors v1.12.0
 	github.com/docker/go-connections v0.6.0
 	github.com/dromara/carbon/v2 v2.6.14
-	github.com/gin-contrib/pprof v1.5.2
+	github.com/gin-contrib/pprof v1.5.3
 	github.com/gin-gonic/gin v1.11.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/locales v0.14.1
