@@ -14,3 +14,39 @@ func HostInfo() *tailcfg.Hostinfo {
 	t.IPNVersion = "zos-1.0.0"
 	return t
 }
+
+func GetHostname() string {
+	h := HostInfo()
+	return h.Hostname
+}
+
+func GetOS() string {
+	h := HostInfo()
+	return h.OS
+}
+
+func GetDistro() string {
+	h := HostInfo()
+	return h.Distro
+}
+
+func GetDistroVersion() string {
+	h := HostInfo()
+	return h.DistroVersion
+}
+
+func GetDistroCodeName() string {
+	h := HostInfo()
+	return h.DistroCodeName
+}
+
+func GetOSVersion() string {
+	h := HostInfo()
+	return h.OSVersion
+}
+
+// IsDebian debian
+func IsDebian() bool {
+	h := HostInfo()
+	return h.Distro == "debian"
+}

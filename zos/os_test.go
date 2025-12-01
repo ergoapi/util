@@ -26,3 +26,13 @@ func TestGetHomeDir(t *testing.T) {
 	got := GetHomeDir()
 	t.Log(got)
 }
+
+func TestIsContainer(t *testing.T) {
+	result := IsContainer()
+	t.Logf("IsContainer: %v", result)
+
+	// 在非 Linux 系统上应该返回 false
+	if !IsLinux() && result {
+		t.Errorf("Expected IsContainer() to return false on non-Linux systems, got true")
+	}
+}

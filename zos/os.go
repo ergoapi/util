@@ -14,6 +14,7 @@
 package zos
 
 import (
+	"os"
 	"os/exec"
 	"os/user"
 	"runtime"
@@ -44,8 +45,14 @@ func NotUnix() bool {
 
 // IsContainer 是否是容器
 func IsContainer() bool {
-	h := HostInfo()
-	return h.Container.EqualBool(true)
+	// 非 Linux 环境不检测
+	if !IsLinux() {
+		return false
+	}
+
+	// 检查 /.dockerenv 文件
+	_, err := os.Stat("/.dockerenv")
+	return err == nil
 }
 
 // GetUserName 获取当前系统登录用户
@@ -66,36 +73,6 @@ func GetUser() *user.User {
 	return user
 }
 
-func GetHostname() string {
-	h := HostInfo()
-	return h.Hostname
-}
-
-func GetOS() string {
-	h := HostInfo()
-	return h.OS
-}
-
-func GetDistro() string {
-	h := HostInfo()
-	return h.Distro
-}
-
-func GetDistroVersion() string {
-	h := HostInfo()
-	return h.DistroVersion
-}
-
-func GetDistroCodeName() string {
-	h := HostInfo()
-	return h.DistroCodeName
-}
-
-func GetOSVersion() string {
-	h := HostInfo()
-	return h.OSVersion
-}
-
 // GetHomeDir 获取home目录
 func GetHomeDir() string {
 	home, err := homedir.Dir()
@@ -112,12 +89,6 @@ func GetHomeDir() string {
 func ExpandPath(path string) string {
 	path, _ = homedir.Expand(path)
 	return path
-}
-
-// IsDebian debian
-func IsDebian() bool {
-	h := HostInfo()
-	return h.Distro == "debian"
 }
 
 func IsWsl() bool {
