@@ -144,7 +144,11 @@ func ExRecovery() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				if res, ok := err.(errors.ErgoError); ok {
-					GinsAbort(c, 400, res.Message)
+					code := 400
+					if strings.Contains(res.Message, "unauth") {
+						code = 401
+					}
+					GinsAbort(c, code, res.Message)
 					return
 				}
 				var brokenPipe bool
