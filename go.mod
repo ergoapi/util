@@ -1,6 +1,6 @@
 module github.com/ergoapi/util
 
-go 1.25.3
+go 1.25.5
 
 require (
 	github.com/6tail/lunar-go v1.4.6
@@ -40,7 +40,7 @@ require (
 	k8s.io/apimachinery v0.32.0
 	k8s.io/client-go v0.32.0
 	sigs.k8s.io/yaml v1.6.0
-	tailscale.com v1.92.0
+	tailscale.com v1.92.1
 )
 
 require (
