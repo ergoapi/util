@@ -18,7 +18,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/gomodule/redigo v1.9.3
 	github.com/google/go-github/v74 v74.0.0
-	github.com/google/gops v0.3.28
+	github.com/google/gops v0.3.29
 	github.com/google/uuid v1.6.0
 	github.com/gosuri/uitable v0.0.4
 	github.com/imroc/req/v3 v3.57.0
