@@ -36,8 +36,8 @@ func NewGoRedisCluster(options ...Option) *GoRedisCluster {
 	}
 }
 
-func (g *GoRedisCluster) Get(key string) (any, error) {
-	object, err := g.Client.Get(context.Background(), key).Result()
+func (g *GoRedisCluster) Get(ctx context.Context, key string) (any, error) {
+	object, err := g.Client.Get(ctx, key).Result()
 	if err == goredis.Nil {
 		return nil, errors.Newf("key %s not found", key)
 	}
@@ -45,8 +45,8 @@ func (g *GoRedisCluster) Get(key string) (any, error) {
 }
 
 // GetWithTTL returns data stored from a given key and its corresponding TTL
-func (g *GoRedisCluster) GetWithTTL(key string) (any, time.Duration, error) {
-	object, err := g.Client.Get(context.Background(), key).Result()
+func (g *GoRedisCluster) GetWithTTL(ctx context.Context, key string) (any, time.Duration, error) {
+	object, err := g.Client.Get(ctx, key).Result()
 	if err == goredis.Nil {
 		return nil, 0, errors.Newf("key %s not found", key)
 	}
@@ -54,7 +54,7 @@ func (g *GoRedisCluster) GetWithTTL(key string) (any, time.Duration, error) {
 		return nil, 0, err
 	}
 
-	ttl, err := g.Client.TTL(context.Background(), key).Result()
+	ttl, err := g.Client.TTL(ctx, key).Result()
 	if err != nil {
 		return nil, 0, err
 	}
@@ -63,10 +63,10 @@ func (g *GoRedisCluster) GetWithTTL(key string) (any, time.Duration, error) {
 }
 
 // Set defines data in Redis for given key identifier
-func (g *GoRedisCluster) Set(key string, value any, options ...Option) error {
+func (g *GoRedisCluster) Set(ctx context.Context, key string, value any, options ...Option) error {
 	opts := ApplyOptionsWithDefault(g.options, options...)
 
-	err := g.Client.Set(context.Background(), key, value, opts.Expiration).Err()
+	err := g.Client.Set(ctx, key, value, opts.Expiration).Err()
 	if err != nil {
 		return err
 	}
@@ -74,16 +74,16 @@ func (g *GoRedisCluster) Set(key string, value any, options ...Option) error {
 }
 
 // Delete removes data from Redis for given key identifier
-func (g *GoRedisCluster) Delete(key string) error {
-	_, err := g.Client.Del(context.Background(), key).Result()
+func (g *GoRedisCluster) Delete(ctx context.Context, key string) error {
+	_, err := g.Client.Del(ctx, key).Result()
 	return err
 }
 
 // Flush resets all data in the store
-func (g *GoRedisCluster) Flush() error {
-	return g.Client.FlushAll(context.Background()).Err()
+func (g *GoRedisCluster) Flush(ctx context.Context) error {
+	return g.Client.FlushAll(ctx).Err()
 }
 
-func (g *GoRedisCluster) Ping() error {
-	return g.Client.Ping(context.Background()).Err()
+func (g *GoRedisCluster) Ping(ctx context.Context) error {
+	return g.Client.Ping(ctx).Err()
 }

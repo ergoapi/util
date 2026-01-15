@@ -7,6 +7,7 @@
 package cache
 
 import (
+	"context"
 	"time"
 
 	"github.com/cockroachdb/errors"
@@ -26,7 +27,7 @@ func NewGoCache(options ...Option) *GoCache {
 	}
 }
 
-func (g *GoCache) Get(key string) (any, error) {
+func (g *GoCache) Get(_ context.Context, key string) (any, error) {
 	var err error
 	value, found := g.Client.Get(key)
 	if !found {
@@ -35,7 +36,7 @@ func (g *GoCache) Get(key string) (any, error) {
 	return value, err
 }
 
-func (g *GoCache) GetWithTTL(key string) (any, time.Duration, error) {
+func (g *GoCache) GetWithTTL(_ context.Context, key string) (any, time.Duration, error) {
 	var err error
 	value, t, found := g.Client.GetWithExpiration(key)
 	if !found {
@@ -45,7 +46,7 @@ func (g *GoCache) GetWithTTL(key string) (any, time.Duration, error) {
 	return value, time.Until(t), nil
 }
 
-func (g *GoCache) Set(key string, value any, options ...Option) error {
+func (g *GoCache) Set(_ context.Context, key string, value any, options ...Option) error {
 	opts := ApplyOptions(options...)
 	if opts == nil {
 		opts = g.options
@@ -54,16 +55,16 @@ func (g *GoCache) Set(key string, value any, options ...Option) error {
 	return nil
 }
 
-func (g *GoCache) Delete(key string) error {
+func (g *GoCache) Delete(_ context.Context, key string) error {
 	g.Client.Delete(key)
 	return nil
 }
 
-func (g *GoCache) Flush() error {
+func (g *GoCache) Flush(_ context.Context) error {
 	g.Client.Flush()
 	return nil
 }
 
-func (g *GoCache) Ping() error {
+func (g *GoCache) Ping(_ context.Context) error {
 	return nil
 }

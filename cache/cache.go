@@ -7,41 +7,44 @@
 // Package cache provides a unified caching interface with multiple backend support.
 package cache
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Cache interface {
-	Get(key string) (any, error)
-	GetWithTTL(key string) (any, time.Duration, error)
-	Set(key string, value any, options ...Option) error
-	Delete(key string) error
-	Flush() error
-	Ping() error
+	Get(ctx context.Context, key string) (any, error)
+	GetWithTTL(ctx context.Context, key string) (any, time.Duration, error)
+	Set(ctx context.Context, key string, value any, options ...Option) error
+	Delete(ctx context.Context, key string) error
+	Flush(ctx context.Context) error
+	Ping(ctx context.Context) error
 }
 
 var (
 	Instance Cache
 )
 
-func Get(key string) (any, error) {
-	return Instance.Get(key)
+func Get(ctx context.Context, key string) (any, error) {
+	return Instance.Get(ctx, key)
 }
 
-func GetWithTTL(key string) (any, time.Duration, error) {
-	return Instance.GetWithTTL(key)
+func GetWithTTL(ctx context.Context, key string) (any, time.Duration, error) {
+	return Instance.GetWithTTL(ctx, key)
 }
 
-func Set(key string, value any, options ...Option) error {
-	return Instance.Set(key, value, options...)
+func Set(ctx context.Context, key string, value any, options ...Option) error {
+	return Instance.Set(ctx, key, value, options...)
 }
 
-func Delete(key string) error {
-	return Instance.Delete(key)
+func Delete(ctx context.Context, key string) error {
+	return Instance.Delete(ctx, key)
 }
 
-func Flush() error {
-	return Instance.Flush()
+func Flush(ctx context.Context) error {
+	return Instance.Flush(ctx)
 }
 
-func Ping() error {
-	return Instance.Ping()
+func Ping(ctx context.Context) error {
+	return Instance.Ping(ctx)
 }

@@ -7,6 +7,7 @@
 package cache
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
@@ -57,7 +58,7 @@ func pingRedis(c redigo.Conn, t time.Time) error {
 	return nil
 }
 
-func (g *Redigo) Get(key string) (any, error) {
+func (g *Redigo) Get(_ context.Context, key string) (any, error) {
 	conn := g.Client.Get()
 	defer conn.Close()
 	reply, err := redigo.Bytes(conn.Do("GET", key))
@@ -68,7 +69,7 @@ func (g *Redigo) Get(key string) (any, error) {
 }
 
 // GetWithTTL returns data stored from a given key and its corresponding TTL
-func (g *Redigo) GetWithTTL(key string) (any, time.Duration, error) {
+func (g *Redigo) GetWithTTL(_ context.Context, key string) (any, time.Duration, error) {
 	conn := g.Client.Get()
 	defer conn.Close()
 	reply, err := redigo.Bytes(conn.Do("GET", key))
@@ -86,7 +87,7 @@ func (g *Redigo) GetWithTTL(key string) (any, time.Duration, error) {
 }
 
 // Set defines data in Redis for given key identifier
-func (g *Redigo) Set(key string, value any, options ...Option) error {
+func (g *Redigo) Set(_ context.Context, key string, value any, options ...Option) error {
 	conn := g.Client.Get()
 	defer conn.Close()
 	data, err := json.Marshal(value)
@@ -108,7 +109,7 @@ func (g *Redigo) Set(key string, value any, options ...Option) error {
 }
 
 // Delete removes data from Redis for given key identifier
-func (g *Redigo) Delete(key string) error {
+func (g *Redigo) Delete(_ context.Context, key string) error {
 	conn := g.Client.Get()
 	defer conn.Close()
 	_, err := redigo.Bool(conn.Do("DEL", key))
@@ -116,14 +117,14 @@ func (g *Redigo) Delete(key string) error {
 }
 
 // Flush resets all data in the store
-func (g *Redigo) Flush() error {
+func (g *Redigo) Flush(_ context.Context) error {
 	conn := g.Client.Get()
 	defer conn.Close()
 	_, err := conn.Do("FLUSHALL")
 	return err
 }
 
-func (g *Redigo) Ping() error {
+func (g *Redigo) Ping(_ context.Context) error {
 	conn := g.Client.Get()
 	defer conn.Close()
 	_, err := conn.Do("PING")
@@ -145,9 +146,9 @@ func (g *Redigo) ReSet(key string, data any, options ...Option) error {
 	conn := g.Client.Get()
 	defer conn.Close()
 	if g.Exists(key) {
-		g.Delete(key)
+		g.Delete(context.Background(), key)
 	}
-	return g.Set(key, data, options...)
+	return g.Set(context.Background(), key, data, options...)
 }
 
 func (g *Redigo) LikeDelete(key string) error {
@@ -158,7 +159,7 @@ func (g *Redigo) LikeDelete(key string) error {
 		return err
 	}
 	for _, key := range keys {
-		g.Delete(key)
+		g.Delete(context.Background(), key)
 	}
 	return nil
 }

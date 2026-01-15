@@ -7,6 +7,7 @@
 package ratelimit
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -18,26 +19,25 @@ type user struct {
 	tokens uint
 }
 
-func clearInBackground(data *sync.Map, rate int64) {
-	for {
-		data.Range(func(k, v any) bool {
-			if v.(user).ts+rate <= time.Now().Unix() {
-				data.Delete(k)
-			}
-			return true
-		})
-		time.Sleep(time.Minute)
-	}
+type inMemoryStoreType struct {
+	rate   int64
+	limit  uint
+	data   *sync.Map
+	mu     sync.Map // per-key mutex
+	skip   func(ctx *gin.Context) bool
+	cancel context.CancelFunc
 }
 
-type inMemoryStoreType struct {
-	rate  int64
-	limit uint
-	data  *sync.Map
-	skip  func(ctx *gin.Context) bool
+func (s *inMemoryStoreType) getMutex(key string) *sync.Mutex {
+	mu, _ := s.mu.LoadOrStore(key, &sync.Mutex{})
+	return mu.(*sync.Mutex)
 }
 
 func (s *inMemoryStoreType) Limit(key string, c *gin.Context) Info {
+	mu := s.getMutex(key)
+	mu.Lock()
+	defer mu.Unlock()
+
 	var u user
 	m, ok := s.data.Load(key)
 	if !ok {
@@ -75,6 +75,13 @@ func (s *inMemoryStoreType) Limit(key string, c *gin.Context) Info {
 	}
 }
 
+// Close stops the background cleanup goroutine.
+func (s *inMemoryStoreType) Close() {
+	if s.cancel != nil {
+		s.cancel()
+	}
+}
+
 type InMemoryOptions struct {
 	// the user can make Limit amount of requests every Rate
 	Rate time.Duration
@@ -84,9 +91,36 @@ type InMemoryOptions struct {
 	Skip func(*gin.Context) bool
 }
 
-func InMemoryStore(options *InMemoryOptions) Store {
+// InMemoryStore creates a new in-memory rate limit store.
+// Call Close() on the returned store when done to stop the background cleanup goroutine.
+func InMemoryStore(options *InMemoryOptions) *inMemoryStoreType {
+	ctx, cancel := context.WithCancel(context.Background())
 	data := &sync.Map{}
-	store := inMemoryStoreType{int64(options.Rate.Seconds()), options.Limit, data, options.Skip}
-	go clearInBackground(data, store.rate)
-	return &store
+	store := &inMemoryStoreType{
+		rate:   int64(options.Rate.Seconds()),
+		limit:  options.Limit,
+		data:   data,
+		skip:   options.Skip,
+		cancel: cancel,
+	}
+	go clearInBackground(ctx, data, store.rate)
+	return store
+}
+
+func clearInBackground(ctx context.Context, data *sync.Map, rate int64) {
+	ticker := time.NewTicker(time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			data.Range(func(k, v any) bool {
+				if v.(user).ts+rate <= time.Now().Unix() {
+					data.Delete(k)
+				}
+				return true
+			})
+		}
+	}
 }

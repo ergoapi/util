@@ -7,6 +7,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -14,30 +15,31 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	cache.InitGoCache()
-	if err := cache.Ping(); err != nil {
+	if err := cache.Ping(ctx); err != nil {
 		return
 	}
 	log.Println("cache is ready")
-	if err := cache.Set("key", "value"); err != nil {
+	if err := cache.Set(ctx, "key", "value"); err != nil {
 		panic(err)
 	}
-	value, err := cache.Get("key")
+	value, err := cache.Get(ctx, "key")
 	if err != nil {
 		panic(err)
 	}
 	log.Println("value:", value)
-	if err := cache.Set("key1", "value1", cache.WithExpiration(time.Second*15)); err != nil {
+	if err := cache.Set(ctx, "key1", "value1", cache.WithExpiration(time.Second*15)); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second * 10)
 	for {
-		if value, t, err := cache.GetWithTTL("key1"); err != nil {
+		if value, t, err := cache.GetWithTTL(ctx, "key1"); err != nil {
 			log.Println("key1 not found")
 			break
 		} else {
 			log.Println("key1 value:", value, t)
-			if value, err := cache.Get("key"); err != nil {
+			if value, err := cache.Get(ctx, "key"); err != nil {
 				log.Println("key not found")
 			} else {
 				log.Println("key value:", value)
@@ -46,7 +48,7 @@ func main() {
 		}
 	}
 
-	if err := cache.Flush(); err != nil {
+	if err := cache.Flush(ctx); err != nil {
 		panic(err)
 	}
 }
