@@ -49,17 +49,9 @@ func TestIsWorkday(t *testing.T) {
 	assert.False(t, isWorkday, "Saturday should not be a workday")
 }
 
-func TestNeedWork(t *testing.T) {
-	// 测试今天是否需要工作
-	needWork := NeedWork()
-	t.Logf("Today need work: %v", needWork)
-}
-
-func TestNeedWorkWithMock(t *testing.T) {
-	// 通过传入无效日期来测试 NeedWork 的错误处理分支
-	// 由于 NeedWork 使用 NowDate()，我们无法直接模拟错误
-	// 但可以通过测试确保函数正常运行
-	result := NeedWork()
+func TestTodayNeedWorkWithMock(t *testing.T) {
+	// 通过测试确保 TodayNeedWork 函数正常运行
+	result := TodayNeedWork()
 	// 结果应该是 true 或 false
 	assert.IsType(t, bool(true), result)
 }
@@ -242,9 +234,9 @@ func BenchmarkGetHoliday(b *testing.B) {
 	}
 }
 
-func BenchmarkNeedWork(b *testing.B) {
+func BenchmarkTodayNeedWork(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = NeedWork()
+		_ = TodayNeedWork()
 	}
 }

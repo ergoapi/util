@@ -10,71 +10,35 @@ import (
 	"encoding/json"
 	"fmt"
 	"runtime"
-	"strings"
 )
 
+// Info contains versioning information.
+// GitVersion, GitCommit and BuildDate are set via -ldflags at build time.
 type Info struct {
-	Major        string `json:"major"`
-	Minor        string `json:"minor"`
-	GitVersion   string `json:"gitVersion"`
-	GitBranch    string `json:"gitBranch"`
-	GitCommit    string `json:"gitCommit"`
-	GitTreeState string `json:"gitTreeState"`
-	BuildDate    string `json:"buildDate"`
-	GoVersion    string `json:"goVersion"`
-	Compiler     string `json:"compiler"`
-	Platform     string `json:"platform"`
-	Release      string `json:"release"`
+	GitVersion string `json:"gitVersion"`
+	GitCommit  string `json:"gitCommit"`
+	BuildDate  string `json:"buildDate"`
+	GoVersion  string `json:"goVersion"`
+	Platform   string `json:"platform"`
 }
 
 func (info Info) String() string {
 	return info.GitVersion
 }
 
+// Get returns the overall codebase version.
 func Get() Info {
-	// These variables typically come from -ldflags settings and in
-	// their absence fallback to the settings in pkg/version/base.go
 	return Info{
-		Major:        gitMajor,
-		Minor:        gitMinor,
-		GitVersion:   gitVersion,
-		GitBranch:    gitBranch,
-		GitCommit:    gitCommit,
-		GitTreeState: gitTreeState,
-		BuildDate:    buildDate,
-		GoVersion:    runtime.Version(),
-		Compiler:     runtime.Compiler,
-		Platform:     fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-		Release:      release,
+		GitVersion: gitVersion,
+		GitCommit:  gitCommit,
+		BuildDate:  buildDate,
+		GoVersion:  runtime.Version(),
+		Platform:   fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 	}
 }
 
+// GetJSONString returns version info as indented JSON.
 func GetJSONString() string {
 	bs, _ := json.MarshalIndent(Get(), "", "  ")
 	return string(bs)
-}
-
-func shortDate(dateStr string) string {
-	var buf strings.Builder
-	for _, c := range dateStr {
-		if c >= '0' && c <= '9' {
-			buf.WriteRune(c)
-		}
-	}
-	dateStr = buf.String()
-	dateStr = strings.TrimPrefix(dateStr, "20")
-	if len(dateStr) > 8 {
-		dateStr = dateStr[:8]
-	}
-	return dateStr
-}
-
-func GetShortString() string {
-	v := Get()
-	return fmt.Sprintf("%s: %s-%s", shortDate(v.BuildDate), v.GitBranch, v.GitCommit)
-}
-
-func GetVersion() string {
-	v := Get()
-	return fmt.Sprintf("%s-%s-%s", v.GitBranch, shortDate(v.BuildDate), v.GitCommit)
 }

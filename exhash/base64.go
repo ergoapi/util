@@ -29,12 +29,6 @@ func B64Encode(data string) string {
 	return b64.StdEncoding.EncodeToString([]byte(data))
 }
 
-// B64EnCode base64加密 (deprecated: use B64Encode instead)
-// Deprecated: Use B64Encode instead
-func B64EnCode(code string) string {
-	return B64Encode(code)
-}
-
 // B64Decode base64解码
 func B64Decode(data string) (string, error) {
 	if data == "" {
@@ -97,12 +91,6 @@ func B58Encode(data []byte) string {
 	return string(reverseBytes(result))
 }
 
-// B58EnCode base58加密 (deprecated: use B58Encode instead)
-// Deprecated: Use B58Encode instead
-func B58EnCode(code string) string {
-	return B58Encode([]byte(code))
-}
-
 // B58Decode base58解码
 func B58Decode(data string) ([]byte, error) {
 	if data == "" {
@@ -153,12 +141,6 @@ func B58DecodeString(data string) (string, error) {
 // B32Encode base32编码
 func B32Encode(data string) string {
 	return b32.StdEncoding.EncodeToString([]byte(data))
-}
-
-// B32EnCode base32加密 (deprecated: use B32Encode instead)
-// Deprecated: Use B32Encode instead
-func B32EnCode(code string) string {
-	return B32Encode(code)
 }
 
 // B32Decode base32解码

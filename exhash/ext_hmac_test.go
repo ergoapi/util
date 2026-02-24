@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestFSEncryptDecryptWithHMAC(t *testing.T) {
+func TestFSEncryptDecryptGCM(t *testing.T) {
 	testCases := []struct {
 		name      string
 		plaintext string
@@ -36,8 +36,7 @@ func TestFSEncryptDecryptWithHMAC(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Encrypt with HMAC
-			encrypted, err := FSEncryptWithHMAC(tc.plaintext, tc.key)
+			encrypted, err := FSEncryptGCM(tc.plaintext, tc.key)
 			if err != nil {
 				t.Fatalf("Encryption failed: %v", err)
 			}
@@ -47,8 +46,7 @@ func TestFSEncryptDecryptWithHMAC(t *testing.T) {
 				t.Error("Encrypted data should not match plaintext")
 			}
 
-			// Decrypt with HMAC verification
-			decrypted, err := FSDecryptWithHMAC(encrypted, tc.key)
+			decrypted, err := FSDecryptGCM(encrypted, tc.key)
 			if err != nil {
 				t.Fatalf("Decryption failed: %v", err)
 			}
@@ -61,12 +59,12 @@ func TestFSEncryptDecryptWithHMAC(t *testing.T) {
 	}
 }
 
-func TestFSDecryptWithHMACTamperDetection(t *testing.T) {
+func TestFSDecryptGCMTamperDetection(t *testing.T) {
 	plaintext := "Sensitive Feishu data"
 	key := "secure-key-123"
 
 	// Encrypt the data
-	encrypted, err := FSEncryptWithHMAC(plaintext, key)
+	encrypted, err := FSEncryptGCM(plaintext, key)
 	if err != nil {
 		t.Fatalf("Encryption failed: %v", err)
 	}
@@ -75,7 +73,7 @@ func TestFSDecryptWithHMACTamperDetection(t *testing.T) {
 	tampered := encrypted[:len(encrypted)-5] + "HACK!"
 
 	// Try to decrypt tampered data
-	_, err = FSDecryptWithHMAC(tampered, key)
+	_, err = FSDecryptGCM(tampered, key)
 	if err == nil {
 		t.Error("Expected error when decrypting tampered data")
 	} else if !strings.Contains(err.Error(), "authentication failed") && !strings.Contains(err.Error(), "base64") && !strings.Contains(err.Error(), "decryption failed") {
@@ -83,7 +81,7 @@ func TestFSDecryptWithHMACTamperDetection(t *testing.T) {
 	}
 
 	// Try with wrong key
-	_, err = FSDecryptWithHMAC(encrypted, "wrong-key")
+	_, err = FSDecryptGCM(encrypted, "wrong-key")
 	if err == nil {
 		t.Error("Expected error with wrong key")
 	} else if !strings.Contains(err.Error(), "authentication failed") && !strings.Contains(err.Error(), "decryption failed") {
@@ -91,7 +89,7 @@ func TestFSDecryptWithHMACTamperDetection(t *testing.T) {
 	}
 }
 
-func TestFSEncryptWithHMACInvalidInput(t *testing.T) {
+func TestFSEncryptGCMInvalidInput(t *testing.T) {
 	testCases := []struct {
 		name      string
 		plaintext string
@@ -114,7 +112,7 @@ func TestFSEncryptWithHMACInvalidInput(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := FSEncryptWithHMAC(tc.plaintext, tc.key)
+			_, err := FSEncryptGCM(tc.plaintext, tc.key)
 			if err == nil {
 				t.Error("Expected error but got none")
 			} else if !strings.Contains(err.Error(), tc.errMsg) {
@@ -124,7 +122,7 @@ func TestFSEncryptWithHMACInvalidInput(t *testing.T) {
 	}
 }
 
-func TestFSDecryptWithHMACInvalidInput(t *testing.T) {
+func TestFSDecryptGCMInvalidInput(t *testing.T) {
 	testCases := []struct {
 		name    string
 		encrypt string
@@ -147,7 +145,7 @@ func TestFSDecryptWithHMACInvalidInput(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := FSDecryptWithHMAC(tc.encrypt, tc.key)
+			_, err := FSDecryptGCM(tc.encrypt, tc.key)
 			if err == nil {
 				t.Error("Expected error but got none")
 			} else if !strings.Contains(strings.ToLower(err.Error()), strings.ToLower(tc.errMsg)) {

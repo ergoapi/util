@@ -245,24 +245,6 @@ func TestB32Decode(t *testing.T) {
 	}
 }
 
-func TestDeprecatedFunctions(t *testing.T) {
-	// 测试已弃用的函数是否仍然工作
-	t.Run("B64EnCode", func(t *testing.T) {
-		result := B64EnCode("test")
-		assert.Equal(t, B64Encode("test"), result)
-	})
-
-	t.Run("B58EnCode", func(t *testing.T) {
-		result := B58EnCode("test")
-		assert.Equal(t, B58Encode([]byte("test")), result)
-	})
-
-	t.Run("B32EnCode", func(t *testing.T) {
-		result := B32EnCode("test")
-		assert.Equal(t, B32Encode("test"), result)
-	})
-}
-
 func TestReverseBytes(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -378,6 +360,9 @@ func TestHex(t *testing.T) {
 		{"short", "test", 8, 8},
 		{"exact", "test", 16, 16},
 		{"long", "test", 20, 20},
+		{"zero length", "test", 0, 32},
+		{"negative length", "test", -1, 32},
+		{"exceed md5 length", "test", 50, 32},
 	}
 
 	for _, tt := range tests {

@@ -189,19 +189,6 @@ func Check(port int) (status bool, err error) {
 	return CheckHostPort("", port)
 }
 
-// Deprecated: Use OutboundIPv2 instead.
-// OutboundIP 获取本机的出口IP.
-func OutboundIP() (string, error) {
-	res := ""
-	conn, err := net.Dial("udp", "8.8.8.8:80")
-	if conn != nil {
-		addr := conn.LocalAddr().(*net.UDPAddr)
-		res = addr.IP.String()
-		_ = conn.Close()
-	}
-	return res, err
-}
-
 // OutboundIPv2 获取出口IP
 func OutboundIPv2() (string, error) {
 	resp, err := http.Get("https://ip.ysicing.net")

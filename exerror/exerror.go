@@ -44,7 +44,7 @@ func Boka(value string, v any) {
 	if v == nil {
 		return
 	}
-	Bomb(value)
+	Bomb("%s", value)
 }
 
 // CheckAndExit check & exit

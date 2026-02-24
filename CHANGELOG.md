@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-02-17]
+
+### Security
+- **exhash**: `removePKCS7Padding` 使用 `crypto/subtle.ConstantTimeCompare` 进行常量时间填充验证，缓解 padding oracle 时序攻击
+- **exhash**: `FSEncryptGCM` 使用 `make`+`copy` 替代 `append` 拼接 nonce，避免潜在的 slice 共享问题
+- **exhash**: `FSDecrypt` 添加明确的废弃警告，说明 AES-CBC 模式的 padding oracle 攻击风险
+
+### Changed
+- **version**: `Info` 结构体从 11 个字段精简为 5 个（GitVersion, GitCommit, BuildDate, GoVersion, Platform）
+- **version**: ldflags 变量从 7 个减少为 3 个（gitVersion, gitCommit, buildDate）
+
+### Fixed
+- **exhash**: `Hex()` 函数新增 length 参数边界检查，防止 `length <= 0` 或 `length > 32` 时 panic
+- **exerror**: 修复 `Boka()` 中 `Bomb(value)` 非常量格式字符串的 go vet 警告
+- **log/glog**: 修复 `Infof(msg)` 非常量格式字符串警告，改为 `Info(msg)`
+
+### Removed
+- **exhash**: 移除废弃函数 `B64EnCode`、`B58EnCode`、`B32EnCode`
+- **exhash**: 移除废弃函数 `FSEncryptWithHMAC`、`FSDecryptWithHMAC`
+- **exid**: 移除 `GenUID`、`HashUID` 函数
+- **exnet**: 移除废弃函数 `OutboundIP`（使用 `OutboundIPv2` 替代）
+- **expass**: 移除废弃函数 `AesEncryptCBC`、`AesDecryptCBC` 及内部函数 `unPaddingPKCS7`
+- **exssh**: 移除废弃函数 `GetSSHConfig`（使用 `GetSSHConfigWithOptions` 替代）
+- **ztime**: 移除废弃函数 `NeedWork`（使用 `TodayNeedWork` 替代）
+- **version/semver**: 移除整个子包（语义版本比较封装）
+- **version/timeversion**: 移除整个子包（时间版本管理）
+- **version/prometheus**: 移除整个子包（Prometheus 指标集成）
+- **version/parse.go**: 移除旧版本比较函数（LTv2, GTv2, NotGTv3 等）
+- **version**: 移除 `GetShortString`、`GetVersion`、`shortDate` 辅助函数
+- **依赖**: 移除 `blang/semver/v4` 依赖
+
 ## [2025-09-06]
 
 ### Added

@@ -67,17 +67,6 @@ func (r *SSHConfigResult) Close() error {
 	return nil
 }
 
-// GetSSHConfig generate ssh config.
-// Deprecated: Use GetSSHConfigWithOptions instead for proper resource management.
-func GetSSHConfig(username, sshPrivateKeyString, passphrase, sshCert string, password string, timeout time.Duration, useAgentAuth bool) (*ssh.ClientConfig, error) {
-	result, err := GetSSHConfigWithOptions(username, sshPrivateKeyString, passphrase, sshCert, password, timeout, useAgentAuth, nil)
-	if err != nil {
-		return nil, err
-	}
-	// Note: AgentConn will leak if useAgentAuth is true. Use GetSSHConfigWithOptions instead.
-	return result.Config, nil
-}
-
 // GetSSHConfigWithOptions generates ssh config with options and returns resources that need cleanup.
 // The caller is responsible for calling result.Close() when done with the SSH connection.
 func GetSSHConfigWithOptions(username, sshPrivateKeyString, passphrase, sshCert string, password string, timeout time.Duration, useAgentAuth bool, opts *SSHConfigOptions) (*SSHConfigResult, error) {

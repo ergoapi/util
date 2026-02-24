@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestAesEncryptDecryptCBCWithHMAC(t *testing.T) {
+func TestAesEncryptDecryptGCM(t *testing.T) {
 	testCases := []struct {
 		name     string
 		data     string
@@ -43,7 +43,7 @@ func TestAesEncryptDecryptCBCWithHMAC(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Test encryption with empty password
 			if tc.password == "" {
-				_, err := AesEncryptCBC(tc.data, tc.password)
+				_, err := AesEncryptGCM(tc.data, tc.password)
 				if err == nil || !strings.Contains(err.Error(), "password cannot be empty") {
 					t.Errorf("Expected error for empty password, got: %v", err)
 				}
@@ -51,7 +51,7 @@ func TestAesEncryptDecryptCBCWithHMAC(t *testing.T) {
 			}
 
 			// Encrypt data
-			encrypted, err := AesEncryptCBC(tc.data, tc.password)
+			encrypted, err := AesEncryptGCM(tc.data, tc.password)
 			if err != nil {
 				t.Fatalf("Encryption failed: %v", err)
 			}
@@ -62,7 +62,7 @@ func TestAesEncryptDecryptCBCWithHMAC(t *testing.T) {
 			}
 
 			// Decrypt data
-			decrypted, err := AesDecryptCBC(encrypted, tc.password)
+			decrypted, err := AesDecryptGCM(encrypted, tc.password)
 			if err != nil {
 				t.Fatalf("Decryption failed: %v", err)
 			}
@@ -75,12 +75,12 @@ func TestAesEncryptDecryptCBCWithHMAC(t *testing.T) {
 	}
 }
 
-func TestAesDecryptCBCWithHMACTamperDetection(t *testing.T) {
+func TestAesDecryptGCMTamperDetection(t *testing.T) {
 	data := "Secret message that should not be tampered with"
 	password := "secure-password-123"
 
 	// Encrypt the data
-	encrypted, err := AesEncryptCBC(data, password)
+	encrypted, err := AesEncryptGCM(data, password)
 	if err != nil {
 		t.Fatalf("Encryption failed: %v", err)
 	}
@@ -90,7 +90,7 @@ func TestAesDecryptCBCWithHMACTamperDetection(t *testing.T) {
 	tampered := encrypted[:len(encrypted)-10] + "TAMPERED!!"
 
 	// Try to decrypt tampered data
-	_, err = AesDecryptCBC(tampered, password)
+	_, err = AesDecryptGCM(tampered, password)
 	if err == nil {
 		t.Error("Expected error when decrypting tampered data, but got none")
 	} else if !strings.Contains(err.Error(), "base64") && !strings.Contains(err.Error(), "HMAC") && !strings.Contains(err.Error(), "invalid") {
@@ -98,23 +98,23 @@ func TestAesDecryptCBCWithHMACTamperDetection(t *testing.T) {
 	}
 
 	// Try with wrong password (should fail HMAC verification)
-	_, err = AesDecryptCBC(encrypted, "wrong-password")
+	_, err = AesDecryptGCM(encrypted, "wrong-password")
 	if err == nil {
 		t.Error("Expected error with wrong password, but got none")
 	}
 }
 
-func TestAesEncryptCBCDeterministic(t *testing.T) {
+func TestAesEncryptGCMDeterministic(t *testing.T) {
 	data := "Test deterministic encryption"
 	password := "test-password"
 
 	// Encrypt the same data twice
-	encrypted1, err := AesEncryptCBC(data, password)
+	encrypted1, err := AesEncryptGCM(data, password)
 	if err != nil {
 		t.Fatalf("First encryption failed: %v", err)
 	}
 
-	encrypted2, err := AesEncryptCBC(data, password)
+	encrypted2, err := AesEncryptGCM(data, password)
 	if err != nil {
 		t.Fatalf("Second encryption failed: %v", err)
 	}
@@ -125,12 +125,12 @@ func TestAesEncryptCBCDeterministic(t *testing.T) {
 	}
 
 	// But both should decrypt to the same original data
-	decrypted1, err := AesDecryptCBC(encrypted1, password)
+	decrypted1, err := AesDecryptGCM(encrypted1, password)
 	if err != nil {
 		t.Fatalf("First decryption failed: %v", err)
 	}
 
-	decrypted2, err := AesDecryptCBC(encrypted2, password)
+	decrypted2, err := AesDecryptGCM(encrypted2, password)
 	if err != nil {
 		t.Fatalf("Second decryption failed: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestAesEncryptCBCDeterministic(t *testing.T) {
 	}
 }
 
-func TestAesDecryptCBCInvalidInput(t *testing.T) {
+func TestAesDecryptGCMInvalidInput(t *testing.T) {
 	testCases := []struct {
 		name      string
 		encrypted string
@@ -169,7 +169,7 @@ func TestAesDecryptCBCInvalidInput(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := AesDecryptCBC(tc.encrypted, tc.password)
+			_, err := AesDecryptGCM(tc.encrypted, tc.password)
 			if err == nil {
 				t.Error("Expected error but got none")
 			} else if !strings.Contains(strings.ToLower(err.Error()), strings.ToLower(tc.errMsg)) {

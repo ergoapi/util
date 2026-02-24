@@ -4,7 +4,6 @@ go 1.25.5
 
 require (
 	github.com/6tail/lunar-go v1.4.6
-	github.com/blang/semver/v4 v4.0.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cockroachdb/errors v1.12.0
 	github.com/docker/go-connections v0.6.0

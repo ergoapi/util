@@ -101,16 +101,6 @@ func TodayNeedWork() bool {
 	return h.IsWork
 }
 
-// Deprecated: use IsWorkday instead
-// NeedWork 判断今天是否需要工作（兼容旧接口，无参数）
-func NeedWork() bool {
-	h, err := GetHoliday(NowDate())
-	if err != nil {
-		return true // 出错默认需要工作
-	}
-	return h.IsWork
-}
-
 // TodayHolidayInfo 获取今天的节假日信息
 func TodayHolidayInfo() (*Holiday, error) {
 	return GetHoliday(NowDate())

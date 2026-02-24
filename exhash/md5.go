@@ -31,5 +31,8 @@ func MD5(str string) string {
 func Hex(s string, length int) string {
 	h := md5.Sum([]byte(s))
 	d := hex.EncodeToString(h[:])
+	if length <= 0 || length > len(d) {
+		return d
+	}
 	return d[:length]
 }

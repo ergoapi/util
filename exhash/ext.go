@@ -11,6 +11,7 @@ import (
 	"crypto/cipher"
 	cryptorand "crypto/rand"
 	"crypto/sha256"
+	"crypto/subtle"
 	b64 "encoding/base64"
 	"io"
 
@@ -18,7 +19,9 @@ import (
 )
 
 // FSDecrypt https://open.feishu.cn/document/ukTMukTMukTM/uYDNxYjL2QTM24iN0EjN/event-subscription-configure-/encrypt-key-encryption-configuration-case
-// Note: This function maintains compatibility with Feishu API. For new implementations, consider using FSDecryptGCM.
+//
+// Deprecated: FSDecrypt uses AES-CBC without authentication, which is vulnerable to padding oracle attacks.
+// Use FSDecryptGCM (AES-GCM) for new implementations. This function is retained only for Feishu API backward compatibility.
 func FSDecrypt(encrypt string, key string) (string, error) {
 	buf, err := b64.StdEncoding.DecodeString(encrypt)
 	if err != nil {
@@ -92,7 +95,9 @@ func FSEncryptGCM(plaintext string, key string) (string, error) {
 	encrypted := aesgcm.Seal(nil, nonce, []byte(plaintext), nil)
 
 	// Combine nonce + encrypted (which includes the auth tag)
-	result := append(nonce, encrypted...)
+	result := make([]byte, len(nonce)+len(encrypted))
+	copy(result, nonce)
+	copy(result[len(nonce):], encrypted)
 
 	return b64.StdEncoding.EncodeToString(result), nil
 }
@@ -137,34 +142,25 @@ func FSDecryptGCM(encrypt string, key string) (string, error) {
 	return string(plaintext), nil
 }
 
-// Deprecated: Use FSEncryptGCM instead. The implementation now uses AES-GCM;
-// this wrapper preserves backward compatibility with the old name.
-func FSEncryptWithHMAC(plaintext string, key string) (string, error) {
-	return FSEncryptGCM(plaintext, key)
-}
-
-// Deprecated: Use FSDecryptGCM instead. The implementation now uses AES-GCM;
-// this wrapper preserves backward compatibility with the old name.
-func FSDecryptWithHMAC(encrypt string, key string) (string, error) {
-	return FSDecryptGCM(encrypt, key)
-}
-
-// removePKCS7Padding 移除PKCS7填充
+// removePKCS7Padding removes PKCS7 padding using constant-time comparison
+// to mitigate padding oracle attacks when used with CBC mode.
 func removePKCS7Padding(data []byte) ([]byte, error) {
 	if len(data) == 0 {
 		return nil, errors.New("empty data")
 	}
 
 	padding := int(data[len(data)-1])
-	if padding > len(data) || padding > aes.BlockSize {
+	if padding == 0 || padding > len(data) || padding > aes.BlockSize {
 		return nil, errors.New("invalid padding size")
 	}
 
-	// 验证所有填充字节
-	for i := len(data) - padding; i < len(data); i++ {
-		if data[i] != byte(padding) {
-			return nil, errors.New("invalid padding bytes")
-		}
+	// Constant-time verification of all padding bytes to prevent timing side-channel attacks
+	expected := make([]byte, padding)
+	for i := range expected {
+		expected[i] = byte(padding)
+	}
+	if subtle.ConstantTimeCompare(data[len(data)-padding:], expected) != 1 {
+		return nil, errors.New("invalid padding bytes")
 	}
 
 	return data[:len(data)-padding], nil

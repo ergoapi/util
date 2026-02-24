@@ -81,7 +81,7 @@ func (mgl *GLogger) logWithLevel(ctx context.Context, level logrus.Level, messag
 
 	switch level {
 	case logrus.InfoLevel:
-		entry.Infof(msg)
+		entry.Info(msg)
 	case logrus.WarnLevel:
 		entry.Warn(msg)
 	case logrus.ErrorLevel:

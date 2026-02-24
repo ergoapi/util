@@ -389,7 +389,7 @@ func TestAesEncryptDecrypt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			encrypted, err := AesEncryptCBC(tt.data, tt.password)
+			encrypted, err := AesEncryptGCM(tt.data, tt.password)
 
 			if tt.wantErr {
 				require.Error(t, err)
@@ -402,27 +402,27 @@ func TestAesEncryptDecrypt(t *testing.T) {
 			assert.NotEqual(t, tt.data, encrypted)
 
 			// 验证相同输入产生不同输出（因为随机IV和盐）
-			encrypted2, err2 := AesEncryptCBC(tt.data, tt.password)
+			encrypted2, err2 := AesEncryptGCM(tt.data, tt.password)
 			require.NoError(t, err2)
 			assert.NotEqual(t, encrypted, encrypted2)
 
 			// 解密测试
-			decrypted, err := AesDecryptCBC(encrypted, tt.password)
+			decrypted, err := AesDecryptGCM(encrypted, tt.password)
 			require.NoError(t, err)
 			assert.Equal(t, tt.data, decrypted)
 
 			// 错误密码解密失败
-			_, err = AesDecryptCBC(encrypted, tt.password+"wrong")
+			_, err = AesDecryptGCM(encrypted, tt.password+"wrong")
 			assert.Error(t, err)
 		})
 	}
 }
 
-func TestAesDecryptCBC_ErrorCases(t *testing.T) {
+func TestAesDecryptGCM_ErrorCases(t *testing.T) {
 	validData := "test data"
 	validPassword := "password"
 
-	encrypted, err := AesEncryptCBC(validData, validPassword)
+	encrypted, err := AesEncryptGCM(validData, validPassword)
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -465,76 +465,11 @@ func TestAesDecryptCBC_ErrorCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := AesDecryptCBC(tt.data, tt.password)
+			result, err := AesDecryptGCM(tt.data, tt.password)
 			require.Error(t, err)
 			assert.Empty(t, result)
 			if tt.errMsg != "" {
 				assert.Contains(t, err.Error(), tt.errMsg)
-			}
-		})
-	}
-}
-
-func TestUnPaddingPKCS7(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   []byte
-		want    []byte
-		wantErr bool
-	}{
-		{
-			name:    "正常padding",
-			input:   []byte{1, 2, 3, 4, 4, 4, 4},
-			want:    []byte{1, 2, 3},
-			wantErr: false,
-		},
-		{
-			name:    "完整块padding",
-			input:   []byte{16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16},
-			want:    []byte{},
-			wantErr: false,
-		},
-		{
-			name:    "空输入",
-			input:   []byte{},
-			want:    nil,
-			wantErr: true,
-		},
-		{
-			name:    "nil输入",
-			input:   nil,
-			want:    nil,
-			wantErr: true,
-		},
-		{
-			name:    "无效padding值过大",
-			input:   []byte{1, 2, 3, 20},
-			want:    nil,
-			wantErr: true,
-		},
-		{
-			name:    "无效padding值为0",
-			input:   []byte{1, 2, 3, 0},
-			want:    nil,
-			wantErr: true,
-		},
-		{
-			name:    "不一致的padding",
-			input:   []byte{1, 2, 3, 2, 3, 3},
-			want:    nil,
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := unPaddingPKCS7(tt.input)
-
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.want, result)
 			}
 		})
 	}
@@ -589,22 +524,22 @@ func BenchmarkCompareHash(b *testing.B) {
 	}
 }
 
-func BenchmarkAesEncryptCBC(b *testing.B) {
+func BenchmarkAesEncryptGCM(b *testing.B) {
 	data := "benchmark test data for encryption"
 	password := "benchmarkPassword"
 
 	for i := 0; i < b.N; i++ {
-		_, _ = AesEncryptCBC(data, password)
+		_, _ = AesEncryptGCM(data, password)
 	}
 }
 
-func BenchmarkAesDecryptCBC(b *testing.B) {
+func BenchmarkAesDecryptGCM(b *testing.B) {
 	data := "benchmark test data for decryption"
 	password := "benchmarkPassword"
-	encrypted, _ := AesEncryptCBC(data, password)
+	encrypted, _ := AesEncryptGCM(data, password)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = AesDecryptCBC(encrypted, password)
+		_, _ = AesDecryptGCM(encrypted, password)
 	}
 }
