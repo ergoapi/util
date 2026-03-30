@@ -8,10 +8,11 @@
 package bark
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
-
-	"github.com/ergoapi/util/exhttp"
 )
 
 type Level string
@@ -23,11 +24,11 @@ const (
 )
 
 type Bark struct {
-	Client    *exhttp.Client `json:"-"`          // http client
-	APIUrl    string         `json:"-"`          // bark url
-	Title     string         `json:"title"`      // 标题
-	Body      string         `json:"body"`       // 内容
-	DeviceKey string         `json:"device_key"` // 设备key
+	client    *http.Client
+	APIUrl    string `json:"-"`          // bark url
+	Title     string `json:"title"`      // 标题
+	Body      string `json:"body"`       // 内容
+	DeviceKey string `json:"device_key"` // 设备key
 
 	// optional args
 	Level             Level  `json:"level,omitempty"`             // 级别
@@ -62,7 +63,6 @@ func (b *Bark) api() string {
 }
 
 func (b *Bark) SendEvent(c Core) error {
-	var res Result
 	if len(c.Title) > 0 {
 		b.Title = c.Title
 	}
@@ -78,22 +78,27 @@ func (b *Bark) SendEvent(c Core) error {
 	if len(c.Copy) > 0 {
 		b.Copy = c.Copy
 	}
-	resp, err := b.Client.R().
-		SetBody(b).
-		SetSuccessResult(&res).
-		Post(b.api())
+	body, err := json.Marshal(b)
 	if err != nil {
 		return err
 	}
-	if !resp.IsSuccessState() {
+	resp, err := b.client.Post(b.api(), "application/json", bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("bark send event failed, bad response status: %s", resp.Status)
 	}
 	return nil
 }
 
-func NewBark(url, device string, httpClient *exhttp.Client) (*Bark, error) {
+func NewBark(url, device string, httpClient *http.Client) (*Bark, error) {
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
 	b := &Bark{
-		Client:            httpClient,
+		client:            httpClient,
 		APIUrl:            url,
 		Title:             "默认标题",
 		Body:              "默认正文",
@@ -102,9 +107,6 @@ func NewBark(url, device string, httpClient *exhttp.Client) (*Bark, error) {
 		AutomaticallyCopy: "1",
 		Group:             "默认",
 		IsArchive:         "1",
-	}
-	if b.Client == nil {
-		b.Client, _ = exhttp.GetClient()
 	}
 	return b, nil
 }

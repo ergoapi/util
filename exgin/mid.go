@@ -19,8 +19,6 @@ import (
 	"github.com/ergoapi/util/environ"
 	errors "github.com/ergoapi/util/exerror"
 	"github.com/ergoapi/util/exid"
-	ltrace "github.com/ergoapi/util/log/hooks/trace"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/en"
@@ -65,7 +63,11 @@ func exTraceID() gin.HandlerFunc {
 		}
 		g.Header("X-Trace-Id", traceID)
 		g.Set("ex-trace-id", traceID)
-		logrus.AddHook(ltrace.NewTraceIDHook(traceID, "exgin"))
+		// per-request logger，避免污染全局 logrus hook 列表
+		g.Set("ex-logger", logrus.WithFields(logrus.Fields{
+			"traceID": traceID,
+			"Tag":     "exgin",
+		}))
 		g.Next()
 	}
 }
@@ -100,36 +102,30 @@ func ExLog(skip ...string) gin.HandlerFunc {
 		xffIP := c.Writer.Header().Get("X-Forwarded-For")
 		readIP := c.Writer.Header().Get("X-Real-Ip")
 		referer := c.Request.Referer()
+		logger := logrus.StandardLogger().WithContext(c.Request.Context())
+		if v, exists := c.Get("ex-logger"); exists {
+			if entry, ok := v.(*logrus.Entry); ok {
+				logger = entry
+			}
+		}
+		fields := logrus.Fields{
+			"statuscode": statuscode,
+			"bodysize":   bodysize,
+			"client_ip":  clientIP,
+			"remote_ip":  remoteIP,
+			"xff_ip":     xffIP,
+			"real_ip":    readIP,
+			"method":     method,
+			"host":       host,
+			"path":       path,
+			"latency":    latency,
+			"ua":         ua,
+			"referer":    referer,
+		}
 		if len(c.Errors) > 0 || c.Writer.Status() >= 500 {
-			logrus.WithFields(logrus.Fields{
-				"statuscode": statuscode,
-				"bodysize":   bodysize,
-				"client_ip":  clientIP,
-				"remote_ip":  remoteIP,
-				"xff_ip":     xffIP,
-				"real_ip":    readIP,
-				"method":     method,
-				"host":       host,
-				"path":       path,
-				"latency":    latency,
-				"ua":         ua,
-				"referer":    referer,
-			}).Warnf("query: %v  <= err: %v", query, c.Errors.String())
+			logger.WithFields(fields).Warnf("query: %v  <= err: %v", query, c.Errors.String())
 		} else {
-			logrus.WithFields(logrus.Fields{
-				"statuscode": statuscode,
-				"bodysize":   bodysize,
-				"client_ip":  clientIP,
-				"remote_ip":  remoteIP,
-				"xff_ip":     xffIP,
-				"real_ip":    readIP,
-				"method":     method,
-				"host":       host,
-				"path":       path,
-				"latency":    latency,
-				"ua":         ua,
-				"referer":    referer,
-			}).Infof("query: %v", query)
+			logger.WithFields(fields).Infof("query: %v", query)
 		}
 		// update prom
 		labels := []string{fmt.Sprint(statuscode), host, path, method}
