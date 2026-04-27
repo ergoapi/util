@@ -5,7 +5,7 @@ go 1.26.1
 require (
 	github.com/6tail/lunar-go v1.4.6
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/cockroachdb/errors v1.12.0
+	github.com/cockroachdb/errors v1.13.0
 	github.com/docker/go-connections v0.7.0
 	github.com/dromara/carbon/v2 v2.6.16
 	github.com/gin-contrib/pprof v1.5.4
@@ -59,7 +59,7 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
-	github.com/getsentry/sentry-go v0.28.1 // indirect
+	github.com/getsentry/sentry-go v0.46.0 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250813024750-ebf49471dced // indirect
