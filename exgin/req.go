@@ -75,11 +75,11 @@ func GinsQueryInt64(c *gin.Context, key string, defaultVal ...int64) int64 {
 func GinsQueryBool(c *gin.Context, key string, defaultVal ...bool) bool {
 	strv := c.Query(key)
 	if strv != "" {
-		intv, err := strconv.Atoi(strv)
+		boolv, err := strconv.ParseBool(strv)
 		if err != nil {
 			return false
 		}
-		return intv == 1
+		return boolv
 	}
 
 	if len(defaultVal) == 0 {
