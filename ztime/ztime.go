@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/6tail/tyme4go/tyme"
+	"github.com/cockroachdb/errors"
 	"github.com/dromara/carbon/v2"
 	"github.com/ergoapi/util/common"
 	"github.com/ergoapi/util/exstr"
@@ -560,4 +561,252 @@ func DayYiGi(t ...string) YiGi {
 		}
 	}
 	return yg
+}
+
+// DayInfo 日期综合信息
+type DayInfo struct {
+	Date            string        `json:"date"`              // 公历日期
+	DayOfYear       int           `json:"day_of_year"`       // 第几天
+	WeekOfYear      int           `json:"week_of_year"`      // 第几周
+	IsWork          bool          `json:"is_work"`           // 今天是否是工作日
+	IsAdjust        bool          `json:"is_adjust"`         // 是否是调休工作日
+	YesterdayIsWork bool          `json:"yesterday_is_work"` // 昨天是否是工作日
+	YesterdayAdjust bool          `json:"yesterday_adjust"`  // 昨天是否是调休工作日
+	TomorrowIsWork  bool          `json:"tomorrow_is_work"`  // 明天是否是工作日
+	TomorrowAdjust  bool          `json:"tomorrow_adjust"`   // 明天是否是调休工作日
+	Festival        *FestivalInfo `json:"festival"`          // 今天的节日信息
+	TomorrowFest    *FestivalInfo `json:"tomorrow_festival"` // 明天的节日信息
+	LunarDate       string        `json:"lunar_date"`        // 农历日期
+	LunarSeason     string        `json:"lunar_season"`      // 农历季节
+	SolarTerm       string        `json:"solar_term"`        // 节气
+	SolarTermDay    int           `json:"solar_term_day"`    // 节气第几天
+	DogDay          *DogDayInfo   `json:"dog_day"`           // 三伏天
+	NineDay         *NineDayInfo  `json:"nine_day"`          // 数九天
+	PlumRainDay     *PlumRainInfo `json:"plum_rain_day"`     // 梅雨天
+	Yi              []string      `json:"yi"`                // 宜
+	Gi              []string      `json:"gi"`                // 忌
+}
+
+// FestivalInfo 节日信息
+type FestivalInfo struct {
+	Name          string `json:"name"`           // 节日名称
+	Type          string `json:"type"`           // solar=公历现代节日, lunar=农历传统节日
+	IsOff         bool   `json:"is_off"`         // 是否放假
+	HolidayDay    int    `json:"holiday_day"`    // 假期第几天(不在假期中为0)
+	HolidayLeft   int    `json:"holiday_left"`   // 假期还剩多少天(不在假期中为0)
+	DataAvailable bool   `json:"data_available"` // 放假安排数据是否已发布
+}
+
+// DogDayInfo 三伏天详情
+type DogDayInfo struct {
+	Name     string `json:"name"`      // 初伏/中伏/末伏
+	Day      int    `json:"day"`       // 当前伏第几天
+	DaysLeft int    `json:"days_left"` // 距离出伏还有多少天
+}
+
+// NineDayInfo 数九天详情
+type NineDayInfo struct {
+	Name     string `json:"name"`      // 一九/二九/.../九九
+	Day      int    `json:"day"`       // 当前九第几天
+	DaysLeft int    `json:"days_left"` // 距离出九还有多少天
+}
+
+// PlumRainInfo 梅雨天详情
+type PlumRainInfo struct {
+	Name     string `json:"name"`      // 入梅/出梅
+	Day      int    `json:"day"`       // 入梅第几天
+	DaysLeft int    `json:"days_left"` // 距离出梅还有多少天
+}
+
+// GetDayInfo 获取指定日期的综合信息，不传参数则使用当前日期
+func GetDayInfo(t ...string) (*DayInfo, error) {
+	var c *carbon.Carbon
+	if len(t) == 0 {
+		c = carbon.Now()
+	} else {
+		c = carbon.Parse(t[0])
+	}
+	if c.IsInvalid() {
+		return nil, errors.New("invalid date format")
+	}
+
+	sd, err := tyme.SolarDay{}.FromYmd(c.Year(), c.Month(), c.Day())
+	if err != nil {
+		return nil, err
+	}
+	ld := sd.GetLunarDay()
+	lm := ld.GetLunarMonth()
+
+	info := &DayInfo{
+		Date:       c.ToDateString(),
+		DayOfYear:  c.DayOfYear(),
+		WeekOfYear: c.WeekOfYear(),
+		LunarDate:  ld.String(),
+		LunarSeason: lm.GetSeason().GetName(),
+	}
+
+	// 今天工作日判断
+	info.IsWork, info.IsAdjust = dayWorkInfo(*sd)
+
+	// 昨天工作日判断
+	info.YesterdayIsWork, info.YesterdayAdjust = dayWorkInfo(sd.Next(-1))
+
+	// 明天工作日判断
+	info.TomorrowIsWork, info.TomorrowAdjust = dayWorkInfo(sd.Next(1))
+
+	// 今天节日信息
+	info.Festival = buildFestivalInfo(*sd, ld)
+
+	// 明天节日信息
+	tmr := sd.Next(1)
+	tmrLd := tmr.GetLunarDay()
+	info.TomorrowFest = buildFestivalInfo(tmr, tmrLd)
+
+	// 节气
+	termDay := sd.GetTermDay()
+	info.SolarTerm = termDay.GetSolarTerm().GetName()
+	info.SolarTermDay = termDay.GetDayIndex() + 1
+
+	// 三伏天
+	if dog := sd.GetDogDay(); dog != nil {
+		daysLeft := 0
+		for i := 1; i <= 60; i++ {
+			if sd.Next(i).GetDogDay() == nil {
+				daysLeft = i
+				break
+			}
+		}
+		info.DogDay = &DogDayInfo{
+			Name:     dog.GetDog().GetName(),
+			Day:      dog.GetDayIndex() + 1,
+			DaysLeft: daysLeft,
+		}
+	}
+
+	// 数九天
+	if nine := sd.GetNineDay(); nine != nil {
+		nineIdx := nine.GetNine().GetIndex()
+		totalDay := nineIdx*9 + nine.GetDayIndex()
+		info.NineDay = &NineDayInfo{
+			Name:     nine.GetNine().GetName(),
+			Day:      nine.GetDayIndex() + 1,
+			DaysLeft: 81 - totalDay - 1,
+		}
+	}
+
+	// 梅雨天
+	if plum := sd.GetPlumRainDay(); plum != nil {
+		daysLeft := 0
+		if plum.GetPlumRain().GetIndex() == 0 {
+			for i := 1; i <= 60; i++ {
+				p := sd.Next(i).GetPlumRainDay()
+				if p == nil || p.GetPlumRain().GetIndex() == 1 {
+					daysLeft = i
+					break
+				}
+			}
+		}
+		info.PlumRainDay = &PlumRainInfo{
+			Name:     plum.GetPlumRain().GetName(),
+			Day:      plum.GetDayIndex() + 1,
+			DaysLeft: daysLeft,
+		}
+	}
+
+	// 宜忌
+	info.Yi = make([]string, 0)
+	if recommends, err := ld.GetRecommends(); err == nil {
+		for _, r := range recommends {
+			info.Yi = append(info.Yi, r.GetName())
+		}
+	}
+	info.Gi = make([]string, 0)
+	if avoids, err := ld.GetAvoids(); err == nil {
+		for _, a := range avoids {
+			info.Gi = append(info.Gi, a.GetName())
+		}
+	}
+
+	return info, nil
+}
+
+// dayWorkInfo 判断指定公历日是否工作日及是否调休
+func dayWorkInfo(sd tyme.SolarDay) (isWork bool, isAdjust bool) {
+	if h := sd.GetLegalHoliday(); h != nil {
+		return h.IsWork(), h.IsWork()
+	}
+	weekday := sd.GetWeek().GetIndex()
+	if weekday == 0 || weekday == 6 {
+		return false, false
+	}
+	return true, false
+}
+
+// hasHolidayData 判断指定年份是否有法定假日数据
+func hasHolidayData(year int) bool {
+	// tyme4go LegalHolidayData 数据起始于2001年，截止至当前已发布的年份
+	// 通过尝试查询该年1月1日来判断是否有数据
+	h, _ := tyme.LegalHoliday{}.FromYmd(year, 1, 1)
+	return h != nil
+}
+
+// buildFestivalInfo 构建指定日期的节日信息
+func buildFestivalInfo(sd tyme.SolarDay, ld tyme.LunarDay) *FestivalInfo {
+	var info *FestivalInfo
+
+	// 检查农历传统节日
+	if f := ld.GetFestival(); f != nil {
+		info = &FestivalInfo{
+			Name:          f.GetName(),
+			Type:          "lunar",
+			DataAvailable: hasHolidayData(sd.GetYear()),
+		}
+	}
+
+	// 检查公历现代节日
+	if f := sd.GetFestival(); f != nil {
+		info = &FestivalInfo{
+			Name:          f.GetName(),
+			Type:          "solar",
+			DataAvailable: hasHolidayData(sd.GetYear()),
+		}
+	}
+
+	// 如果没有节日，检查是否在法定假日中（如国庆假期第4天没有对应节日名，但仍在放假）
+	h := sd.GetLegalHoliday()
+	if h != nil && !h.IsWork() {
+		if info == nil {
+			info = &FestivalInfo{
+				Name:          h.GetName(),
+				Type:          "legal",
+				DataAvailable: true,
+			}
+		}
+		info.IsOff = true
+		info.DataAvailable = true
+		// 计算假期第几天
+		info.HolidayDay = 1
+		for i := 1; i <= 30; i++ {
+			prev := sd.Next(-i)
+			ph := prev.GetLegalHoliday()
+			if ph == nil || ph.IsWork() || ph.GetName() != h.GetName() {
+				break
+			}
+			info.HolidayDay++
+		}
+		// 计算假期还剩多少天
+		info.HolidayLeft = 0
+		for i := 1; i <= 30; i++ {
+			next := sd.Next(i)
+			nh := next.GetLegalHoliday()
+			if nh == nil || nh.IsWork() || nh.GetName() != h.GetName() {
+				break
+			}
+			info.HolidayLeft++
+		}
+	} else if info != nil {
+		info.DataAvailable = hasHolidayData(sd.GetYear())
+	}
+
+	return info
 }
