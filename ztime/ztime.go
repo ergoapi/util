@@ -580,9 +580,9 @@ type DayInfo struct {
 	LunarSeason     string        `json:"lunar_season"`      // 农历季节
 	SolarTerm       string        `json:"solar_term"`        // 节气
 	SolarTermDay    int           `json:"solar_term_day"`    // 节气第几天
-	DogDay          *DogDayInfo   `json:"dog_day"`           // 三伏天
-	NineDay         *NineDayInfo  `json:"nine_day"`          // 数九天
-	PlumRainDay     *PlumRainInfo `json:"plum_rain_day"`     // 梅雨天
+	DogDay          *PeriodInfo   `json:"dog_day"`           // 三伏天
+	NineDay         *PeriodInfo   `json:"nine_day"`          // 数九天
+	PlumRainDay     *PeriodInfo   `json:"plum_rain_day"`     // 梅雨天
 	Yi              []string      `json:"yi"`                // 宜
 	Gi              []string      `json:"gi"`                // 忌
 }
@@ -597,25 +597,11 @@ type FestivalInfo struct {
 	DataAvailable bool   `json:"data_available"` // 放假安排数据是否已发布
 }
 
-// DogDayInfo 三伏天详情
-type DogDayInfo struct {
-	Name     string `json:"name"`      // 初伏/中伏/末伏
-	Day      int    `json:"day"`       // 当前伏第几天
-	DaysLeft int    `json:"days_left"` // 距离出伏还有多少天
-}
-
-// NineDayInfo 数九天详情
-type NineDayInfo struct {
-	Name     string `json:"name"`      // 一九/二九/.../九九
-	Day      int    `json:"day"`       // 当前九第几天
-	DaysLeft int    `json:"days_left"` // 距离出九还有多少天
-}
-
-// PlumRainInfo 梅雨天详情
-type PlumRainInfo struct {
-	Name     string `json:"name"`      // 入梅/出梅
-	Day      int    `json:"day"`       // 入梅第几天
-	DaysLeft int    `json:"days_left"` // 距离出梅还有多少天
+// PeriodInfo 特殊时段详情(三伏天/数九天/梅雨天)
+type PeriodInfo struct {
+	Name     string `json:"name"`      // 阶段名称
+	Day      int    `json:"day"`       // 当前阶段第几天
+	DaysLeft int    `json:"days_left"` // 距离结束还有多少天
 }
 
 // GetDayInfo 获取指定日期的综合信息，不传参数则使用当前日期
@@ -676,7 +662,7 @@ func GetDayInfo(t ...string) (*DayInfo, error) {
 				break
 			}
 		}
-		info.DogDay = &DogDayInfo{
+		info.DogDay = &PeriodInfo{
 			Name:     dog.GetDog().GetName(),
 			Day:      dog.GetDayIndex() + 1,
 			DaysLeft: daysLeft,
@@ -687,7 +673,7 @@ func GetDayInfo(t ...string) (*DayInfo, error) {
 	if nine := sd.GetNineDay(); nine != nil {
 		nineIdx := nine.GetNine().GetIndex()
 		totalDay := nineIdx*9 + nine.GetDayIndex()
-		info.NineDay = &NineDayInfo{
+		info.NineDay = &PeriodInfo{
 			Name:     nine.GetNine().GetName(),
 			Day:      nine.GetDayIndex() + 1,
 			DaysLeft: 81 - totalDay - 1,
@@ -706,7 +692,7 @@ func GetDayInfo(t ...string) (*DayInfo, error) {
 				}
 			}
 		}
-		info.PlumRainDay = &PlumRainInfo{
+		info.PlumRainDay = &PeriodInfo{
 			Name:     plum.GetPlumRain().GetName(),
 			Day:      plum.GetDayIndex() + 1,
 			DaysLeft: daysLeft,
