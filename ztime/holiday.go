@@ -7,9 +7,11 @@
 package ztime
 
 import (
-	"github.com/cockroachdb/errors"
+	"strconv"
+	"strings"
 
-	"github.com/6tail/lunar-go/HolidayUtil"
+	"github.com/6tail/tyme4go/tyme"
+	"github.com/cockroachdb/errors"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -28,26 +30,28 @@ func GetHoliday(date string) (*Holiday, error) {
 		return nil, errors.New("empty date")
 	}
 
-	// 解析日期
 	c := carbon.Parse(date)
 	if c.IsInvalid() {
 		return nil, errors.New("invalid date format")
 	}
 
-	// 查询节假日信息
 	h := &Holiday{
-		// 规范化为 YYYY-MM-DD
 		Date: c.ToDateString(),
 	}
 
-	// 查询外部节假日数据（使用规范化日期）
-	d := HolidayUtil.GetHoliday(h.Date)
+	parts := strings.Split(h.Date, "-")
+	if len(parts) != 3 {
+		return nil, errors.New("invalid date format")
+	}
+	year, _ := strconv.Atoi(parts[0])
+	month, _ := strconv.Atoi(parts[1])
+	day, _ := strconv.Atoi(parts[2])
+
+	d, _ := tyme.LegalHoliday{}.FromYmd(year, month, day)
 	if d != nil {
 		h.Name = d.GetName()
 		h.IsWork = d.IsWork()
-		// 如果该日存在节假日数据且为工作日，通常为调休上班
 		h.IsAdjust = d.IsWork()
-		// 是否为休息日：与是否上班相反
 		h.IsHoliday = !h.IsWork
 
 		if h.IsAdjust {
@@ -56,7 +60,6 @@ func GetHoliday(date string) (*Holiday, error) {
 		return h, nil
 	}
 
-	// 判断是否是周末（兼容不同返回范围：0=Sunday..6=Saturday 或 1=Monday..7=Sunday）
 	weekday := c.DayOfWeek()
 	if weekday == 6 || weekday == 7 || weekday == 0 {
 		h.Name = "周末"

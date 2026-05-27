@@ -10,7 +10,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/6tail/lunar-go/calendar"
+	"github.com/6tail/tyme4go/tyme"
 	"github.com/dromara/carbon/v2"
 	"github.com/ergoapi/util/common"
 	"github.com/ergoapi/util/exstr"
@@ -166,11 +166,17 @@ func DaysInYear(t ...string) int {
 
 // LunarDaysInYear 获取指定时间所在年份的农历天数, 如果未指定时间, 则获取当前时间所在年份的农历天数
 func LunarDaysInYear(t ...string) int {
+	var year int
 	if len(t) == 0 {
-		return calendar.NewLunarYear(carbon.Now().Year()).GetDayCount()
+		year = carbon.Now().Year()
+	} else {
+		year = carbon.Parse(t[0]).Year()
 	}
-	// t 格式为 2019-08-05 13:14:15
-	return calendar.NewLunarYear(carbon.Parse(t[0]).Year()).GetDayCount()
+	ly, err := tyme.LunarYear{}.FromYear(year)
+	if err != nil {
+		return 0
+	}
+	return ly.GetDayCount()
 }
 
 // DaysInMonth 获取指定时间所在月份的天数, 如果未指定时间, 则获取当前时间所在月份的天数
@@ -184,11 +190,19 @@ func DaysInMonth(t ...string) int {
 
 // LunarDaysInMonth 获取指定时间所在月份的农历天数, 如果未指定时间, 则获取当前时间所在月份的农历天数
 func LunarDaysInMonth(t ...string) int {
+	var year, month int
 	if len(t) == 0 {
-		return calendar.NewLunarMonthFromYm(carbon.Now().Year(), carbon.Now().Month()).GetDayCount()
+		year = carbon.Now().Year()
+		month = carbon.Now().Month()
+	} else {
+		year = carbon.Parse(t[0]).Year()
+		month = carbon.Parse(t[0]).Month()
 	}
-	// t 格式为 2019-08-05 13:14:15
-	return calendar.NewLunarMonthFromYm(carbon.Parse(t[0]).Year(), carbon.Parse(t[0]).Month()).GetDayCount()
+	lm, err := tyme.LunarMonth{}.FromYm(year, month)
+	if err != nil {
+		return 0
+	}
+	return lm.GetDayCount()
 }
 
 // Age 获取年龄
@@ -471,8 +485,17 @@ func ParseStringDate(t string) string {
 
 // NowShiChen 获取当前时辰
 func NowShiChen() string {
-	lunar := calendar.NewLunarFromDate(time.Now())
-	return lunar.GetTimeInGanZhi()
+	now := time.Now()
+	sd, err := tyme.SolarDay{}.FromYmd(now.Year(), int(now.Month()), now.Day())
+	if err != nil {
+		return ""
+	}
+	ld := sd.GetLunarDay()
+	lh, err := tyme.LunarHour{}.FromYmdHms(ld.GetYear(), ld.GetMonth(), ld.GetDay(), now.Hour(), now.Minute(), now.Second())
+	if err != nil {
+		return ""
+	}
+	return lh.GetSixtyCycle().GetName()
 }
 
 // DayFestivals 获取指定日期节假日信息, 包含传统节假日和法定节假日
@@ -483,19 +506,19 @@ func DayFestivals(t ...string) []string {
 	} else {
 		timeStr = t[0]
 	}
-	st := carbon.Parse(timeStr).StdTime()
-	// t 格式为 2019-08-05 13:14:15
-	d := calendar.NewLunarFromDate(st)
-	l := d.GetFestivals()
+	c := carbon.Parse(timeStr)
+	sd, err := tyme.SolarDay{}.FromYmd(c.Year(), c.Month(), c.Day())
+	if err != nil {
+		return nil
+	}
 	fs := make([]string, 0)
-	for i := l.Front(); i != nil; i = i.Next() {
-		fs = append(fs, i.Value.(string))
+	ld := sd.GetLunarDay()
+	if f := ld.GetFestival(); f != nil {
+		fs = append(fs, f.GetName())
 	}
-	l = d.GetOtherFestivals()
-	for i := l.Front(); i != nil; i = i.Next() {
-		fs = append(fs, i.Value.(string))
+	if f := sd.GetFestival(); f != nil {
+		fs = append(fs, f.GetName())
 	}
-	// 排序, 去重
 	sort.Strings(fs)
 	fs = exstr.DuplicateStrElement(fs)
 	return fs
@@ -515,20 +538,26 @@ func DayYiGi(t ...string) YiGi {
 	} else {
 		timeStr = t[0]
 	}
-	st := carbon.Parse(timeStr).StdTime()
-	d := calendar.NewLunarFromDate(st)
+	c := carbon.Parse(timeStr)
 	yg := YiGi{
-		Date: carbon.Parse(timeStr).ToDateString(),
+		Date: c.ToDateString(),
 	}
-	l := d.GetDayYi()
+	sd, err := tyme.SolarDay{}.FromYmd(c.Year(), c.Month(), c.Day())
+	if err != nil {
+		return yg
+	}
+	ld := sd.GetLunarDay()
 	yg.Yi = make([]string, 0)
-	for i := l.Front(); i != nil; i = i.Next() {
-		yg.Yi = append(yg.Yi, i.Value.(string))
+	if recommends, err := ld.GetRecommends(); err == nil {
+		for _, r := range recommends {
+			yg.Yi = append(yg.Yi, r.GetName())
+		}
 	}
-	l = d.GetDayJi()
 	yg.Gi = make([]string, 0)
-	for i := l.Front(); i != nil; i = i.Next() {
-		yg.Gi = append(yg.Gi, i.Value.(string))
+	if avoids, err := ld.GetAvoids(); err == nil {
+		for _, a := range avoids {
+			yg.Gi = append(yg.Gi, a.GetName())
+		}
 	}
 	return yg
 }

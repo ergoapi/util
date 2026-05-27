@@ -3,7 +3,7 @@ module github.com/ergoapi/util
 go 1.26.3
 
 require (
-	github.com/6tail/lunar-go v1.4.6
+	github.com/6tail/tyme4go v1.4.3
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cockroachdb/errors v1.13.0
 	github.com/docker/go-connections v0.7.0
