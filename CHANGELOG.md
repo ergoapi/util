@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-05-27]
+
+### Added
+- **ztime**: 新增 `GetDayInfo` 综合日期信息函数，支持工作日/调休判断、节日假期详情、农历日期/季节、节气、三伏天/数九天/梅雨天进度、每日宜忌
+
+### Changed
+- **ztime**: 将 `github.com/6tail/lunar-go` 替换为 `github.com/6tail/tyme4go`，lunar-go 已停止维护
+
 ## [2026-02-17]
 
 ### Security
