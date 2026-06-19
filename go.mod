@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	github.com/6tail/tyme4go v1.5.0
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/cockroachdb/errors v1.13.0
+	github.com/cockroachdb/errors v1.14.0
 	github.com/docker/go-connections v0.7.0
 	github.com/dromara/carbon/v2 v2.6.16
 	github.com/gin-contrib/pprof v1.5.4
