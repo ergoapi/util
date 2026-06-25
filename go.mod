@@ -32,7 +32,7 @@ require (
 	golang.org/x/crypto v0.53.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/telebot.v3 v3.3.8
-	gorm.io/gorm v1.31.1
+	gorm.io/gorm v1.31.2
 	k8s.io/api v0.34.0
 	k8s.io/apiextensions-apiserver v0.34.0
 	k8s.io/apimachinery v0.34.0
