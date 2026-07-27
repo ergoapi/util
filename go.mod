@@ -6,7 +6,7 @@ require (
 	github.com/6tail/tyme4go v1.5.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cockroachdb/errors v1.14.0
-	github.com/docker/go-connections v0.7.0
+	github.com/docker/go-connections v0.8.1
 	github.com/dromara/carbon/v2 v2.6.16
 	github.com/gin-contrib/pprof v1.5.4
 	github.com/gin-gonic/gin v1.12.0
