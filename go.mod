@@ -13,7 +13,7 @@ require (
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
-	github.com/go-playground/validator/v10 v10.30.3
+	github.com/go-playground/validator/v10 v10.30.4
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gomodule/redigo v1.9.3
 	github.com/google/go-github/v74 v74.0.0
@@ -57,7 +57,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.12.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/getsentry/sentry-go v0.46.0 // indirect
 	github.com/gin-contrib/sse v1.1.1 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
@@ -79,7 +79,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.23 // indirect
