@@ -1,6 +1,6 @@
 module github.com/ergoapi/util
 
-go 1.27.1
+go 1.27.3
 
 require (
 	github.com/6tail/tyme4go v1.5.0
@@ -38,7 +38,7 @@ require (
 	k8s.io/apimachinery v0.37.0
 	k8s.io/client-go v0.37.0
 	sigs.k8s.io/yaml v1.6.0
-	tailscale.com v1.104.1
+	tailscale.com v1.104.2
 )
 
 require (
@@ -63,7 +63,7 @@ require (
 	github.com/gin-contrib/sse v1.1.1 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
+	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-openapi/jsonpointer v1.0.0 // indirect
 	github.com/go-openapi/jsonreference v1.0.0 // indirect
 	github.com/go-openapi/swag v0.27.1 // indirect
