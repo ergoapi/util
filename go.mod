@@ -3,7 +3,7 @@ module github.com/ergoapi/util
 go 1.27.3
 
 require (
-	github.com/6tail/tyme4go v1.5.0
+	github.com/6tail/tyme4go v1.5.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cockroachdb/errors v1.14.0
 	github.com/docker/go-connections v0.8.2
