@@ -7,7 +7,7 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cockroachdb/errors v1.14.0
 	github.com/docker/go-connections v0.8.2
-	github.com/dromara/carbon/v2 v2.7.0
+	github.com/dromara/carbon/v2 v2.7.1
 	github.com/gin-contrib/pprof v1.5.8
 	github.com/gin-gonic/gin v1.12.0
 	github.com/glebarez/sqlite v1.11.0
