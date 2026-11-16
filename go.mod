@@ -1,6 +1,6 @@
 module github.com/ergoapi/util
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/6tail/tyme4go v1.5.1
@@ -38,7 +38,7 @@ require (
 	k8s.io/apimachinery v0.37.0
 	k8s.io/client-go v0.37.0
 	sigs.k8s.io/yaml v1.6.0
-	tailscale.com v1.104.5
+	tailscale.com v1.104.7
 )
 
 require (
