@@ -25,7 +25,7 @@ require (
 	github.com/otiai10/copy v1.14.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.25.0
-	github.com/redis/go-redis/v9 v9.23.0
+	github.com/redis/go-redis/v9 v9.24.0
 	github.com/schollz/progressbar/v3 v3.19.1
 	github.com/sirupsen/logrus v1.10.2
 	github.com/stretchr/testify v1.12.1
